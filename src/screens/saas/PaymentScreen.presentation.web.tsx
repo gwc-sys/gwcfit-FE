@@ -1,0 +1,1 @@
+export { PaymentScreenView, MetricView, PaymentFiltersView, TableView, PlatformPaymentsDashboardView, ChartView, RecentView, ReceiptModalView, ReceiptDetailView } from "../../ui/web/pages/saas/PaymentScreen";

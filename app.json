@@ -1,0 +1,56 @@
+{
+  "expo": {
+    "name": "PulseFit Gym SaaS",
+    "slug": "pulsefit-gym-saas",
+    "version": "1.0.0",
+    "orientation": "default",
+    "userInterfaceStyle": "automatic",
+    "scheme": "pulsefit",
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "bundleIdentifier": "com.pulsefit.gymsaas",
+      "userInterfaceStyle": "automatic",
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSAppTransportSecurity": {
+          "NSAllowsArbitraryLoads": true
+        }
+      }
+    },
+    "android": {
+      "package": "com.pulsefit.gymsaas",
+      "userInterfaceStyle": "automatic",
+      "adaptiveIcon": {
+        "backgroundColor": "#007AFF"
+      }
+    },
+    "plugins": [
+      "expo-asset",
+      [
+        "expo-secure-store",
+        {
+          "configureAndroidBackup": true,
+          "faceIDPermission": "Allow PulseFit to protect your account session with Face ID."
+        }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow PulseFit to scan attendance codes and provide camera-assisted workout tracking."
+        }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "usesCleartextTraffic": true
+          }
+        }
+      ],
+      "expo-font",
+      "expo-status-bar"
+    ]
+  }
+}

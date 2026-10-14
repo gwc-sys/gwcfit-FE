@@ -1,0 +1,40 @@
+import { StyleSheet } from "react-native";
+import { radius, spacing, typography } from "../../../theme/theme";
+import type { ThemeColors } from "../../../theme/theme";
+
+export const createStyles = (colors: ThemeColors) => StyleSheet.create({
+  page: { gap: spacing.lg, paddingBottom: spacing.xxl },
+  stats: { flexDirection: "row", flexWrap: "wrap", gap: spacing.sm },
+  stat: { flex: 1, minWidth: 170, minHeight: 90, flexDirection: "row", alignItems: "center", gap: spacing.sm, borderWidth: 1, borderColor: colors.border, borderRadius: radius.md, padding: spacing.md, backgroundColor: colors.surface }, statActive: { borderColor: colors.primary, borderWidth: 2 },
+  statIcon: { width: 42, height: 42, alignItems: "center", justifyContent: "center", borderRadius: radius.sm }, statLabel: { ...typography.small, color: colors.muted }, statValue: { ...typography.h2, color: colors.ink, marginTop: 2 }, statLive: { ...typography.small, color: colors.success, marginTop: 2 },
+  grid: { flexDirection: "row", flexWrap: "wrap", gap: spacing.lg, alignItems: "flex-start" },
+  card: { flexGrow: 1, flexBasis: 380, minWidth: 280, gap: spacing.md, padding: spacing.lg, borderWidth: 1, borderColor: colors.border, borderRadius: radius.lg, backgroundColor: colors.surface },
+  cardTitle: { ...typography.h3, color: colors.ink },
+  helper: { ...typography.body, color: colors.muted },
+  label: { ...typography.small, fontWeight: "700", color: colors.ink },
+  roles: { flexDirection: "row", flexWrap: "wrap", gap: spacing.sm },
+  role: { paddingVertical: spacing.sm, paddingHorizontal: spacing.md, borderRadius: radius.pill, borderWidth: 1, borderColor: colors.border },
+  roleActive: { backgroundColor: colors.primary, borderColor: colors.primary },
+  roleText: { ...typography.small, color: colors.ink },
+  roleTextActive: { color: "#FFFFFF", fontWeight: "800" },
+  tokenBox: { gap: spacing.sm, padding: spacing.md, borderRadius: radius.md, backgroundColor: colors.primarySoft },
+  tokenLabel: { ...typography.small, fontWeight: "800", color: colors.muted },
+  token: { ...typography.body, color: colors.ink, fontWeight: "700" },
+  listHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" }, historyFilterLabel: { ...typography.small, color: colors.muted, marginTop: 2 },
+  historySearch: { minHeight: 44, flexDirection: "row", alignItems: "center", gap: spacing.sm, borderWidth: 1, borderColor: colors.border, borderRadius: radius.sm, paddingHorizontal: spacing.sm, backgroundColor: colors.surfaceElevated }, historyInput: { flex: 1, color: colors.ink, ...typography.small },
+  row: { flexDirection: "row", flexWrap: "wrap", alignItems: "center", gap: spacing.sm, paddingVertical: spacing.md, borderBottomWidth: 1, borderBottomColor: colors.border },
+  rowCopy: { flex: 1, minWidth: 190, gap: 3 },
+  rowTitle: { ...typography.body, fontWeight: "700", color: colors.ink },
+  rowMeta: { ...typography.small, color: colors.muted },
+  rowTokenArea: { gap: spacing.xs, marginTop: spacing.xs },
+  rowToken: { ...typography.small, color: colors.ink, fontFamily: "monospace" },
+  rowTokenActions: { flexDirection: "row", flexWrap: "wrap", gap: spacing.md },
+  tokenAction: { flexDirection: "row", alignItems: "center", gap: 5, minHeight: 32 },
+  reveal: { ...typography.small, color: colors.primary, fontWeight: "800" },
+  unavailable: { ...typography.small, color: colors.muted, fontStyle: "italic", marginTop: spacing.xs },
+  badge: { paddingVertical: 5, paddingHorizontal: spacing.sm, borderRadius: radius.pill, backgroundColor: colors.primarySoft },
+  badgeInactive: { backgroundColor: colors.surfaceElevated },
+  badgeText: { ...typography.small, color: colors.ink, textTransform: "capitalize" },
+  revoke: { ...typography.small, color: colors.danger, fontWeight: "800" },
+  empty: { ...typography.body, color: colors.muted }
+});
