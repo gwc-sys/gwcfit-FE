@@ -15,6 +15,8 @@ build/
 .next/
 out/
 coverage/
+/plans-build/
+/web-warning-check/
 
 # Python
 __pycache__/
