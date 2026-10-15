@@ -119,8 +119,9 @@ export const createStyles = (colors: ThemeColors, width: number) => {
     discoveryTitle: { ...typography.h3, color: colors.ink },
     discoveryText: { ...typography.small, color: colors.muted, lineHeight: 18 },
     fieldGrid: {
-      flexDirection: compact ? "column" : "row",
-      alignItems: "flex-start",
+      flexDirection: "column",
+      alignItems: "stretch",
+      width: "100%",
       gap: spacing.md,
     },
     formHeader: {

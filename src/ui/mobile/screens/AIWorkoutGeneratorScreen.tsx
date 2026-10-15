@@ -1,4 +1,5 @@
-import { Pressable, Text, View } from "react-native";
+import { Pressable } from "../components/NativePressable";
+import { Text, View } from "react-native";
 import { Bot, Check, Clock, Dumbbell, Sparkles, Target } from "../components/icons";
 import { AppScreen } from "../components/AppScreen";
 import { Header } from "../components/Header";

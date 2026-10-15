@@ -1,6 +1,7 @@
+import { Pressable } from "../../components/NativePressable";
 import { showAlert } from "../../../../utils/appAlert";
 import { Ionicons } from "@expo/vector-icons";
-import { ActivityIndicator, Image, Pressable, RefreshControl, Text, View } from "react-native";
+import { ActivityIndicator, Image, RefreshControl, Text, View } from "react-native";
 import Svg, { Circle, Line, Polyline, Text as SvgText } from "react-native-svg";
 import { Screen } from "../../components/Screen";
 import { getApiErrorMessage } from "../../../../services/api/client";

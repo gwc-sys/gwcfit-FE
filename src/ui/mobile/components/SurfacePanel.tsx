@@ -1,8 +1,9 @@
+import { Pressable } from "./NativePressable";
 import { controlMetrics } from "../theme/theme";
 import { Ionicons } from "@expo/vector-icons";
 import type { ReactNode } from "react";
 import { useMemo } from "react";
-import { Pressable, StyleProp, StyleSheet, Text, useWindowDimensions, View, ViewStyle } from "react-native";
+import { StyleProp, StyleSheet, Text, useWindowDimensions, View, ViewStyle } from "react-native";
 import Animated, { FadeInUp, useReducedMotion } from "react-native-reanimated";
 import { useAppTheme } from "../../../theme/AppThemeProvider";
 import { radius, shadows, spacing, typography } from "../theme/theme";
@@ -72,7 +73,7 @@ const createStyles = (colors: ThemeColors, width: number) => {
       borderWidth: 0,
       borderColor: colors.border,
       backgroundColor: colors.card,
-      padding: spacing.xl,
+      padding: compact ? spacing.md : spacing.xl,
       ...shadows.none
     },
     header: {

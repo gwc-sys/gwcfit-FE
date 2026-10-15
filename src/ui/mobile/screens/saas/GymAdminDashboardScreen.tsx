@@ -1,5 +1,11 @@
+import { InsightCarousel } from "../../components/InsightCarousel";
+import { WeekCalendar } from "../../components/WeekCalendar";
+import { Pressable } from "../../components/NativePressable";
+import { OwnerMobileDataContext, OwnerMobileOverview } from "../../components/OwnerMobileOverview";
+import { useState } from "react";
+import { PulseStat, pulseStyles } from "../../components/PulseReference";
 import { Ionicons } from "@expo/vector-icons";
-import { Modal, Pressable, RefreshControl, Text, View } from "react-native";
+import { Modal, RefreshControl, Text, View } from "react-native";
 import { DataState } from "../../components/DataState";
 import { MetricCard } from "../../components/MetricCard";
 import { QuickAction } from "../../components/QuickAction";
@@ -22,6 +28,7 @@ export function GymAdminDashboardScreenView({ model }: { model: ReturnType<typeo
     case "view1": {
       const { GymOwnerDashboardContent, navigation, statsQuery, recentMembers, recentStaff, userCounts, plansQuery, paymentsQuery, attendanceQuery, workoutsQuery } = model.props;
       return ((
+      <OwnerMobileDataContext.Provider value={{ members: recentMembers, payments: paymentsQuery.data ?? [], loading: statsQuery.isLoading || plansQuery.isLoading || paymentsQuery.isLoading, error: statsQuery.error ? getApiErrorMessage(statsQuery.error) : null }}>
       <GymOwnerDashboardContent
         navigation={navigation}
         stats={statsQuery.data}
@@ -33,6 +40,7 @@ export function GymAdminDashboardScreenView({ model }: { model: ReturnType<typeo
         attendance={attendanceQuery.data ?? []}
         workouts={workoutsQuery.data ?? []}
       />
+      </OwnerMobileDataContext.Provider>
     ));
     }
     case "view2": {
@@ -76,7 +84,7 @@ export function GymAdminDashboardScreenView({ model }: { model: ReturnType<typeo
                 label="Active Members"
                 value={String(statsQuery.data.active_members)}
                 icon="people-outline"
-                trend="+12% this month"
+                trend="Current period"
                 tone="success"
               />
               <MetricCard
@@ -322,6 +330,7 @@ export function GymAdminDashboardScreenView({ model }: { model: ReturnType<typeo
 }
 
 export function GymOwnerDashboardContentView({ model }: { model: ReturnType<typeof useGymOwnerDashboardContentPresentation> }): React.ReactNode {
+  const [showDetails, setShowDetails] = useState(false);
   if (model == null) return null;
   if (typeof model !== "object" || !("kind" in model)) return model;
   switch (model.kind) {
@@ -329,80 +338,13 @@ export function GymOwnerDashboardContentView({ model }: { model: ReturnType<type
       const { styles, displayName, setCalendarOpen, colors, formattedSelectedDate, navigation, owner, calendarOpen, ownerCalendarStyles, setCalendarMonth, calendarMonth, calendarWeekdays, calendarDays, selectedDate, setSelectedDate, OwnerMetric, activeMembers, stats, revenue, userCounts, SimpleChart, DistributionRow, workouts, pendingPayments, StatusPanel, statusCounts, PlansPanel, plans, planCounts, RevenuePanel, revenueValues, RecentMembersPanel, recent, exerciseGroupCounts, OwnerProfileMenu, profileMenuOpen, logout, setProfileMenuOpen } = model.props;
       return ((
     <PulseDashboardLayout activeLabel="Dashboard" roleLabel="Gym Owner">
-      <View style={[styles.header, styles.sharedHeaderReplacement]}>
-        <View style={styles.headerCopy}>
-          <Text style={styles.welcome}>Welcome back, {displayName}! 👋</Text>
-          <Text style={styles.headerSubtitle}>
-            Here&apos;s what&apos;s happening at your gym today.
-          </Text>
-        </View>
-        <View style={styles.headerActions}>
-          <Pressable style={styles.datePill} onPress={() => setCalendarOpen((open) => !open)} accessibilityRole="button" accessibilityLabel="Select dashboard date">
-            <Ionicons
-              name="calendar-outline"
-              size={17}
-              color={colors.textSecondary}
-            />
-            <Text style={styles.dateText}>{formattedSelectedDate}</Text>
-            <Ionicons
-              name="chevron-down"
-              size={14}
-              color={colors.textSecondary}
-            />
-          </Pressable>
-          <Pressable style={styles.headerIcon} accessibilityRole="button" accessibilityLabel="Search members" onPress={() => navigation.navigate("MemberList")}>
-            <Ionicons name="search-outline" size={21} color={colors.white} />
-          </Pressable>
-          <Pressable accessibilityRole="button"
-            style={styles.headerIcon}
-            onPress={() => navigation.navigate("Notifications")}
-          >
-            <Ionicons
-              name="notifications-outline"
-              size={21}
-              color={colors.white}
-            />
-            <View style={styles.headerBadge}>
-              <Text style={styles.headerBadgeText}>3</Text>
-            </View>
-          </Pressable>
-          <Pressable accessibilityRole="button"
-            style={styles.addButton}
-            onPress={() => navigation.navigate("AddMember")}
-          >
-            <Ionicons name="add" size={20} color={colors.white} />
-            <Text style={styles.addButtonText}>Add Member</Text>
-          </Pressable>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Open profile"
-            style={styles.profileButton}
-            onPress={() => navigation.navigate("Profile")}
-          >
-            <View style={styles.profileAvatar}>
-              <Text style={styles.profileAvatarText}>
-                {owner?.full_name
-                  ?.split(/\s+/)
-                  .map((part) => part[0])
-                  .join("")
-                  .slice(0, 2)
-                  .toUpperCase() || "GO"}
-              </Text>
-            </View>
-            <View>
-              <Text numberOfLines={1} style={styles.profileName}>
-                {owner?.full_name ?? "Gym Owner"}
-              </Text>
-              <Text style={styles.profileRole}>Gym Owner</Text>
-            </View>
-            <Ionicons
-              name="chevron-down"
-              size={14}
-              color={colors.textSecondary}
-            />
-          </Pressable>
-        </View>
-      </View>
+      <WeekCalendar selectedDate={selectedDate} onSelect={date => { setSelectedDate(date); setCalendarMonth(new Date(date.getFullYear(), date.getMonth(), 1)); }} />
+      <OwnerMobileOverview totalMembers={userCounts.member} activeMembers={activeMembers} revenue={revenue} onMembers={() => navigation.navigate("MemberList")} onReports={() => navigation.navigate("Reports")} onMember={id => navigation.navigate("MemberProfile", { memberId: id })} />
+      <Pressable accessibilityRole="button" accessibilityState={{ expanded: showDetails }} onPress={() => setShowDetails(value => !value)} style={({ pressed }) => ({ minHeight: 56, flexDirection: "row", alignItems: "center", gap: 12, padding: 16, borderRadius: 16, backgroundColor: colors.card, opacity: pressed ? 0.7 : 1 })}>
+        <Ionicons name="analytics-outline" size={22} color={colors.primary} />
+        <Text style={{ flex: 1, fontSize: 16, fontWeight: "600", color: colors.ink }}>{showDetails ? "Hide insights" : "More insights"}</Text>
+        <Ionicons name={showDetails ? "chevron-up" : "chevron-down"} size={20} color={colors.muted} />
+      </Pressable>
       <Modal
         visible={calendarOpen}
         transparent
@@ -507,12 +449,14 @@ export function GymOwnerDashboardContentView({ model }: { model: ReturnType<type
           </Pressable>
         </Pressable>
       </Modal>
-      <View style={styles.metricGrid}>
+      {showDetails && <View style={{ gap: 20 }}>
+      <View style={{ gap: 4 }}><Text accessibilityRole="header" style={styles.panelTitle}>Gym insights</Text><Text style={styles.panelSubtitle}>Memberships, activity and tools for your gym</Text></View>
+      <InsightCarousel label="Gym summary">
         <OwnerMetric
           icon="people-outline"
           label="Active Members"
           value={String(activeMembers)}
-          trend="↑ 12% this month"
+          trend="Current period"
           tone="#0A84FF"
           styles={styles}
         />
@@ -528,7 +472,7 @@ export function GymOwnerDashboardContentView({ model }: { model: ReturnType<type
           icon="card-outline"
           label="Revenue (This Month)"
           value={formatCurrency(revenue)}
-          trend="↑ 18.7% this month"
+          trend="Current period"
           tone="#F59E0B"
           styles={styles}
         />
@@ -540,8 +484,8 @@ export function GymOwnerDashboardContentView({ model }: { model: ReturnType<type
           tone="#0A84FF"
           styles={styles}
         />
-      </View>
-      <View style={styles.dashboardGrid}>
+      </InsightCarousel>
+      <InsightCarousel label="Member overview">
         <View style={styles.overviewPanel}>
           <View style={styles.panelHeader}>
             <Text style={styles.panelTitle}>Overview</Text>
@@ -591,10 +535,21 @@ export function GymOwnerDashboardContentView({ model }: { model: ReturnType<type
             </View>
           </View>
         </View>
+        <StatusPanel
+          styles={styles}
+          active={activeMembers}
+          statusCounts={statusCounts}
+        />
+        <RevenuePanel
+          styles={styles}
+          revenue={revenue}
+          values={revenueValues}
+        />
+      </InsightCarousel>
         <View style={styles.activityPanel}>
           <View style={styles.panelHeader}>
             <Text style={styles.panelTitle}>Today&apos;s Activity</Text>
-            <Text style={styles.viewAll}>View All</Text>
+            <Pressable accessibilityRole="button" accessibilityLabel="View attendance" onPress={() => navigation.navigate("Attendance")} style={{ minHeight: 44, justifyContent: "center" }}><Text style={[styles.viewAll, { color: colors.primary }]}>View attendance</Text></Pressable>
           </View>
           {[
             [
@@ -633,45 +588,10 @@ export function GymOwnerDashboardContentView({ model }: { model: ReturnType<type
             </View>
           ))}
         </View>
-      </View>
-      <View style={styles.dashboardGrid}>
-        <StatusPanel
-          styles={styles}
-          active={activeMembers}
-          statusCounts={statusCounts}
-        />
+      <InsightCarousel label="Plans and recent members">
         <PlansPanel styles={styles} plans={plans} planCounts={planCounts} />
-        <RevenuePanel
-          styles={styles}
-          revenue={revenue}
-          values={revenueValues}
-        />
         <RecentMembersPanel styles={styles} members={recent} />
-      </View>
-      <View style={styles.quickPanel}>
-        <View style={styles.panelHeader}>
-          <View>
-            <Text style={styles.panelTitle}>Exercise Library</Text>
-            <Text style={styles.panelSubtitle}>
-              {repdbExerciseLibrary.length} exercises grouped for workout planning
-            </Text>
-          </View>
-          <Text style={styles.viewAll}>Start / peak pairs combined</Text>
-        </View>
-        <View style={styles.quickActions}>
-          {exerciseGroupCounts.map(({ group, count }) => (
-            <View key={group} style={styles.quickAction}>
-              <View style={[styles.quickIcon, { backgroundColor: "#0A84FF24" }]}>
-                <Ionicons name="barbell-outline" size={20} color="#0A84FF" />
-              </View>
-              <View>
-                <Text style={styles.quickTitle}>{group}</Text>
-                <Text style={styles.quickSubtitle}>{count} exercises</Text>
-              </View>
-            </View>
-          ))}
-        </View>
-      </View>
+      </InsightCarousel>
       <View style={styles.quickPanel}>
         <Text style={styles.panelTitle}>Quick Actions</Text>
         <View style={styles.quickActions}>
@@ -733,11 +653,35 @@ export function GymOwnerDashboardContentView({ model }: { model: ReturnType<type
                   color={tone as string}
                 />
               </View>
-              <View>
+              <View style={{ flex: 1, minWidth: 0 }}>
                 <Text style={styles.quickTitle}>{title}</Text>
                 <Text style={styles.quickSubtitle}>{subtitle}</Text>
               </View>
             </Pressable>
+          ))}
+        </View>
+      </View>
+      <View style={styles.quickPanel}>
+        <View style={styles.panelHeader}>
+          <View>
+            <Text style={styles.panelTitle}>Exercise Library</Text>
+            <Text style={styles.panelSubtitle}>
+              {repdbExerciseLibrary.length} exercises grouped for workout planning
+            </Text>
+          </View>
+          <Text style={styles.viewAll}>Start / peak pairs combined</Text>
+        </View>
+        <View style={styles.quickActions}>
+          {exerciseGroupCounts.map(({ group, count }) => (
+            <View key={group} style={styles.quickAction}>
+              <View style={[styles.quickIcon, { backgroundColor: "#0A84FF24" }]}>
+                <Ionicons name="barbell-outline" size={20} color="#0A84FF" />
+              </View>
+              <View style={{ flex: 1, minWidth: 0 }}>
+                <Text style={styles.quickTitle}>{group}</Text>
+                <Text style={styles.quickSubtitle}>{count} exercises</Text>
+              </View>
+            </View>
           ))}
         </View>
       </View>
@@ -749,6 +693,7 @@ export function GymOwnerDashboardContentView({ model }: { model: ReturnType<type
         navigation={navigation}
         styles={styles}
       />
+      </View>}
     </PulseDashboardLayout>
   ));
     }
@@ -875,9 +820,9 @@ export function OwnerMetricView({ model }: { model: ReturnType<typeof useOwnerMe
       <View style={[styles.metricIcon, { backgroundColor: `${tone}24` }]}>
         <Ionicons name={icon} size={23} color={tone} />
       </View>
-      <View style={{ width: "100%", minWidth: 0 }}>
+      <View style={{ flex: 1, minWidth: 0 }}>
         <Text style={styles.metricLabel}>{label}</Text>
-        <Text numberOfLines={1} adjustsFontSizeToFit style={styles.metricValue}>{value}</Text>
+        <Text style={styles.metricValue}>{value}</Text>
         <Text style={styles.metricTrend}>{trend}</Text>
       </View>
     </View>
@@ -977,7 +922,7 @@ export function StatusPanelView({ model }: { model: ReturnType<typeof useStatusP
           <Text style={styles.statusRingValue}>{active}</Text>
           <Text style={styles.statusRingLabel}>Active Members</Text>
         </View>
-        <View>
+        <View style={styles.distributionLegend}>
           <DistributionRow
             label="Active"
             value={statusCounts.active ?? active}

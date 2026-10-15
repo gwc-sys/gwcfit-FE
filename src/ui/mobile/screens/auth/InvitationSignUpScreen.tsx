@@ -1,6 +1,7 @@
+import { Pressable } from "../../components/NativePressable";
 import { controlMetrics } from "../../theme/theme";
 import { Ionicons } from "@expo/vector-icons";
-import { Pressable, Text, View } from "react-native";
+import { Text, View } from "react-native";
 import { AppHeader } from "../../components/AppHeader";
 import { FormTextField } from "../../components/FormTextField";
 import { NoticeBanner } from "../../components/NoticeBanner";

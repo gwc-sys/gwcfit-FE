@@ -1,6 +1,7 @@
+import { Pressable } from "./NativePressable";
 import { controlMetrics } from "../theme/theme";
 import { Ionicons } from "@expo/vector-icons";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { useMemo } from "react";
 import { useAppTheme } from "../../../theme/AppThemeProvider";
 import { radius, spacing, typography } from "../theme/theme";

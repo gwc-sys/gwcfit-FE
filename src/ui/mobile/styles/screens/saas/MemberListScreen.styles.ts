@@ -58,7 +58,7 @@ export const createPlatformDirectoryStyles = (colors: ThemeColors) => adaptPageS
       flexDirection: "row",
       flexWrap: "wrap",
       gap: 4
-    }, filterTab: { borderRadius: radius.sm, paddingHorizontal: 10, paddingVertical: spacing.sm, minHeight: controlMetrics.minimumTouchSize, justifyContent: "center" }, filterTabActive: { backgroundColor: colors.primarySoft }, filterTabText: {
+    }, filterTab: { borderRadius: radius.sm, paddingHorizontal: 10, paddingVertical: spacing.sm, minHeight: controlMetrics.minimumTouchSize, justifyContent: "center" }, filterTabActive: { backgroundColor: colors.primaryButton }, filterTabText: {
       ...typography.small,
       color: colors.muted,
       fontSize: 13
@@ -224,13 +224,13 @@ export const createStyles = (colors: ThemeColors) =>
       gap: 4
     },
     filterTab: { paddingHorizontal: 10, paddingVertical: spacing.sm, borderRadius: radius.sm, minHeight: controlMetrics.minimumTouchSize, justifyContent: "center" },
-    filterTabActive: { backgroundColor: colors.primarySoft },
+    filterTabActive: { backgroundColor: colors.primaryButton },
     filterTabText: {
       ...typography.small,
       color: colors.muted,
       fontSize: 13
     },
-    filterTabTextActive: { color: colors.primary, fontWeight: "800" },
+    filterTabTextActive: { color: colors.white, fontWeight: "800" },
     tableHeader: {
       minHeight: 48,
       flexDirection: "row",

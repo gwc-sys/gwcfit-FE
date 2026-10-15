@@ -1,7 +1,8 @@
+import { Pressable } from "../../components/NativePressable";
 import { controlMetrics } from "../../theme/theme";
 import { Ionicons } from "@expo/vector-icons";
 import { Controller } from "react-hook-form";
-import { FlatList, Image, ImageBackground, Pressable, RefreshControl, ScrollView, Text, TextInput, View } from "react-native";
+import { FlatList, Image, ImageBackground, RefreshControl, ScrollView, Text, TextInput, View } from "react-native";
 import { EmptyState } from "../../components/EmptyState";
 import { DatePickerField } from "../../../../components/DatePickerField";
 import { FoodNutritionMealPicker } from "../../../../components/FoodNutritionMealPicker";
@@ -27,7 +28,7 @@ export function ResourceCrudPanelView<TRead extends { id: string }, TCreate, TUp
       const { config, formOnly, showForm, beginCreate, styles, records, formTitle, closeForm, colors, autoAssignCurrentTrainer, currentUser, visibleFields, control, errors, setDietScheduleMode, setValue, dietStartDate, dietScheduleMode, dietEndDate, dietCaloriesByTitle, getRelationState, getRelationIcon, relationOptions, GenderWorkoutSessionPicker, dietTargetCalories, createMutation, updateMutation, isMutating, submit, editingRecord, notice, listQuery, deleteMutation, setSearch, search, setSortDirection, sortDirection, filteredRecords, LoadingRows, beginEdit, confirmDelete, page, setPage } = model.props;
       return ((
     <SurfacePanel
-      title={config.title}
+      title={config.title === "Workout Plans" ? "Your plans" : config.title}
       kicker={config.subtitle}
       icon={config.icon}
       actionLabel={formOnly || showForm ? undefined : "New"}

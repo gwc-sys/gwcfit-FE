@@ -1,4 +1,4 @@
-import { controlMetrics } from "../theme/theme";
+import { controlMetrics, getResponsiveFontSize } from "../theme/theme";
 import { StyleSheet } from "react-native";
 import type { ThemeColors } from "../theme/theme";
 
@@ -8,11 +8,11 @@ export const createWorkspaceChromeStyles = (c: ThemeColors, width: number) => {
     root: { backgroundColor: c.background },
     dashboardContent: { paddingBottom: 32, flexGrow: 1 },
     pageContent: { flex: 1 },
-    navigationBar: { minHeight: 68, flexDirection: "row", alignItems: "center", gap: 10, paddingHorizontal: gutter, paddingVertical: 10, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: c.borderMuted },
+    navigationBar: { minHeight: 60, flexDirection: "row", alignItems: "center", gap: 10, paddingHorizontal: gutter, paddingVertical: 10, borderBottomWidth: 0, borderBottomColor: c.borderMuted },
     brand: { flex: 1, flexDirection: "row", alignItems: "center", gap: 10, minWidth: 0 },
-    brandMark: { width: 38, height: 38, borderRadius: 13, backgroundColor: c.primarySoft, alignItems: "center", justifyContent: "center" },
+    brandMark: { width: 32, height: 32, borderRadius: 13, backgroundColor: c.primarySoft, alignItems: "center", justifyContent: "center" },
     identity: { flex: 1, minWidth: 0 },
-    brandName: { fontSize: 18, lineHeight: 23, fontWeight: "700", letterSpacing: -0.4, color: c.ink },
+    brandName: { fontSize: getResponsiveFontSize(width, 16), lineHeight: getResponsiveFontSize(width, 21), fontWeight: "700", letterSpacing: -0.4, color: c.primary },
     role: { fontSize: 12, lineHeight: 17, color: c.muted },
     iconButton: { width: controlMetrics.minimumTouchSize, height: controlMetrics.minimumTouchSize, alignItems: "center", justifyContent: "center", borderRadius: 22, backgroundColor: c.surface },
     notificationDot: { position: "absolute", top: 8, right: 9, width: 7, height: 7, borderRadius: 4, backgroundColor: c.danger, borderWidth: 1, borderColor: c.surface },
@@ -20,7 +20,7 @@ export const createWorkspaceChromeStyles = (c: ThemeColors, width: number) => {
     accountInitials: { color: c.primary, fontSize: 14, fontWeight: "700" },
     overview: { paddingHorizontal: gutter, paddingTop: 26, paddingBottom: 22, gap: 5 },
     eyebrow: { color: c.muted, fontSize: 11, lineHeight: 17, letterSpacing: 1.5, fontWeight: "600" },
-    title: { fontSize: 36, lineHeight: 43, fontWeight: "700", letterSpacing: -1, color: c.ink },
+    title: { fontSize: getResponsiveFontSize(width, 28), lineHeight: getResponsiveFontSize(width, 34), fontWeight: "700", letterSpacing: -1, color: c.ink },
     subtitle: { fontSize: 16, lineHeight: 23, color: c.muted },
     toolbar: { flexDirection: "row", flexWrap: "wrap", gap: 10, marginTop: 15 },
     dateButton: { minHeight: controlMetrics.minimumTouchSize, flexGrow: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, paddingHorizontal: 12, borderRadius: 14, backgroundColor: c.surface },

@@ -1,8 +1,9 @@
+import { Pressable } from "../../components/NativePressable";
 import { controlMetrics } from "../../theme/theme";
 import { showAlert } from "../../../../utils/appAlert";
 import { Ionicons } from "@expo/vector-icons";
 import { Controller } from "react-hook-form";
-import { FlatList, Pressable, RefreshControl, Text, TextInput, View } from "react-native";
+import { FlatList, RefreshControl, Text, TextInput, View } from "react-native";
 import { EmptyState } from "../../components/EmptyState";
 import { FormTextField } from "../../components/FormTextField";
 import { PrimaryButton } from "../../components/PrimaryButton";

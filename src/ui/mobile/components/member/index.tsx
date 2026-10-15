@@ -1,8 +1,9 @@
+import { Pressable } from "../NativePressable";
 import { controlMetrics } from "../../theme/theme";
 import { Ionicons } from "@expo/vector-icons";
 import type { ReactNode } from "react";
 import { useMemo } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { SkeletonList } from "../DataState";
 import { EmptyState as BaseEmptyState } from "../EmptyState";
 import { SectionHeader as BaseSectionHeader } from "../SectionHeader";

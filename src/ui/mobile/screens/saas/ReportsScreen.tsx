@@ -1,3 +1,7 @@
+import { Pressable } from "../../components/NativePressable";
+import { useState } from "react";
+
+import { PulseAnalytics } from "../../components/PulseAnalytics";
 import { RefreshControl, Text, View } from "react-native";
 import { DataState } from "../../components/DataState";
 import { MetricCard } from "../../components/MetricCard";
@@ -13,6 +17,7 @@ import type * as React from "react";
 import type { useReportsScreenPresentation, useOwnerRevenueViewPresentation, useRevenueVolumeChartPresentation, usePlatformReportViewPresentation, useReportBarPresentation } from "../../../../screens/saas/ReportsScreen";
 
 export function ReportsScreenView({ model }: { model: ReturnType<typeof useReportsScreenPresentation> }): React.ReactNode {
+  const [showDetails, setShowDetails] = useState(false);
   if (model == null) return null;
   if (typeof model !== "object" || !("kind" in model)) return model;
   switch (model.kind) {
@@ -23,7 +28,7 @@ export function ReportsScreenView({ model }: { model: ReturnType<typeof useRepor
     case "view2": {
       const { styles, platformQuery, PlatformReportView } = model.props;
       return ((
-      <Screen
+      <Screen reference
         scroll
         contentContainerStyle={styles.screen}
         refreshControl={<RefreshControl refreshing={platformQuery.isFetching} onRefresh={() => platformQuery.refetch()} />}
@@ -37,14 +42,17 @@ export function ReportsScreenView({ model }: { model: ReturnType<typeof useRepor
     case "view3": {
       const { styles, dashboardQuery, ReportBar, OwnerRevenueView, ownerPaymentsQuery } = model.props;
       return ((
-    <Screen
+    <Screen reference
       scroll
       contentContainerStyle={styles.screen}
-      refreshControl={<RefreshControl refreshing={dashboardQuery.isFetching} onRefresh={() => dashboardQuery.refetch()} />}
+      refreshControl={<RefreshControl refreshing={dashboardQuery.isFetching || ownerPaymentsQuery.isFetching} onRefresh={() => { dashboardQuery.refetch(); ownerPaymentsQuery.refetch(); }} />}
     >
-      <ScreenHeader title="Reports" subtitle="Gym-specific performance" icon="analytics-outline" />
+      <ScreenHeader title="Analytics" />
+      <DataState loading={ownerPaymentsQuery.isLoading} error={ownerPaymentsQuery.error ? getApiErrorMessage(ownerPaymentsQuery.error) : null} />
+      {!ownerPaymentsQuery.isLoading && !ownerPaymentsQuery.error && <PulseAnalytics payments={ownerPaymentsQuery.data ?? []} />}
+      <Pressable accessibilityRole="button" accessibilityState={{ expanded: showDetails }} onPress={() => setShowDetails(value => !value)} style={{ minHeight: 44, justifyContent: "center" }}><Text style={styles.emptyText}>{showDetails ? "Hide details" : "More insights"}</Text></Pressable>
       <DataState loading={dashboardQuery.isLoading} error={dashboardQuery.error ? getApiErrorMessage(dashboardQuery.error) : null} />
-      {dashboardQuery.data ? (
+      {dashboardQuery.data && showDetails ? (
         <>
           <View style={styles.metrics}>
             <MetricCard label="Active members" value={String(dashboardQuery.data.active_members)} icon="people-outline" footer="Current" />

@@ -4,11 +4,11 @@ export function adaptPageStyles<T extends Record<string, ViewStyle | TextStyle |
   const result = { ...styles };
   for (const key of Object.keys(styles) as Array<keyof T>) {
     const style = { ...styles[key] };
-    if (typeof style.minWidth === "number" && style.minWidth >= 280) {
+    if (typeof style.minWidth === "number" && style.minWidth >= 200) {
       style.minWidth = 0;
       style.flexBasis = "100%";
     }
-    if (typeof style.width === "number" && style.width > 280) {
+    if (typeof style.width === "number" && style.width > 200) {
       style.maxWidth = style.width;
       style.width = "100%";
     }

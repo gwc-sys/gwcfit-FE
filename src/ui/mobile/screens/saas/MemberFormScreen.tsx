@@ -29,8 +29,8 @@ export function MemberFormScreenView({ model }: { model: ReturnType<typeof useMe
         title={title}
         subtitle={
           isEditing
-            ? "Update tenant member details"
-            : "Create a tenant member record"
+            ? "Update this member’s details"
+            : "Add a member to your gym"
         }
         onBack={() => navigation.goBack()}
       />

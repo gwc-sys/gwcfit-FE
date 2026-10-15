@@ -7,9 +7,10 @@ import type { ThemeColors } from "../../../theme/theme";
 export const createDashboardStyles = (colors: ThemeColors) => adaptPageStyles(StyleSheet.create({
   statCard: {
     flex: 1,
-    minWidth: 190,
-    minHeight: 180,
-    padding: 20,
+    minWidth: 0,
+    flexBasis: "45%",
+    minHeight: 140,
+    padding: 16,
     borderRadius: 16,
     borderWidth: 1,
     borderColor: colors.border,
@@ -25,7 +26,7 @@ export const createDashboardStyles = (colors: ThemeColors) => adaptPageStyles(St
     alignItems: "center",
     justifyContent: "center",
   },
-  statLabel: { color: colors.inkSoft, fontSize: 14, fontWeight: "600" },
+  statLabel: { flex: 1, minWidth: 0, color: colors.inkSoft, fontSize: 13, fontWeight: "600" },
   statValue: {
       color: colors.ink,
       fontSize: 28,
@@ -73,7 +74,7 @@ export const createStyles = (colors: ThemeColors) =>
       justifyContent: "space-between",
       gap: spacing.md,
     },
-    heroCopy: { gap: 5 },
+    heroCopy: { width: "100%", minWidth: 0, gap: 5 },
     heroTitle: {
       color: colors.ink,
       fontSize: 28,
@@ -132,24 +133,24 @@ export const createStyles = (colors: ThemeColors) =>
       color: colors.muted,
     },
     activityPanel: { gap: spacing.md, minHeight: 350, padding: spacing.lg, borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.card },
-    middleGrid: { flexDirection: "row", alignItems: "stretch", gap: spacing.md },
-    middleCard: { flex: 1, minWidth: 0, minHeight: 350 },
-    activityHeader: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+    middleGrid: { flexDirection: "column", alignItems: "stretch", gap: spacing.md },
+    middleCard: { minWidth: 0, width: "100%" },
+    activityHeader: { flexDirection: "row", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: 12 },
     activityTitle: {
       color: colors.ink,
       fontSize: 20,
       fontWeight: "700"
     },
     reportLink: { color: "#0A84FF", fontSize: 13, fontWeight: "800" },
-    activityContent: { flexDirection: "row", alignItems: "center", gap: 36, flexWrap: "wrap" },
-    activityRing: { width: 190, height: 190, alignItems: "center", justifyContent: "center", borderRadius: 95, borderWidth: 11, borderColor: colors.border },
+    activityContent: { flexDirection: "column", alignItems: "center", gap: 24 },
+    activityRing: { width: 160, height: 160, alignItems: "center", justifyContent: "center", borderRadius: 80, borderWidth: 9, borderColor: colors.border },
     activityPercent: {
       color: colors.ink,
       fontSize: 28,
       fontWeight: "700"
     },
     activityLabel: { color: colors.muted, fontSize: 12, marginTop: 2 },
-    activityList: { flex: 1, minWidth: 260, gap: 15 },
+    activityList: { width: "100%", minWidth: 0, gap: 16 },
     activityItem: { flexDirection: "row", alignItems: "center", gap: 10 },
     activityIcon: { width: 28, height: 28, alignItems: "center", justifyContent: "center", borderRadius: 8 },
     activityItemLabel: { flex: 1, color: colors.inkSoft, fontSize: 13 },

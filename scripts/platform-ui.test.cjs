@@ -143,7 +143,7 @@ test('both sign-in designs preserve submit, recovery, registration and pending b
 
 test('member payment, workout and reward summaries retain their existing arithmetic', () => {
   const h = harness('native', 'member');
-  const module = h.load(path.join(root, 'screens/member/MemberFeatureScreens.tsx'));
+  const module = h.load(path.join(root, 'utils/memberFeatureMetrics.ts'));
   assert.deepEqual(module.getMemberPaymentTotals([{ paid_amount_cents: 1055, due_amount_cents: 50 }, { paid_amount_cents: 20, due_amount_cents: 75 }]), { paid: 1075, due: 125 });
   assert.deepEqual(module.getMemberPaymentTotals([]), { paid: 0, due: 0 });
   assert.equal(module.getCompletedWorkoutCount([{ completed_workouts: 2 }, { completed_workouts: 3 }]), 5);
@@ -196,5 +196,16 @@ test('platform resolution includes only the intended UI tree and UI files contai
       ts.forEachChild(node, inspect);
     }
     inspect(sf);
+  }
+});
+
+
+test('member renderers do not import their screen controller at runtime', () => {
+  for (const file of ['ui/mobile/screens/member/MemberFeatureScreens.tsx', 'ui/web/pages/member/MemberFeatureScreens.tsx']) {
+    const output = ts.transpileModule(fs.readFileSync(path.join(root, file), 'utf8'), {
+      compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022, jsx: ts.JsxEmit.ReactJSX },
+    }).outputText;
+    assert.ok(!output.includes('require("../../../../screens/member/MemberFeatureScreens")'), file);
+    assert.ok(output.includes('require("../../../../utils/memberFeatureMetrics")'), file);
   }
 });

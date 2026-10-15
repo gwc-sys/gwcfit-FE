@@ -1,5 +1,6 @@
+import { Pressable } from "../../components/NativePressable";
 import { Ionicons } from "@expo/vector-icons";
-import { FlatList, Modal, Pressable, RefreshControl, Text, TextInput, View } from "react-native";
+import { FlatList, Modal, RefreshControl, Text, TextInput, View } from "react-native";
 import { DataState } from "../../components/DataState";
 import { PrimaryButton } from "../../components/PrimaryButton";
 import { Screen } from "../../components/Screen";

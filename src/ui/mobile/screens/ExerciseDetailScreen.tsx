@@ -1,4 +1,5 @@
-import { ImageBackground, Pressable, Text, View } from "react-native";
+import { Pressable } from "../components/NativePressable";
+import { ImageBackground, Text, View } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Check, Clock, Flame, MoreVertical, Pause, Play, RotateCcw } from "../components/icons";
 import { Header } from "../components/Header";

@@ -1,7 +1,8 @@
+import { Pressable } from "./NativePressable";
 import { controlMetrics } from "../theme/theme";
 import { Ionicons } from "@expo/vector-icons";
 import { useMemo, useState } from "react";
-import { ActivityIndicator, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from "react-native";
+import { ActivityIndicator, Modal, Platform, ScrollView, StyleSheet, Text, useWindowDimensions, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAppTheme } from "../../../theme/AppThemeProvider";
 import { radius, spacing, typography } from "../theme/theme";

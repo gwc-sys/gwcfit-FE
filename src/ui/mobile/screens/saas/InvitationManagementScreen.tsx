@@ -1,6 +1,7 @@
+import { Pressable } from "../../components/NativePressable";
 import { controlMetrics } from "../../theme/theme";
 import { Ionicons } from "@expo/vector-icons";
-import { Pressable, Share, Text, TextInput, View } from "react-native";
+import { Share, Text, TextInput, View } from "react-native";
 import { FormTextField } from "../../components/FormTextField";
 import { NoticeBanner } from "../../components/NoticeBanner";
 import { PrimaryButton } from "../../components/PrimaryButton";

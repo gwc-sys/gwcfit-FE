@@ -1,4 +1,5 @@
-import { Pressable, RefreshControl, Text, View } from "react-native";
+import { Pressable } from "../../components/NativePressable";
+import { RefreshControl, Text, View } from "react-native";
 import { DataState } from "../../components/DataState";
 import { MetricCard } from "../../components/MetricCard";
 import { QuickAction } from "../../components/QuickAction";

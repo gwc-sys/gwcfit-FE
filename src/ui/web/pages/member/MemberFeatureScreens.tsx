@@ -1,4 +1,4 @@
-import { getMemberPaymentTotals, getCompletedWorkoutCount, getRewardPoints, getRewardBadgeCount } from "../../../../screens/member/MemberFeatureScreens";
+import { getMemberPaymentTotals, getCompletedWorkoutCount, getRewardPoints, getRewardBadgeCount } from "../../../../utils/memberFeatureMetrics";
 import { FlatList, RefreshControl, Switch, Text, View } from "react-native";
 import type { ReactNode } from "react";
 import { FormTextField } from "../../components/FormTextField";

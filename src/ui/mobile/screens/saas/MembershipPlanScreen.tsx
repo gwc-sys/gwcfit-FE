@@ -1,7 +1,9 @@
+import { ScreenHeader } from "../../components/ScreenHeader";
+import { Pressable } from "../../components/NativePressable";
 import { controlMetrics } from "../../theme/theme";
 import { showAlert } from "../../../../utils/appAlert";
 import { Ionicons } from "@expo/vector-icons";
-import { ActivityIndicator, Modal, Pressable, ScrollView, Switch, Text, TextInput, View } from "react-native";
+import { ActivityIndicator, Modal, ScrollView, Switch, Text, TextInput, View } from "react-native";
 import { PrimaryButton } from "../../components/PrimaryButton";
 import { NoticeBanner } from "../../components/NoticeBanner";
 import { PulseDashboardLayout } from "../../../../components/dashboard/PulseDashboardLayout";
@@ -31,12 +33,7 @@ export function MembershipPlanScreenView({ model }: { model: ReturnType<typeof u
     >
       <View style={styles.header}>
         <View style={styles.headerCopy}>
-          <Text style={styles.title}>{isSuperAdmin ? "Platform Membership Plans" : "Membership Plans"}</Text>
-          <Text style={styles.subtitle}>
-            {isSuperAdmin
-              ? "Review every plan currently used by gym owners across the platform."
-              : "Create and manage membership plans for your gym."}
-          </Text>
+          <ScreenHeader title={isSuperAdmin ? "Platform Membership Plans" : "Membership Plans"} subtitle={isSuperAdmin ? "Review every plan currently used by gym owners across the platform." : "Create and manage membership plans for your gym."} />
         </View>
         {!isSuperAdmin && !query.data?.length ? (
           <PrimaryButton

@@ -1,8 +1,9 @@
+import { Pressable } from "./NativePressable";
 import { Ionicons } from "@expo/vector-icons";
 import { useMemo } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, useWindowDimensions, View } from "react-native";
 import { useAppTheme } from "../../../theme/AppThemeProvider";
-import { radius, spacing, typography } from "../theme/theme";
+import { getResponsiveFontSize, radius, spacing, typography } from "../theme/theme";
 import type { ThemeColors } from "../theme/theme";
 
 type AppHeaderProps = {
@@ -23,6 +24,7 @@ export function AppHeader({
   light,
 }: AppHeaderProps) {
   const { colors } = useAppTheme();
+  const { width } = useWindowDimensions();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const iconColor = light ? colors.white : colors.ink;
 
@@ -41,20 +43,16 @@ export function AppHeader({
       )}
       <View style={styles.center}>
         <Text
-          adjustsFontSizeToFit
-          
-          style={[styles.title, light && styles.lightText]}
-          numberOfLines={1}
+
+          style={[styles.title, { fontSize: getResponsiveFontSize(width, typography.h3.fontSize) }, light && styles.lightText]}
         >
           {title}
         </Text>
         {subtitle ? (
           <Text
-            adjustsFontSizeToFit
-            
+
             style={[styles.subtitle, light && styles.lightSub]}
-            numberOfLines={1}
-          >
+            >
             {subtitle}
           </Text>
         ) : null}

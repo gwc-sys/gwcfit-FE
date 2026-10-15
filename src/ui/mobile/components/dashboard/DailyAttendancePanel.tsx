@@ -1,5 +1,6 @@
+import { Pressable } from "../NativePressable";
 import { Ionicons } from "@expo/vector-icons";
-import { Modal, Pressable, ScrollView, Text, View } from "react-native";
+import { Modal, ScrollView, Text, View } from "react-native";
 import QRCode from "react-native-qrcode-svg";
 import { getApiErrorMessage } from "../../../../services/api/client";
 import type * as React from "react";

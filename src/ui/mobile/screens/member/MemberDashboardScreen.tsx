@@ -1,6 +1,8 @@
+import { useAuthStore } from "../../../../store/useAuthStore";
+import { Pressable } from "../../components/NativePressable";
 import { Ionicons } from "@expo/vector-icons";
 import type { ReactNode } from "react";
-import { Image, Pressable, RefreshControl, Text, View } from "react-native";
+import { Image, RefreshControl, Text, View } from "react-native";
 import Svg, { Circle } from "react-native-svg";
 import { Screen } from "../../components/Screen";
 import { getApiErrorMessage } from "../../../../services/api/client";
@@ -200,6 +202,7 @@ export function DashboardStateView({ model }: { model: ReturnType<typeof useDash
 }
 
 export function MemberDashboardScreenView({ model }: { model: ReturnType<typeof useMemberDashboardScreenPresentation> }): React.ReactNode {
+  const user = useAuthStore(state => state.user);
   if (model == null) return null;
   if (typeof model !== "object" || !("kind" in model)) return model;
   switch (model.kind) {
@@ -220,7 +223,7 @@ export function MemberDashboardScreenView({ model }: { model: ReturnType<typeof 
           <View style={styles.mobileBrand}>
             <View style={styles.mobileBrandContent}>
               <Text style={styles.mobileIdentityRole}>YOUR FITNESS</Text>
-              <Text accessibilityRole="header" style={styles.brandText}>Overview</Text>
+              <Text accessibilityRole="header" style={styles.brandText}>{dashboard?.gym_name?.trim() || user?.gym_name?.trim() || "Your gym"}</Text>
               <Text style={styles.mobileIdentityName}>{memberName}</Text>
             </View>
             <View style={styles.mobileBrandActions}>

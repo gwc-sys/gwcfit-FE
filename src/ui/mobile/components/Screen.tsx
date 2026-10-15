@@ -2,6 +2,9 @@ import type { ReactElement, ReactNode } from "react";
 import { createContext, useContext } from "react";
 import { KeyboardAvoidingView, Platform, ScrollView, RefreshControlProps, StyleProp, StyleSheet, useWindowDimensions, View, ViewStyle } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+import { BottomTabBarHeightContext } from "@react-navigation/bottom-tabs";
+import { LinearGradient } from "expo-linear-gradient";
+import { pulseScreenGradients } from "../theme/referenceTokens";
 import { useAppTheme } from "../../../theme/AppThemeProvider";
 import { breakpoints, getResponsiveBottomInset, getResponsiveScreenPadding, getResponsiveSpacing, resolveContentMaxWidth, spacing } from "../theme/theme";
 import type { ScreenContentWidth } from "../theme/theme";
@@ -16,6 +19,7 @@ type ScreenProps = {
   refreshControl?: ReactElement<RefreshControlProps>;
   keyboard?: boolean;
   maxWidth?: ScreenContentWidth;
+  reference?: boolean;
 };
 
 // A workspace supplies the outer safe area; each feature keeps its own scroll
@@ -31,16 +35,20 @@ export function Screen({
   contentContainerStyle,
   refreshControl,
   keyboard = false,
-  maxWidth = "dashboard"
+  maxWidth = "dashboard",
+  reference = true
 }: ScreenProps) {
-  const { colors } = useAppTheme();
+  const { colors, isDark } = useAppTheme();
   const embedded = useContext(EmbeddedScreenContext);
+  const tabBarHeight = useContext(BottomTabBarHeightContext);
+  const insideTabs = typeof tabBarHeight === "number" && tabBarHeight > 0;
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
-  const backgroundColor = dark ? colors.dark : colors.background;
-  const horizontalPadding = getResponsiveScreenPadding(width);
-  const bottomPadding = getResponsiveBottomInset(width, insets.bottom);
-  const resolvedMaxWidth = resolveContentMaxWidth(width, maxWidth);
+  const backgroundColor = embedded ? "transparent" : dark ? colors.dark : colors.background;
+  const availableWidth = Math.max(0, width - insets.left - insets.right);
+  const horizontalPadding = getResponsiveScreenPadding(availableWidth);
+  const bottomPadding = getResponsiveBottomInset(width, insideTabs ? 0 : insets.bottom);
+  const resolvedMaxWidth = resolveContentMaxWidth(availableWidth, maxWidth);
   const topPadding = width < breakpoints.tablet ? getResponsiveSpacing(width, spacing.md) : getResponsiveSpacing(width, spacing.lg);
   const bodyStyle = [
     styles.body,
@@ -75,7 +83,8 @@ export function Screen({
   );
 
   return (
-    <SafeAreaView edges={embedded ? [] : ["top", "right", "bottom", "left"]} style={[styles.safe, { backgroundColor }, style]}>
+    <SafeAreaView edges={embedded ? [] : insideTabs ? ["top", "right", "left"] : ["top", "right", "bottom", "left"]} style={[styles.safe, { backgroundColor }, style]}>
+      {reference && !embedded && !dark ? <LinearGradient pointerEvents="none" colors={isDark ? pulseScreenGradients.dark : pulseScreenGradients.light} style={StyleSheet.absoluteFill} /> : null}
       {keyboard ? (
         <KeyboardAvoidingView
           behavior={Platform.OS === "ios" ? "padding" : "height"}

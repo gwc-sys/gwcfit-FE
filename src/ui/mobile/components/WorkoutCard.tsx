@@ -1,6 +1,7 @@
+import { Pressable } from "./NativePressable";
 import { controlMetrics } from "../theme/theme";
 import { useMemo } from "react";
-import { ImageBackground, Pressable, StyleSheet, Text, View } from "react-native";
+import { ImageBackground, StyleSheet, Text, View } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Dumbbell, Sparkles } from "./icons";
 import type { WorkoutPlan } from "../../../types/fitness";

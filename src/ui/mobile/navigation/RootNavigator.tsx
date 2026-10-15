@@ -47,19 +47,20 @@ export function MainTabsView({ model }: { model: ReturnType<typeof useMainTabsPr
           if (route.name === "Dashboard" && focused) {
             return (
               <View style={styles.activeTab}>
-                <Ionicons name="speedometer" size={24} color={colors.primary} />
+                <Ionicons name="home" size={24} color={colors.primary} />
               </View>
             );
           }
 
-          return <Ionicons name={getTabIcon(route.name, focused, isPlatformAdmin, isMember)} size={24} color={color} />;
+          const ownerIcon = route.name === "Dashboard" ? (focused ? "home" : "home-outline") : route.name === "Reports" ? (focused ? "bar-chart" : "bar-chart-outline") : undefined;
+          return <Ionicons name={!isPlatformAdmin && !isMember && ownerIcon ? ownerIcon : getTabIcon(route.name, focused, isPlatformAdmin, isMember)} size={22} color={color} />;
         }
       })}
     >
       <Tabs.Screen
         name="Dashboard"
         component={RoleDashboardScreen}
-        options={user?.role === "receptionist" ? { tabBarStyle: { display: "none" } } : undefined}
+        options={user?.role === "receptionist" ? { tabBarStyle: { display: "none" } } : { title: "Home" }}
       />
       {isPlatformAdmin ? (
         <Tabs.Screen name="Directory" component={SuperAdminManageGymsScreen} options={{ title: "Gyms" }} />
@@ -68,7 +69,7 @@ export function MainTabsView({ model }: { model: ReturnType<typeof useMainTabsPr
       ) : canManageMembers ? (
         <Tabs.Screen name="Directory" component={OwnerMembersScreen} options={{ title: "Members" }} />
       ) : (
-        <Tabs.Screen name="Directory" component={OperationsHubScreen} options={{ title: "Tools" }} />
+        <Tabs.Screen name="Directory" component={OperationsHubScreen} options={{ title: "Operations" }} />
       )}
 
       {isPlatformAdmin ? (
@@ -76,10 +77,10 @@ export function MainTabsView({ model }: { model: ReturnType<typeof useMainTabsPr
       ) : isMember ? (
         <Tabs.Screen name="Workflows" component={NotificationsScreen} options={{ title: "Alerts" }} />
       ) : (
-        <Tabs.Screen name="Workflows" component={OperationsHubScreen} options={{ title: "Tools" }} />
+        <Tabs.Screen name="Workflows" component={OperationsHubScreen} options={{ title: "Operations" }} />
       )}
 
-      {canViewReports ? <Tabs.Screen name="Reports" component={OwnerReportsScreen} /> : null}
+      {canViewReports ? <Tabs.Screen name="Reports" component={OwnerReportsScreen} options={{ title: "Analytics" }} /> : null}
       <Tabs.Screen name="Profile" component={OwnerProfileScreen} />
     </Tabs.Navigator>
   ));

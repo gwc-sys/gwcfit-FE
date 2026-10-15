@@ -1,6 +1,7 @@
+import { Pressable } from "../../components/NativePressable";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import { ActivityIndicator, Image, Pressable, RefreshControl, Text, View } from "react-native";
+import { ActivityIndicator, Image, RefreshControl, Text, View } from "react-native";
 import { Screen } from "../../components/Screen";
 import { getApiErrorMessage } from "../../../../services/api/client";
 import { formatDate } from "../../../../utils/formatters";

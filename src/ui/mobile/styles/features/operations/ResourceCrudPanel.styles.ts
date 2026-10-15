@@ -217,14 +217,16 @@ export const createStyles = (colors: ThemeColors, width: number) => {
     },
     iconButton: { width: controlMetrics.minimumTouchSize, height: controlMetrics.minimumTouchSize, alignItems: "center", justifyContent: "center", borderRadius: radius.sm, backgroundColor: colors.surface },
     pagination: {
-      flexDirection: compact ? "column" : "row",
+      flexDirection: "row",
+      flexWrap: "wrap",
       alignItems: "center",
       justifyContent: "space-between",
       gap: spacing.sm,
     },
     pageButton: {
       flex: compact ? undefined : 1,
-      width: compact ? "100%" : undefined,
+      minWidth: 0,
+      width: undefined,
     },
     pageLabel: {
       ...typography.small,

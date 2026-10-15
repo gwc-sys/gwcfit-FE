@@ -13,7 +13,7 @@ function harness(width, scheme = 'dark', { os = 'ios', fontScale = 1, reduceMoti
   let colors;
   const rn = {
     Platform: { OS: os, select: v => v[os] ?? v.default },
-    StyleSheet: { create: v => v, hairlineWidth: 0.5 },
+    StyleSheet: { create: v => v, hairlineWidth: 0.5, flatten: value => Array.isArray(value) ? Object.assign({}, ...value.filter(Boolean).map(item => rn.StyleSheet.flatten(item))) : value },
     useWindowDimensions: () => ({ width, height: 844, fontScale }),
     View: 'View', Text: 'Text', Pressable: 'Pressable', ScrollView: 'ScrollView',
     Modal: 'Modal', TextInput: 'TextInput', KeyboardAvoidingView: 'KeyboardAvoidingView', Image: 'Image', ActivityIndicator: 'ActivityIndicator',
@@ -26,18 +26,21 @@ function harness(width, scheme = 'dark', { os = 'ios', fontScale = 1, reduceMoti
       compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022, jsx: ts.JsxEmit.ReactJSX, esModuleInterop: true },
     }).outputText;
     function requireMock(request) {
-      if (request === 'react') return { ...React, useMemo: fn => fn(), useContext: ctx => contexts.get(ctx) ?? false, useState: initial => [initial, () => {}] };
+      if (request === 'react') return { ...React, useMemo: fn => fn(), useContext: ctx => contexts.get(ctx) ?? ctx?._currentValue ?? false, useState: initial => [initial, () => {}] };
       if (request === 'react/jsx-runtime') return require(request);
       if (request === 'react-native') return rn;
       if (request === '@expo/vector-icons') return { Ionicons: 'Icon' };
       if (request === 'expo-linear-gradient') return { LinearGradient: 'Gradient' };
+      if (request === 'react-native-svg') return { __esModule: true, default: 'Svg', Path: 'Path', Defs: 'Defs', LinearGradient: 'SvgGradient', Stop: 'Stop' };
+      if (request === 'expo-constants') return { __esModule: true, default: { expoConfig: { version: '1.0.0' } } };
+      if (request.endsWith('/hooks/useAnalyticsMembers')) return { useAnalyticsMembers: () => ({ query: { data: [], isLoading: false, error: null }, permitted: true }) };
       if (request === 'react-native-reanimated') return { useReducedMotion: () => reduceMotion };
-      if (request === '@react-navigation/native') return { NavigationContainer: 'NavigationContainer' };
+      if (request === '@react-navigation/native') return { NavigationContainer: 'NavigationContainer', useNavigation: () => ({ getState: () => ({ type: 'tab' }), canGoBack: () => false }) };
       if (request === '@react-navigation/bottom-tabs') return { BottomTabBar: 'BottomTabBar' };
       if (request.includes('data/onboarding')) return { onboardingSlides: [{ id: 'one' }, { id: 'two' }, { id: 'three' }] };
       if (request === 'react-native-safe-area-context') return { SafeAreaView: 'SafeAreaView', useSafeAreaInsets: () => ({ top: 47, bottom: 34, left: 0, right: 0 }) };
-      if (request.includes('AppThemeProvider')) return { useAppTheme: () => ({ colors }) };
-      if (request.includes('utils/formatters')) return { initials: name => name.split(' ').map(p => p[0]).join('') };
+      if (request.includes('AppThemeProvider')) return { useAppTheme: () => ({ colors, isDark: scheme === 'dark', themeMode: scheme }) };
+      if (request.includes('utils/formatters')) return load(path.resolve(path.dirname(file), request + '.ts'));
       if (request.includes('utils/logoutConfirmation')) return { requestLogoutConfirmation: fn => fn() };
       const base = path.resolve(path.dirname(file), request);
       const resolved = [base + '.tsx', base + '.ts'].find(p => fs.existsSync(p));
@@ -53,6 +56,7 @@ function harness(width, scheme = 'dark', { os = 'ios', fontScale = 1, reduceMoti
   function expand(element) {
     if (Array.isArray(element)) return element.flatMap(expand);
     if (!React.isValidElement(element)) return [];
+    if (element.type === 'Modal' && !element.props.visible) return [];
     if (element.type?.$$typeof === Symbol.for('react.context')) {
       const previous = contexts.get(element.type);
       contexts.set(element.type, element.props.value);
@@ -124,7 +128,14 @@ test('phone directories expose full-width search and readable themed profile car
     const dashboard = h.load(path.join(mobile, 'styles/screens/saas/GymAdminDashboardScreen.styles.ts')).createOwnerDashboardStyles(h.colors);
     assert.notEqual(dashboard.statusRingValue.color, h.colors.card);
     assert.equal(dashboard.metric.minWidth, 0);
-    assert.equal(dashboard.metric.flexBasis, '45%');
+    assert.equal(dashboard.metric.width, '100%');
+    assert.equal(dashboard.metricGrid.flexDirection, 'column');
+    assert.equal(dashboard.dashboardGrid.flexDirection, 'column');
+    assert.equal(dashboard.quickActions.flexDirection, 'column');
+    assert.equal(dashboard.distributionBody.flexDirection, 'row');
+    assert.equal(dashboard.distributionBody.flexWrap, 'wrap');
+    assert.equal(dashboard.statusContent.flexDirection, 'row');
+    assert.equal(dashboard.statusContent.flexWrap, 'wrap');
   }
 });
 
@@ -279,5 +290,184 @@ test('keyboard avoidance uses one iOS inset strategy and Android height behavior
     const nodes = h.expand(Screen({ scroll: true, keyboard: true, children: null }));
     assert.equal(nodes.find(n => n.type === 'ScrollView').props.automaticallyAdjustKeyboardInsets, false);
     assert.equal(nodes.find(n => n.type === 'KeyboardAvoidingView').props.behavior, os === 'ios' ? 'padding' : 'height');
+  }
+});
+
+
+test('reference operation grid keeps permitted actions and destinations in both themes', () => {
+  for (const scheme of ['light', 'dark']) {
+    const h = harness(320, scheme);
+    const { OperationsHubScreenView } = h.load(path.join(mobile, 'screens/saas/OperationsHubScreen.tsx'));
+    const routes = [];
+    const model = { kind: 'view1', props: { hasPermission: () => true, canManageStaff: true, navigation: { navigate: route => routes.push(route) } } };
+    const nodes = h.expand(OperationsHubScreenView({ model }));
+    for (const title of ['Add Member', 'Check-In', 'Manage Plans', 'Payments', 'Attendance', 'Announcements', 'Equipment', 'Reports']) {
+      const action = nodes.find(node => node.type === 'Pressable' && node.props.accessibilityLabel === title);
+      assert.ok(action, title);
+      const style = flattenStyle(action.props.style({ pressed: false }));
+      assert.equal(style.flexBasis, '45%');
+      assert.ok(style.minHeight >= 124);
+      action.props.onPress();
+    }
+    assert.deepEqual(routes, ['AddMember', 'Attendance', 'MembershipPlans', 'Payments', 'Attendance', 'Notifications', 'WorkoutPlans', 'Reports']);
+    const restricted = h.expand(OperationsHubScreenView({ model: { kind: 'view1', props: { ...model.props, hasPermission: () => false, canManageStaff: false } } }));
+    assert.ok(!restricted.some(node => node.props.accessibilityLabel === 'Payments'));
+    assert.ok(!restricted.some(node => node.props.accessibilityLabel === 'Add Member'));
+  }
+});
+
+test('reference members toolbar maps status filters and preserves search, reset and creation', () => {
+  const h = harness(390, 'light');
+  const { MemberListScreenView } = h.load(path.join(mobile, 'screens/saas/MemberListScreen.tsx'));
+  const calls = [];
+  const nodes = h.expand(MemberListScreenView({ model: { kind: 'view3', props: {
+    colors: h.colors, styles: {}, compact: true, memberFilter: 'all', search: '', page: 0, sortDirection: 'az', visibleMembers: [], canManageMembers: true,
+    membersQuery: { data: [], isLoading: false, isFetching: false }, deleteMember: {},
+    setMemberFilter: value => calls.push(['filter', value]), setSearch: value => calls.push(['search', value]), setPage: value => calls.push(['page', value]),
+    navigation: { navigate: value => calls.push(['navigate', value]) },
+  } } }));
+  nodes.find(node => node.props.accessibilityLabel === 'Add member').props.onPress();
+  nodes.find(node => node.props.accessibilityLabel === 'Search members').props.onChangeText('Alex');
+  const filters = nodes.filter(node => node.type === 'Pressable' && node.props.accessibilityState?.selected !== undefined);
+  assert.equal(filters.length, 4);
+  filters[3].props.onPress();
+  assert.deepEqual(calls, [['navigate', 'AddMember'], ['search', 'Alex'], ['page', 0], ['filter', 'all'], ['page', 0]]);
+});
+
+test('reference notification rows open details and retain the unread mutation guard', () => {
+  for (const scheme of ['light', 'dark']) {
+    const h = harness(390, scheme);
+    const { NotificationsScreenView } = h.load(path.join(mobile, 'screens/saas/NotificationsScreen.tsx'));
+    const marked = [];
+    const data = [{ id: 'unread', title: 'Payment received', body: 'Receipt ready', created_at: new Date().toISOString(), status: 'unread' }, { id: 'read', title: 'Announcement', body: 'Class update', created_at: new Date().toISOString(), status: 'read' }];
+    const nodes = h.expand(NotificationsScreenView({ model: { kind: 'view1', props: { colors: h.colors, query: { data, isLoading: false }, markRead: { mutate: id => marked.push(id), isPending: false } } } }));
+    for (const node of nodes.filter(node => node.props.accessibilityLabel?.includes('Open notification'))) node.props.onPress();
+    assert.deepEqual(marked, ['unread']);
+    assert.ok(nodes.some(node => node.type === 'Icon' && node.props.name === 'wallet'));
+    assert.ok(nodes.some(node => node.type === 'Icon' && node.props.name === 'megaphone'));
+  }
+});
+
+test('reference home and analytics render real zero states rather than sample metrics in both themes', () => {
+  for (const scheme of ['light', 'dark']) {
+    const h = harness(320, scheme, { fontScale: 2 });
+    const { OwnerMobileOverview } = h.load(path.join(mobile, 'components/OwnerMobileOverview.tsx'));
+    const { PulseAnalytics } = h.load(path.join(mobile, 'components/PulseAnalytics.tsx'));
+    const home = h.expand(OwnerMobileOverview({ totalMembers: 0, activeMembers: 0, revenue: 0, onMembers() {}, onReports() {}, onMember() {} }));
+    const analytics = h.expand(PulseAnalytics({ payments: [] }));
+    const homeText = home.filter(node => node.type === 'Text').map(node => node.props.children).flat().join(' ');
+    assert.ok(homeText.includes('Total Members'));
+    assert.ok(homeText.includes('New Members'));
+    assert.ok(homeText.includes('Expiring Soon'));
+    assert.ok(!homeText.includes('248'));
+    const chartText = analytics.filter(node => node.type === 'Text').map(node => node.props.children).flat().join(' ');
+    assert.ok(chartText.includes('New Members'));
+    assert.ok(chartText.includes('Member Growth'));
+    assert.ok(!chartText.includes('12,480'));
+    const chips = analytics.filter(node => node.type === 'Pressable' && node.props.accessibilityState?.selected !== undefined);
+    assert.equal(chips.length, 4);
+  }
+});
+
+test('reference profile exposes grouped settings while preserving staff and subscription permissions', () => {
+  for (const scheme of ['light', 'dark']) {
+    const h = harness(390, scheme);
+    const { ProfileScreenView } = h.load(path.join(mobile, 'screens/saas/ProfileScreen.tsx'));
+    const destinations = [];
+    const props = { styles: {}, user: { full_name: 'Owner Name', email: 'owner@example.test', role: 'gym_owner', permissions: ['manage_membership_plans'] }, canManageStaff: true, navigation: { navigate: route => destinations.push(route) }, logout: {}, confirmLogout() {} };
+    const nodes = h.expand(ProfileScreenView({ model: { kind: 'view1', props } }));
+    for (const label of ['Account Settings', 'Manage Staff', 'Subscription & Billing']) nodes.find(node => node.props.accessibilityLabel === label).props.onPress();
+    assert.deepEqual(destinations, ['Settings', 'Staff', 'MembershipPlans']);
+    for (const label of ['Gym Information', 'App Preferences', 'Help & Support', 'About']) assert.ok(nodes.some(node => node.props.accessibilityLabel === label));
+    const restricted = h.expand(ProfileScreenView({ model: { kind: 'view1', props: { ...props, canManageStaff: false, user: { ...props.user, role: 'trainer', permissions: [] } } } }));
+    assert.ok(!restricted.some(node => node.props.accessibilityLabel === 'Manage Staff'));
+    assert.ok(!restricted.some(node => node.props.accessibilityLabel === 'Subscription & Billing'));
+  }
+});
+
+
+test('video regression: gym fields stretch in phone and tablet containers', () => {
+  for (const width of [320, 375, 390, 768]) {
+    const h = harness(width, 'dark', { fontScale: 2 });
+    const { createStyles } = h.load(path.join(mobile, 'styles/features/operations/GymPanels.styles.ts'));
+    const grid = createStyles(h.colors, width).fieldGrid;
+    assert.equal(grid.flexDirection, 'column');
+    assert.equal(grid.alignItems, 'stretch');
+    const { FormTextField } = h.load(path.join(mobile, 'components/FormTextField.tsx'));
+    const nodes = h.expand(FormTextField({ label: 'Public business email', leftIcon: 'mail-outline', value: '', onChangeText() {} }));
+    const field = flattenStyle(nodes[0].props.style);
+    assert.equal(field.width, '100%');
+    assert.equal(field.alignSelf, 'stretch');
+    assert.equal(field.minWidth, 0);
+    const input = nodes.find(node => node.type === 'TextInput');
+    assert.equal(input.props.accessibilityLabel, 'Public business email');
+  }
+});
+
+test('video regression: empty revenue avoids fabricated or duplicated axis ticks', () => {
+  const h = harness(375);
+  const { PulseAnalytics } = h.load(path.join(mobile, 'components/PulseAnalytics.tsx'));
+  const nodes = h.expand(PulseAnalytics({ payments: [] }));
+  const text = nodes.filter(node => node.type === 'Text').flatMap(node => node.props.children).join(' ');
+  assert.ok(text.includes('No paid revenue in this period.'));
+  assert.ok(!text.includes('0.01'));
+});
+
+test('video regression: phone Staff hides the desktop column header', () => {
+  const h = harness(375);
+  const { StaffScreenView } = h.load(path.join(mobile, 'screens/saas/StaffScreen.tsx'));
+  const props = { styles: {}, colors: h.colors, compact: true, usersQuery: { data: [], isLoading: false }, countsQuery: {}, users: [], counts: { trainer: 0, receptionist: 0, sub_admin: 0 }, roleOptions: [], roleFilter: 'all', deactivateUser: {}, user: { role: 'gym_owner' }, CountCard: () => null, search: '' };
+  const nodes = h.expand(StaffScreenView({ model: { kind: 'view2', props } }));
+  assert.ok(!nodes.some(node => node.type === 'Text' && node.props.children === 'Joined On'));
+  assert.ok(!nodes.some(node => node.type === 'Text' && node.props.children === 'Actions'));
+});
+
+
+test('expanded mobile redesign keeps Attendance and workout cards within phone widths', () => {
+  for (const width of [320, 375, 390, 768]) {
+    for (const scheme of ['light', 'dark']) {
+      const h = harness(width, scheme);
+      const attendance = h.load(path.join(mobile, 'styles/screens/saas/AttendanceScreen.styles.ts'));
+      const styles = attendance.createStyles(h.colors);
+      assert.equal(styles.middleGrid.flexDirection, 'column');
+      assert.equal(styles.middleCard.width, '100%');
+      assert.equal(styles.activityList.minWidth, 0);
+      assert.equal(styles.activityList.width, '100%');
+      assert.ok(styles.activityRing.width <= 160);
+      const metric = attendance.createDashboardStyles(h.colors).statCard;
+      assert.equal(metric.minWidth, 0);
+      assert.equal(metric.flexBasis, '45%');
+      const workout = h.load(path.join(mobile, 'styles/screens/saas/WorkoutPlansScreen.styles.ts')).createStyles(h.colors);
+      assert.equal(workout.stats.flexWrap, 'wrap');
+      assert.equal(workout.stat.minWidth, 0);
+      const qr = h.load(path.join(mobile, 'styles/components/dashboard/DailyAttendancePanel.styles.ts')).makeStyles(h.colors, true);
+      assert.equal(qr.layout.flexDirection, 'column');
+      assert.equal(qr.metrics.flexWrap, 'wrap');
+    }
+  }
+});
+
+test('workout redesign retains create action and live records without hardcoded metric cards', () => {
+  const h = harness(375);
+  const { WorkoutPlansScreenView } = h.load(path.join(mobile, 'screens/saas/WorkoutPlansScreen.tsx'));
+  let createRequested = false;
+  const nodes = h.expand(WorkoutPlansScreenView({ model: { kind: 'view2', props: { styles: {}, createRequest: 0, setCreateRequest: () => { createRequested = true; } } } }));
+  nodes.find(node => node.props.accessibilityLabel === 'Create New Plan').props.onPress();
+  assert.equal(createRequested, true);
+  assert.ok(!nodes.some(node => node.type === 'Text' && node.props.children === 'No plans created yet'));
+});
+
+
+test('shared headers and panel sizing adapt to phones, split windows and tablets', () => {
+  for (const width of [280, 320, 390, 600, 768, 1024, 1366]) {
+    const h = harness(width, 'light', { fontScale: 2 });
+    const theme = h.load(path.join(mobile, 'theme/theme.ts'));
+    const font = theme.getResponsiveFontSize(width, 28);
+    assert.ok(font >= 26 && font <= 32, `${width}: ${font}`);
+    const adapt = h.load(path.join(mobile, 'styles/adaptPageStyles.ts')).adaptPageStyles;
+    const styles = adapt({ panel: { width: 315, minWidth: 250 }, actions: { flexDirection: 'row' } });
+    assert.equal(styles.panel.width, '100%');
+    assert.equal(styles.panel.minWidth, 0);
+    assert.equal(styles.actions.flexWrap, 'wrap');
   }
 });

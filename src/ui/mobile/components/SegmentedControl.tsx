@@ -1,5 +1,6 @@
+import { Pressable } from "./NativePressable";
 import { useMemo } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { useAppTheme } from "../../../theme/AppThemeProvider";
 import { controlMetrics, radius, spacing, typography } from "../theme/theme";
 import type { ThemeColors } from "../theme/theme";

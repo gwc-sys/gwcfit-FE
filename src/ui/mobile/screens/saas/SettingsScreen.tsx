@@ -1,8 +1,9 @@
+import { Pressable } from "../../components/NativePressable";
 import { controlMetrics } from "../../theme/theme";
 import { Ionicons } from "@expo/vector-icons";
 import type { ReactNode } from "react";
 import { Controller } from "react-hook-form";
-import { Modal, Pressable, ScrollView, Switch, Text, TextInput, View } from "react-native";
+import { Modal, ScrollView, Switch, Text, TextInput, View } from "react-native";
 import { FormTextField } from "../../components/FormTextField";
 import { NoticeBanner } from "../../components/NoticeBanner";
 import { PrimaryButton } from "../../components/PrimaryButton";
@@ -153,8 +154,6 @@ export function SettingsOptionGridView({ model }: { model: ReturnType<typeof use
     <View style={styles.optionGrid}>
       <SettingsOption icon="person-circle-outline" title="Profile" description="View your account details" onPress={() => onNavigate("Profile")} colors={colors} styles={styles} />
       <SettingsOption icon="card-outline" title="Subscription" description="Manage plans and free-trial settings" onPress={() => onNavigate(subscriptionRoute)} colors={colors} styles={styles} />
-      <View style={styles.optionCard}><View style={styles.optionIcon}><Ionicons name="color-palette-outline" size={20} color={colors.primary} /></View><View style={styles.optionCopy}><Text style={styles.optionTitle}>Theme</Text><Text style={styles.optionDescription}>{isDark ? "Dark theme" : "Light theme"}</Text></View><Switch value={isDark} onValueChange={onToggleTheme} trackColor={{ true: colors.primary, false: colors.surfaceStrong }} thumbColor={colors.white} /></View>
-      <View style={styles.optionCard}><View style={styles.optionIcon}><Ionicons name="lock-closed-outline" size={20} color={colors.primary} /></View><View style={styles.optionCopy}><Text style={styles.optionTitle}>Authentication</Text><Text style={styles.optionDescription}>Change your password in the security section below.</Text></View></View>
     </View>
   ));
     }

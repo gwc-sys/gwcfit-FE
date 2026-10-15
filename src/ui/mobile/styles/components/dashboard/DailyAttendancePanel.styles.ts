@@ -70,7 +70,7 @@ export const makeStyles = (c: any, compact: boolean) =>
     },
     muted: { fontSize: 12, color: c.textSecondary },
     error: { color: c.danger },
-    metrics: { flexDirection: "row", gap: 8 },
+    metrics: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
     heading: {
       marginTop: 5,
       fontSize: 14,
@@ -80,6 +80,8 @@ export const makeStyles = (c: any, compact: boolean) =>
     row: {
       flexDirection: "row",
       justifyContent: "space-between",
+      flexWrap: "wrap",
+      gap: 8,
       paddingVertical: 9,
       borderBottomWidth: 1,
       borderBottomColor: c.border,

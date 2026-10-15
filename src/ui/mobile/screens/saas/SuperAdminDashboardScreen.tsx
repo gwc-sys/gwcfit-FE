@@ -1,5 +1,6 @@
+import { Pressable } from "../../components/NativePressable";
 import { Ionicons } from "@expo/vector-icons";
-import { Pressable, RefreshControl, Text, View } from "react-native";
+import { RefreshControl, Text, View } from "react-native";
 import { DataState } from "../../components/DataState";
 import { MetricCard } from "../../components/MetricCard";
 import { QuickAction } from "../../components/QuickAction";

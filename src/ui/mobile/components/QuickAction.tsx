@@ -1,12 +1,14 @@
+import { Pressable } from "./NativePressable";
 import { controlMetrics } from "../theme/theme";
 import { Ionicons } from "@expo/vector-icons";
 import { useMemo } from "react";
-import { Pressable, StyleSheet, Text, useWindowDimensions, View } from "react-native";
+import { StyleSheet, Text, useWindowDimensions, View } from "react-native";
 import { useAppTheme } from "../../../theme/AppThemeProvider";
 import { radius, shadows, spacing, typography } from "../theme/theme";
 import type { ThemeColors } from "../theme/theme";
 
 type QuickActionProps = {
+  tile?: boolean;
   icon: keyof typeof Ionicons.glyphMap;
   title: string;
   subtitle?: string;
@@ -25,7 +27,7 @@ function getTone(colors: ThemeColors, tone: NonNullable<QuickActionProps["tone"]
   return tones[tone];
 }
 
-export function QuickAction({ icon, title, subtitle, onPress, tone = "primary" }: QuickActionProps) {
+export function QuickAction({ icon, title, subtitle, onPress, tile = false, tone = "primary" }: QuickActionProps) {
   const { colors } = useAppTheme();
   const { width } = useWindowDimensions();
   const styles = useMemo(() => createStyles(colors), [colors]);
@@ -43,31 +45,33 @@ export function QuickAction({ icon, title, subtitle, onPress, tone = "primary" }
         compact && styles.wrapCompact,
         tablet && styles.wrapTablet,
         desktop && styles.wrapDesktop,
+        tile && styles.tile,
         pressed && styles.pressed
       ]}
     >
       <View style={[styles.iconWrap, { backgroundColor: toneColor.background }]}>
-        <Ionicons name={icon} size={compact ? 20 : 23} color={toneColor.foreground} />
+        <Ionicons name={icon} size={tile ? 34 : compact ? 20 : 23} color={toneColor.foreground} />
       </View>
-      <View style={styles.copy}>
-        <Text adjustsFontSizeToFit  style={styles.title}>
+      <View style={[styles.copy, tile && { flex: undefined, alignItems: "center" }]}>
+        <Text adjustsFontSizeToFit  style={[styles.title, tile && { fontSize: 14, lineHeight: 20, textAlign: "center" }]}>
           {title}
         </Text>
-        {subtitle ? (
+        {subtitle && !tile ? (
           <Text  style={styles.subtitle}>
             {subtitle}
           </Text>
         ) : null}
       </View>
-      <View style={styles.arrow}>
+      {!tile && <View style={styles.arrow}>
         <Ionicons name="chevron-forward" size={19} color={colors.textSecondary} />
-      </View>
+      </View>}
     </Pressable>
   );
 }
 
 const createStyles = (colors: ThemeColors) =>
   StyleSheet.create({
+  tile: { flexBasis: "45%", flexDirection: "column", minHeight: 126, borderRadius: 16, gap: 12, justifyContent: "center", borderWidth: StyleSheet.hairlineWidth },
   wrap: { flexGrow: 1, flexBasis: "100%", minWidth: controlMetrics.minimumTouchSize, minHeight: 76, flexDirection: "row", alignItems: "center", gap: spacing.md, borderRadius: radius.lg, borderWidth: 0, borderColor: colors.border, backgroundColor: colors.card, padding: spacing.md, ...shadows.none },
   wrapCompact: {
     minHeight: 76,

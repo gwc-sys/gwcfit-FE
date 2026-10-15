@@ -1,6 +1,7 @@
+import { Pressable } from "../../components/NativePressable";
 import { Ionicons } from "@expo/vector-icons";
 import { CameraView } from "expo-camera";
-import { ActivityIndicator, Image, Pressable, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Image, StyleSheet, Text, View } from "react-native";
 import Svg, { Circle, Line } from "react-native-svg";
 import { Screen } from "../../components/Screen";
 import { getApiErrorMessage } from "../../../../services/api/client";

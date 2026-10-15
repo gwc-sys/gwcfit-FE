@@ -8,7 +8,7 @@ const navigationStyles = (colors: ThemeColors, bottomInset: number) => adaptPage
     height: 56 + Math.max(bottomInset, 8),
     paddingTop: 8,
     paddingBottom: Math.max(bottomInset, 8),
-    backgroundColor: colors.surface,
+    backgroundColor: colors.background === "#0B1119" ? colors.background : colors.surface,
     borderTopWidth: StyleSheet.hairlineWidth,
     borderColor: colors.border,
     elevation: 0,

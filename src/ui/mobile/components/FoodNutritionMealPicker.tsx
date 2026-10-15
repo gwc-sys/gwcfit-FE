@@ -1,7 +1,8 @@
+import { Pressable } from "./NativePressable";
 import { useReducedMotion } from "react-native-reanimated";
 import { controlMetrics } from "../theme/theme";
 import { Ionicons } from "@expo/vector-icons";
-import { Modal, Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { Modal, ScrollView, Text, TextInput, View } from "react-native";
 import { foodNutritionCatalog, foodNutritionCategories } from "../../../data/foodNutritionCatalog";
 import type * as React from "react";
 import type { useFoodNutritionMealPickerPresentation, useMacroPresentation } from "../../../components/FoodNutritionMealPicker";

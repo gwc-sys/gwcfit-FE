@@ -1,6 +1,7 @@
+import { Pressable } from "./NativePressable";
 import type { ReactNode } from "react";
 import { useMemo } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { ArrowLeft } from "./icons";
 import { useNavigation } from "@react-navigation/native";
 import { useAppTheme } from "../../../theme/AppThemeProvider";

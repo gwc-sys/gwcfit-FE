@@ -6,7 +6,7 @@ import type { ThemeColors } from "../../../theme/theme";
 export const createStyles = (colors: ThemeColors) =>
   adaptPageStyles(StyleSheet.create({
   screen: {
-      gap: spacing.lg,
+      gap: spacing.md,
       paddingTop: spacing.md,
       paddingBottom: 32
     },

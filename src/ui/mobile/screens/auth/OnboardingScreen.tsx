@@ -1,4 +1,5 @@
-import { Image, Pressable, Text, View } from "react-native";
+import { Pressable } from "../../components/NativePressable";
+import { Image, Text, View } from "react-native";
 import { useMemo } from "react";
 import { PrimaryButton } from "../../components/PrimaryButton";
 import { Screen } from "../../components/Screen";

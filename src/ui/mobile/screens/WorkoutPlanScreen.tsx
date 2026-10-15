@@ -1,4 +1,5 @@
-import { Pressable, ScrollView, Text, View } from "react-native";
+import { Pressable } from "../components/NativePressable";
+import { ScrollView, Text, View } from "react-native";
 import { CalendarDays, Dumbbell, MoreVertical } from "../components/icons";
 import { AppScreen } from "../components/AppScreen";
 import { ExerciseListItem } from "../components/ExerciseListItem";

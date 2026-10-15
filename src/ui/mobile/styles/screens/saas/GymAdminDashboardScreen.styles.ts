@@ -154,25 +154,23 @@ export const createOwnerDashboardStyles = (c: ThemeColors) =>
       fontWeight: "700"
     },
     metricGrid: {
-      flexDirection: "row",
-      flexWrap: "wrap",
+      flexDirection: "column",
       gap: 12,
       marginBottom: 0
     },
     metric: {
       flex: undefined,
       minWidth: 0,
-      minHeight: 150,
-      flexDirection: "column",
-      alignItems: "flex-start",
+      minHeight: 104,
+      flexDirection: "row",
+      alignItems: "center",
       gap: 8,
       borderWidth: 0,
       borderColor: c.border,
       borderRadius: 22,
       padding: 16,
       backgroundColor: c.card,
-      flexGrow: 1,
-      flexBasis: "45%"
+      width: "100%"
     },
     metricIcon: {
       width: 36,
@@ -195,14 +193,14 @@ export const createOwnerDashboardStyles = (c: ThemeColors) =>
     },
     metricTrend: {
       fontSize: 13,
-      color: "#18C77A",
-      fontWeight: "800",
+      color: c.textSecondary,
+      fontWeight: "400",
       marginTop: 4,
       lineHeight: 16
     },
     dashboardGrid: {
       flexDirection: "column",
-      flexWrap: "wrap",
+      alignItems: "stretch",
       gap: 16,
       marginBottom: 0
     },
@@ -237,7 +235,7 @@ export const createOwnerDashboardStyles = (c: ThemeColors) =>
       backgroundColor: c.card
     },
     panelHeader: {
-      flexDirection: "row",
+      flexDirection: "column",
       alignItems: "flex-start",
       justifyContent: "space-between",
       gap: 8,
@@ -324,39 +322,40 @@ export const createOwnerDashboardStyles = (c: ThemeColors) =>
     },
     chartLabel: { fontSize: 12, color: c.textSecondary },
     distributionBody: {
-      flex: 1,
       flexDirection: "row",
+      paddingTop: 28,
+      paddingBottom: 16,
       alignItems: "center",
       justifyContent: "space-around",
       gap: 16,
       flexWrap: "wrap",
     },
     donut: {
-      width: 128,
-      height: 128,
+      width: 144,
+      height: 144,
       alignItems: "center",
       justifyContent: "center",
-      borderRadius: 64,
-      borderWidth: 23,
+      borderRadius: 72,
+      borderWidth: 25,
       borderColor: "#18C77A",
       borderRightColor: "#1685F8",
       borderTopColor: "#0A84FF",
     },
     donutHole: {
-      width: 76,
-      height: 76,
+      width: 94,
+      height: 94,
       alignItems: "center",
       justifyContent: "center",
-      borderRadius: 38,
+      borderRadius: 47,
       backgroundColor: c.card,
     },
     donutValue: {
-      fontSize: 20,
+      fontSize: 26,
       color: c.ink,
       fontWeight: "700"
     },
-    donutLabel: { fontSize: 13, color: c.textSecondary },
-    distributionLegend: { gap: 11 },
+    donutLabel: { fontSize: 10, lineHeight: 14, color: c.textSecondary, textAlign: "center" },
+    distributionLegend: { gap: 12, flexGrow: 1, flexBasis: 110, minWidth: 105, alignSelf: "center" },
     distributionRow: {
       minWidth: 105,
       flexDirection: "row",
@@ -370,7 +369,7 @@ export const createOwnerDashboardStyles = (c: ThemeColors) =>
       fontWeight: "800",
     },
     activityRow: {
-      minHeight: 38,
+      minHeight: 52,
       flexDirection: "row",
       alignItems: "center",
       gap: 8,
@@ -384,7 +383,7 @@ export const createOwnerDashboardStyles = (c: ThemeColors) =>
       justifyContent: "center",
       borderRadius: 6,
     },
-    activityLabel: { flex: 1, fontSize: 13, color: c.textSecondary },
+    activityLabel: { flex: 1, fontSize: 15, color: c.textSecondary },
     activityValue: { fontSize: 13, color: c.ink, fontWeight: "800" },
     smallPanel: {
       flex: undefined,
@@ -397,30 +396,31 @@ export const createOwnerDashboardStyles = (c: ThemeColors) =>
       backgroundColor: c.card,
     },
     statusContent: {
-      flex: 1,
       flexDirection: "row",
+      paddingTop: 28,
+      paddingBottom: 16,
       alignItems: "center",
       justifyContent: "space-around",
       gap: 16,
       flexWrap: "wrap",
     },
     statusRing: {
-      width: 120,
-      height: 120,
+      width: 144,
+      height: 144,
       alignItems: "center",
       justifyContent: "center",
-      borderRadius: 60,
-      borderWidth: 16,
+      borderRadius: 72,
+      borderWidth: 20,
       borderColor: "#18C77A",
       borderRightColor: "#EF476F",
       borderTopColor: "#F59E0B",
     },
     statusRingValue: {
-      fontSize: 20,
+      fontSize: 26,
       color: c.ink,
       fontWeight: "700"
     },
-    statusRingLabel: { fontSize: 13, color: c.textSecondary },
+    statusRingLabel: { fontSize: 10, lineHeight: 14, color: c.textSecondary, textAlign: "center" },
     planRow: {
       flexDirection: "row",
       alignItems: "center",
@@ -486,8 +486,8 @@ export const createOwnerDashboardStyles = (c: ThemeColors) =>
       padding: 17,
       backgroundColor: c.card,
     },
-    quickActions: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
-    quickAction: { flexGrow: 1, flexBasis: "100%", minWidth: controlMetrics.minimumTouchSize, minHeight: 66, flexDirection: "row", alignItems: "center", gap: 10, borderWidth: 1, borderColor: c.border, borderRadius: 8, padding: 10 },
+    quickActions: { flexDirection: "column", gap: 10 },
+    quickAction: { width: "100%", minWidth: controlMetrics.minimumTouchSize, minHeight: 66, flexDirection: "row", alignItems: "center", gap: 10, borderWidth: 1, borderColor: c.border, borderRadius: 14, padding: 14, backgroundColor: c.surfaceMuted },
     quickIcon: {
       width: 39,
       height: 39,
@@ -495,7 +495,7 @@ export const createOwnerDashboardStyles = (c: ThemeColors) =>
       justifyContent: "center",
       borderRadius: 9,
     },
-    quickTitle: { fontSize: 13, color: c.ink, fontWeight: "800" },
+    quickTitle: { fontSize: 15, color: c.ink, fontWeight: "800" },
     quickSubtitle: { fontSize: 12, color: c.textSecondary, marginTop: 3 },
   }));
 

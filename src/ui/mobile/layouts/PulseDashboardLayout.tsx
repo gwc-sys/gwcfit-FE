@@ -1,8 +1,9 @@
+import { Pressable } from "../components/NativePressable";
 import { useReducedMotion } from "react-native-reanimated";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import type { ReactNode } from "react";
-import { Modal, Pressable, ScrollView, Text, TextInput, View, useWindowDimensions } from "react-native";
+import { Modal, ScrollView, Text, TextInput, View, useWindowDimensions } from "react-native";
 import { initials } from "../../../utils/formatters";
 import { requestLogoutConfirmation } from "../../../utils/logoutConfirmation";
 import { Screen, EmbeddedScreenContext } from "../components/Screen";
@@ -23,13 +24,13 @@ export function PulseDashboardLayoutView({ model }: { model: ReturnType<typeof u
       const workspaceScrolls = isDashboard || Boolean(contentStyle);
       const showBack = navigation.getState?.().type === "stack" && navigation.canGoBack?.();
       return (
-    <Screen scroll={workspaceScrolls} noPadding style={chrome.root} contentContainerStyle={[workspaceScrolls ? chrome.dashboardContent : chrome.pageContent, contentStyle]} refreshControl={refreshControl}>
-      <View style={chrome.navigationBar}>
+    <Screen reference scroll={workspaceScrolls} noPadding style={chrome.root} contentContainerStyle={[workspaceScrolls ? chrome.dashboardContent : chrome.pageContent, contentStyle]} refreshControl={refreshControl}>
+      {isDashboard || isTrainer ? <View style={chrome.navigationBar}>
         {showBack ? <Pressable accessibilityRole="button" accessibilityLabel="Go back" onPress={() => navigation.goBack()} style={chrome.iconButton}><Ionicons name="chevron-back" size={24} color={colors.primary} /></Pressable> : null}
         <View style={chrome.brand}>
           <View style={chrome.brandMark}><Ionicons name="pulse" size={22} color={colors.primary} /></View>
           <View style={chrome.identity}>
-            <Text style={chrome.brandName}>PulseFit</Text>
+            <Text numberOfLines={2} style={chrome.brandName}>{user?.gym_name?.trim() || (user?.gym_id ? "Your gym" : "PulseFit")}</Text>
             <Text numberOfLines={1} style={chrome.role}>{resolvedRoleLabel}</Text>
           </View>
         </View>
@@ -40,19 +41,18 @@ export function PulseDashboardLayoutView({ model }: { model: ReturnType<typeof u
         <Pressable accessibilityRole="button" accessibilityLabel="Open account menu" onPress={() => setAccountMenuOpen(true)} style={({ pressed }) => [chrome.accountButton, pressed && chrome.pressed]}>
           <Text style={chrome.accountInitials}>{initials(userName) || "U"}</Text>
         </Pressable>
-      </View>
+      </View> : null}
       {isTrainer ? <View style={chrome.searchBar}>
         <Ionicons name="search-outline" size={20} color={colors.muted} />
         <TextInput accessibilityLabel="Search workspace" value={resolvedTrainerSearch} onChangeText={setResolvedTrainerSearch} placeholder="Search workspace" placeholderTextColor={colors.subtle} style={chrome.searchInput} />
         {resolvedTrainerSearch ? <Pressable accessibilityRole="button" accessibilityLabel="Clear search" onPress={() => setResolvedTrainerSearch("")} style={chrome.clearButton}><Ionicons name="close-circle" size={20} color={colors.muted} /></Pressable> : null}
       </View> : null}
-      {isDashboard && isGymOwner ? <View style={chrome.overview}>
-        <Text style={chrome.eyebrow}>YOUR GYM AT A GLANCE</Text>
-        <Text accessibilityRole="header" style={chrome.title}>Today</Text>
-        <Text style={chrome.subtitle}>Welcome back, {firstName(userName)}.</Text>
-        <View style={chrome.toolbar}>
-          <Pressable accessibilityRole="button" accessibilityLabel="Open attendance calendar" onPress={() => navigation.navigate("Attendance")} style={({ pressed }) => [chrome.dateButton, pressed && chrome.pressed]}><Ionicons name="calendar-outline" size={18} color={colors.primary} /><Text style={chrome.dateText}>{ownerDate}</Text><Ionicons name="chevron-forward" size={14} color={colors.muted} /></Pressable>
-          <Pressable accessibilityRole="button" accessibilityLabel="Add member" onPress={() => navigation.navigate("AddMember")} style={({ pressed }) => [chrome.addButton, pressed && chrome.pressed]}><Ionicons name="add" size={20} color={colors.white} /><Text style={chrome.addText}>Add member</Text></Pressable>
+      {isDashboard && isGymOwner ? <View style={[chrome.overview, { paddingTop: 12, paddingBottom: 16 }]}>
+        <Text style={chrome.subtitle}>{new Date().getHours() < 12 ? "Good morning," : new Date().getHours() < 18 ? "Good afternoon," : "Good evening,"}</Text>
+        <Text accessibilityRole="header" style={chrome.title}>{userName}</Text>
+        <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+          <Pressable accessibilityRole="button" accessibilityLabel="Open attendance calendar" onPress={() => navigation.navigate("Attendance")} style={{ minHeight: 44, justifyContent: "center" }}><Text style={chrome.role}>{ownerDate}</Text></Pressable>
+          <Pressable accessibilityRole="button" accessibilityLabel="Add member" onPress={() => navigation.navigate("AddMember")} style={chrome.iconButton}><Ionicons name="person-add-outline" size={20} color={colors.primary} /></Pressable>
         </View>
       </View> : null}
       {isDashboard && isTrainer ? <Pressable accessibilityRole="button" accessibilityLabel="Open attendance calendar" onPress={() => navigation.navigate("Attendance")} style={chrome.trainerDate}><Ionicons name="calendar-outline" size={18} color={colors.primary} /><Text style={chrome.dateText}>{trainerDate}</Text></Pressable> : null}

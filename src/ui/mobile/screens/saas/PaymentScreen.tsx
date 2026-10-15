@@ -1,8 +1,9 @@
+import { Pressable } from "../../components/NativePressable";
 import { controlMetrics } from "../../theme/theme";
 import { useAppTheme } from "../../../../theme/AppThemeProvider";
 import { Ionicons } from "@expo/vector-icons";
 import { Fragment } from "react";
-import { ActivityIndicator, Modal, Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { ActivityIndicator, Modal, ScrollView, Text, TextInput, View } from "react-native";
 import Svg, { Line, Text as SvgText } from "react-native-svg";
 import { NoticeBanner } from "../../components/NoticeBanner";
 import { PrimaryButton } from "../../components/PrimaryButton";
@@ -302,7 +303,6 @@ export function MetricView({ model }: { model: ReturnType<typeof useMetricPresen
     <View>
       <Text style={s.muted}>{label}</Text>
       <Text style={s.metricValue}>{value}</Text>
-      <Text style={{ color }}>↑ 8.2% this month</Text>
     </View>
   </Pressable>
 ));
@@ -432,11 +432,13 @@ export function PlatformPaymentsDashboardView({ model }: { model: ReturnType<typ
 }
 
 export function ChartView({ model }: { model: ReturnType<typeof useChartPresentation> }): React.ReactNode {
+  const { colors } = useAppTheme();
   if (model == null) return null;
   if (typeof model !== "object" || !("kind" in model)) return model;
   switch (model.kind) {
     case "view1": {
       const { s, compact, max, values, monthLabels } = model.props;
+      if (!values.some(value => value > 0)) return <View style={s.panel}><Text style={s.panelTitle}>Payment Overview</Text><View style={{ minHeight: 140, alignItems: "center", justifyContent: "center" }}><Ionicons name="bar-chart-outline" size={28} color={colors.muted} /><Text style={[s.muted, { marginTop: 12 }]}>No paid transactions in this period.</Text></View></View>;
       return ((
     <View style={[s.panel, s.overviewPanel]}>
       <Text style={s.panelTitle}>Payment Overview</Text>
@@ -456,8 +458,8 @@ export function ChartView({ model }: { model: ReturnType<typeof useChartPresenta
                 key={`axis-${ratio}`}
                 x={88 + ratio * 280}
                 y="270"
-                fill="#94A3B8"
-                fontSize="8"
+                fill={colors.muted}
+                fontSize="10"
                 textAnchor="middle"
               >
                 {compact(max * ratio)}
@@ -473,8 +475,8 @@ export function ChartView({ model }: { model: ReturnType<typeof useChartPresenta
                   key={`date-${index}`}
                   x="76"
                   y={rowY + 4}
-                  fill="#CBD5E1"
-                  fontSize="9"
+                  fill={colors.muted}
+                  fontSize="11"
                   textAnchor="end"
                 >
                   {monthLabels[index]}
@@ -504,7 +506,7 @@ export function ChartView({ model }: { model: ReturnType<typeof useChartPresenta
                   x={Math.min(392, 98 + barWidth)}
                   y={rowY + 4}
                   fill="#64D2FF"
-                  fontSize="9"
+                  fontSize="11"
                 >
                   {compact(value)}
                 </SvgText>
@@ -529,6 +531,7 @@ export function RecentView({ model }: { model: ReturnType<typeof useRecentPresen
     <>
       <View style={[s.panel, s.recentPanel]}>
         <Text style={s.panelTitle}>Recent Transactions</Text>
+        {!visibleTransactions.length && <Text style={s.muted}>Your recent transactions will appear here.</Text>}
         {visibleTransactions.map((p) => (
           <View key={p.id} style={s.recent}>
             <View>

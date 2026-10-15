@@ -1,7 +1,8 @@
+import { Pressable } from "./NativePressable";
 import { controlMetrics } from "../theme/theme";
 import { useReducedMotion } from "react-native-reanimated";
 import { Ionicons } from "@expo/vector-icons";
-import { Modal, Pressable, ScrollView, Text, View, useWindowDimensions } from "react-native";
+import { Modal, ScrollView, Text, View, useWindowDimensions } from "react-native";
 import type * as React from "react";
 import type { useDatePickerFieldPresentation } from "../../../components/DatePickerField";
 

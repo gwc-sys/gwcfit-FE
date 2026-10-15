@@ -1,5 +1,6 @@
+import { Pressable } from "../../components/NativePressable";
 import { Ionicons } from "@expo/vector-icons";
-import { ActivityIndicator, Modal, Pressable, RefreshControl, ScrollView, Text, View } from "react-native";
+import { ActivityIndicator, Modal, RefreshControl, ScrollView, Text, View } from "react-native";
 import QRCode from "react-native-qrcode-svg";
 import { CameraView } from "expo-camera";
 import { Screen } from "../../components/Screen";

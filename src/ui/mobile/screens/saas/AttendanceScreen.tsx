@@ -1,5 +1,7 @@
+import { ScreenHeader } from "../../components/ScreenHeader";
+import { Pressable } from "../../components/NativePressable";
 import { Ionicons } from "@expo/vector-icons";
-import { Pressable, Text, TextInput, View } from "react-native";
+import { Text, TextInput, View } from "react-native";
 import { FormTextField } from "../../components/FormTextField";
 import { NoticeBanner } from "../../components/NoticeBanner";
 import { PrimaryButton } from "../../components/PrimaryButton";
@@ -30,13 +32,10 @@ export function AttendanceScreenView({ model }: { model: ReturnType<typeof useAt
       <View style={styles.hero}>
         <View style={styles.heroHeader}>
           <View style={styles.heroCopy}>
-            <Text style={styles.heroTitle}>Attendance</Text>
-            <Text style={styles.heroSubtitle}>
-              Track member check-ins, check-outs and today's attendance summary
-            </Text>
+            <ScreenHeader title="Attendance" subtitle="Member visits and today’s activity" />
           </View>
           <View style={styles.datePill}>
-            <Ionicons name="calendar-outline" size={17} color="#D7DEE9" />
+            <Ionicons name="calendar-outline" size={17} color={colors.muted} />
             <Text style={styles.dateText}>
               {new Intl.DateTimeFormat("en-US", {
                 month: "short",
@@ -44,7 +43,7 @@ export function AttendanceScreenView({ model }: { model: ReturnType<typeof useAt
                 year: "numeric",
               }).format(new Date())}
             </Text>
-            <Ionicons name="chevron-down" size={15} color="#D7DEE9" />
+
           </View>
         </View>
         <View style={styles.statsGrid}>
@@ -81,7 +80,7 @@ export function AttendanceScreenView({ model }: { model: ReturnType<typeof useAt
       <View style={styles.middleGrid}>
       <View style={styles.middleCard}><DailyAttendancePanel /></View>
       <View style={[styles.activityPanel, styles.middleCard]}>
-        <View style={styles.activityHeader}><Text style={styles.activityTitle}>Today&apos;s Activity</Text><Pressable accessibilityRole="button" onPress={() => queryClient.invalidateQueries({ queryKey: ["attendance", "today"] })}><Text style={styles.reportLink}>View Report</Text></Pressable></View>
+        <View style={styles.activityHeader}><Text style={styles.activityTitle}>Today&apos;s Activity</Text><Pressable accessibilityRole="button" onPress={() => queryClient.invalidateQueries({ queryKey: ["attendance", "today"] })} style={{ minHeight: 44, justifyContent: "center" }}><Text style={styles.reportLink}>View Report</Text></Pressable></View>
         <View style={styles.activityContent}>
           <View style={styles.activityRing}><Text style={styles.activityPercent}>{Math.round(((statsQuery.data?.total_check_ins ?? 0) / Math.max(statsQuery.data?.daily_visit_limit ?? 4, 1)) * 100)}%</Text><Text style={styles.activityLabel}>Activity</Text></View>
           <View style={styles.activityList}><ActivityItem icon="log-in-outline" label="Check-ins" value={statsQuery.data?.total_check_ins ?? 0} tone="#0A84FF" styles={styles} /><ActivityItem icon="log-out-outline" label="Check-outs" value={statsQuery.data?.total_check_outs ?? 0} tone="#22C55E" styles={styles} /><ActivityItem icon="people-outline" label="Inside Now" value={statsQuery.data?.currently_checked_in ?? 0} tone="#38BDF8" styles={styles} /><ActivityItem icon="calendar-outline" label="Visit Limit Reached" value={statsQuery.data?.daily_visit_limit ?? 4} tone="#F59E0B" styles={styles} /></View>
@@ -125,10 +124,7 @@ export function AttendanceScreenView({ model }: { model: ReturnType<typeof useAt
                   Trainer:{" "}
                   {relatedDisplayName(member.trainer_name, "Not assigned")}
                 </Text>
-                <StatusBadge
-                  label={member.member_code}
-                  tone={selected ? "success" : "neutral"}
-                />
+                <Text numberOfLines={1} ellipsizeMode="middle" accessibilityLabel={`Member code ${member.member_code}`} style={[styles.memberChipMeta, { width: "100%" }]}>{member.member_code}</Text>
                 <Pressable accessibilityRole="button" style={styles.checkinButton} onPress={() => { setSelectedMemberId(member.id); checkInMutation.mutate(member.id); }}><Ionicons name="person-add-outline" size={15} color="#fff" /><Text style={styles.checkinButtonText}>Check-in</Text></Pressable>
               </Pressable>
             );

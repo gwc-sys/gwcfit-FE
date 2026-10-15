@@ -1,7 +1,8 @@
+import { Pressable } from "../../components/NativePressable";
 import { controlMetrics } from "../../theme/theme";
 import { showAlert } from "../../../../utils/appAlert";
 import { Ionicons } from "@expo/vector-icons";
-import { ActivityIndicator, Image, Modal, Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { ActivityIndicator, Image, Modal, ScrollView, Text, TextInput, View } from "react-native";
 import { Screen } from "../../components/Screen";
 import { ResourceCrudPanel } from "../../../../features/operations/ResourceCrudPanel";
 import { dietPlanConfig } from "../../../../features/operations/resourceConfigs";

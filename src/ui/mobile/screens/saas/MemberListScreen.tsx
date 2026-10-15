@@ -1,7 +1,13 @@
+import { Pressable } from "../../components/NativePressable";
+import { pulseEffects } from "../../theme/referenceTokens";
+import { useState } from "react";
+import { isExpiringMember } from "../../data/referenceMetrics";
+import { ScreenHeader } from "../../components/ScreenHeader";
+import { PulseAvatar, PulseChips, pulseStyles } from "../../components/PulseReference";
 import { controlMetrics } from "../../theme/theme";
 import { showAlert } from "../../../../utils/appAlert";
 import { Ionicons } from "@expo/vector-icons";
-import { FlatList, Modal, Pressable, RefreshControl, Text, TextInput, View } from "react-native";
+import { FlatList, Modal, RefreshControl, Text, TextInput, View } from "react-native";
 import { DataState } from "../../components/DataState";
 import { NoticeBanner } from "../../components/NoticeBanner";
 import { PrimaryButton } from "../../components/PrimaryButton";
@@ -18,6 +24,8 @@ import type { useMemberListScreenPresentation, usePlatformUserDirectoryPresentat
 type MemberFilter = "all" | "active" | "inactive" | "expired" | "frozen";
 
 export function MemberListScreenView({ model }: { model: ReturnType<typeof useMemberListScreenPresentation> }): React.ReactNode {
+  const [expiringOnly, setExpiringOnly] = useState(false);
+  const [filtersOpen, setFiltersOpen] = useState(false);
   if (model == null) return null;
   if (typeof model !== "object" || !("kind" in model)) return model;
   switch (model.kind) {
@@ -31,8 +39,11 @@ export function MemberListScreenView({ model }: { model: ReturnType<typeof useMe
     }
     case "view3": {
       const { styles, compact, membersQuery, isTrainer, colors, setSearch, setPage, search, setMemberFilter, memberFilter, canManageMembers, navigation, MemberStat, activeCount, newThisMonthCount, expiredCount, setSortDirection, sortDirection, notice, deleteMember, visibleMembers, MemberRow, confirmDelete, page } = model.props;
+      const ps = pulseStyles(colors);
+      const displayedMembers = expiringOnly ? visibleMembers.filter(isExpiringMember) : visibleMembers;
+      const selectedChip = expiringOnly ? "Expiring" : memberFilter === "active" ? "Active" : memberFilter === "inactive" ? "Inactive" : "All";
       return ((
-    <Screen
+    <Screen reference
       scroll
       contentContainerStyle={[styles.screen, compact && styles.screenCompact]}
       refreshControl={
@@ -42,60 +53,27 @@ export function MemberListScreenView({ model }: { model: ReturnType<typeof useMe
         />
       }
     >
-      <View style={styles.pageHeader}>
-        <View style={{ minWidth: 0 }}>
-          <Text style={styles.pageTitle}>Members</Text>
-          <Text style={styles.pageSubtitle}>
-            {isTrainer ? "Members assigned to you" : "Manage all members of your gym"}
-          </Text>
+      <ScreenHeader title="Members" actionIcon={canManageMembers ? "person-add-outline" : undefined} actionLabel="Add member" onAction={canManageMembers ? () => navigation.navigate("AddMember") : undefined} />
+      <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+        <View style={[styles.toolbarSearch, { flex: 1, width: undefined, minHeight: 44 }]}>
+          <Ionicons name="search-outline" size={18} color={colors.muted} />
+          <TextInput autoCapitalize="none" maxLength={120} onChangeText={value => { setSearch(value); setPage(0); }} placeholder="Search members..." placeholderTextColor={colors.subtle} style={[styles.searchInput, { fontSize: 14, minHeight: 44 }]} accessibilityLabel="Search members" value={search} />
         </View>
-        <View style={[styles.headerActions, compact && styles.headerActionsCompact]}>
-          <View style={styles.toolbarSearch}>
-            <Ionicons name="search-outline" size={19} color={colors.muted} />
-            <TextInput
-              autoCapitalize="none"
-              maxLength={120}
-              onChangeText={(value) => { setSearch(value); setPage(0); }}
-              placeholder="Search member..."
-              placeholderTextColor={colors.subtle}
-              style={styles.searchInput}
-              accessibilityLabel="Search members"
-              value={search}
-            />
-          </View>
-          <Pressable accessibilityRole="button" style={styles.headerButton} onPress={() => setMemberFilter((value) => value === "all" ? "active" : value === "active" ? "inactive" : value === "inactive" ? "expired" : value === "expired" ? "frozen" : "all")}>
-            <Ionicons name="funnel-outline" size={17} color={colors.ink} />
-            <Text style={styles.headerButtonText}>Filters{memberFilter !== "all" ? `: ${memberFilter}` : ""}</Text>
-          </Pressable>
-          <Pressable accessibilityRole="button" style={styles.headerButton} onPress={() => showAlert("Export members", "Member export is ready to connect to your backend export endpoint.")}>
-            <Ionicons name="download-outline" size={17} color={colors.ink} />
-            <Text style={styles.headerButtonText}>Export</Text>
-          </Pressable>
-          {canManageMembers ? <PrimaryButton title="Add Member" onPress={() => navigation.navigate("AddMember")} style={styles.addMemberButton} /> : null}
-        </View>
+        <Pressable accessibilityRole="button" accessibilityLabel="Member filters and sorting" onPress={() => setFiltersOpen(true)} style={ps.iconButton}><Ionicons name="filter" size={20} color={colors.ink} /></Pressable>
       </View>
-
-      <View style={[styles.statsGrid, compact && styles.statsGridCompact]}>
-        <MemberStat icon="people" label="Total Members" value={String((membersQuery.data ?? []).length)} tone="#0A84FF" styles={styles} />
-        <MemberStat icon="people" label="Active Members" value={String(activeCount)} tone="#16C784" styles={styles} />
-        <MemberStat icon="person-add" label="New This Month" value={String(newThisMonthCount)} tone="#3B82F6" styles={styles} />
-        <MemberStat icon="time" label="Expired Members" value={String(expiredCount)} tone="#F59E0B" styles={styles} />
-      </View>
-
-      <View style={styles.tableCard}>
-      <View style={styles.filterBar}>
-        <View style={styles.filterTabs}>
-          {(["all", "active", "inactive", "expired", "frozen"] as MemberFilter[]).map((filter) => (
-            <Pressable accessibilityRole="button" key={filter} accessibilityState={{ selected: memberFilter === filter }} style={[styles.filterTab, memberFilter === filter && styles.filterTabActive]} onPress={() => { setMemberFilter(filter); setPage(0); }}>
-              <Text style={[styles.filterTabText, memberFilter === filter && styles.filterTabTextActive]}>{filter === "all" ? "All Members" : filter[0].toUpperCase() + filter.slice(1)}</Text>
-            </Pressable>
-          ))}
-        </View>
-        <Pressable accessibilityRole="button" style={styles.sortButton} onPress={() => setSortDirection((value) => (value === "az" ? "za" : "az"))}>
-          <Text style={styles.sortText}>Sort by: {sortDirection === "az" ? "A-Z" : "Z-A"}</Text>
-          <Ionicons name="chevron-down" size={15} color={colors.muted} />
+      <PulseChips options={["All", "Active", "Inactive", "Expiring"]} value={selectedChip} onChange={value => { setExpiringOnly(value === "Expiring"); setMemberFilter(value === "Active" ? "active" : value === "Inactive" ? "inactive" : "all"); setPage(0); }} />
+      <Modal visible={filtersOpen} transparent animationType="none" onRequestClose={() => setFiltersOpen(false)}>
+        <Pressable accessibilityRole="button" accessibilityLabel="Close member filters" onPress={() => setFiltersOpen(false)} style={{ flex: 1, backgroundColor: pulseEffects.scrim, justifyContent: "center", padding: 20 }}>
+          <Pressable accessible={false} onPress={event => event.stopPropagation()} style={[ps.card, { gap: 16 }]}>
+            <Text style={[ps.name, { fontSize: 20 }]}>Member filters</Text>
+            <PulseChips options={["All", "Active", "Inactive", "Expired", "Frozen"]} value={memberFilter[0].toUpperCase() + memberFilter.slice(1)} onChange={value => { setExpiringOnly(false); setMemberFilter(value.toLowerCase() as MemberFilter); setPage(0); setFiltersOpen(false); }} />
+            <PrimaryButton title={`Sort: ${sortDirection === "az" ? "A-Z" : "Z-A"}`} variant="secondary" onPress={() => setSortDirection(value => value === "az" ? "za" : "az")} />
+            <PrimaryButton title="Export members" variant="secondary" onPress={() => showAlert("Export members", "Member export is ready to connect to your backend export endpoint.")} />
+            <PrimaryButton title="Done" onPress={() => setFiltersOpen(false)} />
+          </Pressable>
         </Pressable>
-      </View>
+      </Modal>
+      <View style={{ gap: 0 }}>
       {!compact ? (
         <View style={styles.tableHeader}>
           <Text style={[styles.columnHeader, styles.memberColumn]}>Member</Text>
@@ -121,30 +99,30 @@ export function MemberListScreenView({ model }: { model: ReturnType<typeof useMe
         error={
           membersQuery.error ? getApiErrorMessage(membersQuery.error) : null
         }
-        empty={!membersQuery.isLoading && visibleMembers.length === 0}
-        emptyTitle={search ? "No members match" : "No members found"}
+        empty={!membersQuery.isLoading && displayedMembers.length === 0}
+        emptyTitle={search || expiringOnly || memberFilter !== "all" ? "No members match" : "No members found"}
         emptyMessage={
-          search
-            ? "Clear the search or try another detail."
+          search || expiringOnly || memberFilter !== "all"
+            ? "Clear the search or filters to see more members."
             : isTrainer
               ? "No members are currently assigned to you."
               : "Add your first member to start managing this gym."
         }
         emptyActionLabel={
-          search ? "Clear Search" : canManageMembers ? "Add Member" : undefined
+          search || expiringOnly || memberFilter !== "all" ? "Clear Filters" : canManageMembers ? "Add Member" : undefined
         }
         onEmptyAction={
-          search
-            ? () => setSearch("")
+          search || expiringOnly || memberFilter !== "all"
+            ? () => { setSearch(""); setExpiringOnly(false); setMemberFilter("all"); setPage(0); }
             : canManageMembers
               ? () => navigation.navigate("AddMember")
               : undefined
         }
       />
 
-      {visibleMembers.length > 0 ? (
+      {displayedMembers.length > 0 ? (
         <FlatList
-          data={visibleMembers}
+          data={displayedMembers}
           keyExtractor={(item) => item.id}
           ItemSeparatorComponent={() => <View style={styles.separator} />}
           renderItem={({ item }) => (
@@ -203,7 +181,7 @@ export function PlatformUserDirectoryView({ model }: { model: ReturnType<typeof 
     case "view1": {
       const { styles, colors, setSearch, search, setFilter, navigation, PlatformStat, users, roleCount, filter, usersQuery, visibleUsers, PlatformUserRow, setSelectedUser, openEditor, UserDetailsModal, selectedUser, editingUser, draft, setDraft, gymsQuery, updateUser, setEditingUser, saveUser , activeUserCount, inactiveUserCount } = model.props;
       return ((
-    <Screen scroll contentContainerStyle={styles.screen}>
+    <Screen reference scroll contentContainerStyle={styles.screen}>
       <View style={styles.header}><View><Text style={styles.title}>Members</Text><Text style={styles.subtitle}>Manage all users across the PulseFit platform</Text></View><View style={styles.headerActions}><View style={styles.search}><Ionicons name="search-outline" size={19} color={colors.muted} /><TextInput autoCapitalize="none" onChangeText={setSearch} placeholder="Search member..." placeholderTextColor={colors.subtle} style={styles.searchInput} value={search} /></View><Pressable accessibilityRole="button" style={styles.headerButton} onPress={() => setFilter((value) => value === "all" ? "member" : value === "member" ? "trainer" : value === "trainer" ? "receptionist" : value === "receptionist" ? "sub_admin" : "all")}><Ionicons name="funnel-outline" size={17} color={colors.ink} /><Text style={styles.headerButtonText}>Filters</Text></Pressable><Pressable accessibilityRole="button" style={styles.headerButton} onPress={() => showAlert("Export users", "User export is ready to connect to your backend export endpoint.")}><Ionicons name="download-outline" size={17} color={colors.ink} /><Text style={styles.headerButtonText}>Export</Text></Pressable><PrimaryButton title="Add Member" onPress={() => navigation.navigate("AddMember")} style={styles.addButton} /></View></View>
       <View style={styles.stats}><PlatformStat icon="people" label="Total Users" value={String(users.length)} tone="#0A84FF" styles={styles} /><PlatformStat icon="checkmark-circle" label="Active Users" value={String(activeUserCount)} tone="#16C784" styles={styles} /><PlatformStat icon="person" label="Members" value={String(roleCount("member"))} tone="#3B82F6" styles={styles} /><PlatformStat icon="time" label="Inactive Users" value={String(inactiveUserCount)} tone="#F59E0B" styles={styles} /></View>
       <View style={styles.tableCard}><View style={styles.filterBar}><View style={styles.filterTabs}>{([["all", "All Users"], ["member", "Members"], ["trainer", "Trainers"], ["receptionist", "Reception"], ["sub_admin", "Sub Admins"]] as const).map(([value, label]) => <Pressable accessibilityRole="button" key={value} style={[styles.filterTab, filter === value && styles.filterTabActive]} onPress={() => setFilter(value)}><Text style={[styles.filterTabText, filter === value && styles.filterTabTextActive]}>{label}</Text></Pressable>)}</View><Text style={styles.loadedLabel}>{users.length} loaded · 20 per batch</Text></View><View style={styles.tableHeader}><Text style={[styles.columnHeader, styles.memberColumn]}>User</Text><Text style={styles.columnHeader}>Contact</Text><Text style={styles.columnHeader}>Gym</Text><Text style={styles.columnHeader}>Role</Text><Text style={styles.columnHeader}>Status</Text><Text style={styles.columnHeader}>Action</Text></View>{usersQuery.isLoading ? <Text style={styles.muted}>Loading users...</Text> : visibleUsers.map((user) => <PlatformUserRow key={user.id} user={user} styles={styles} colors={colors} onPress={() => setSelectedUser(user)} onEdit={() => openEditor(user)} />)}{usersQuery.error ? <Text style={styles.error}>{getApiErrorMessage(usersQuery.error)}</Text> : null}{!usersQuery.isLoading && visibleUsers.length === 0 ? <View style={styles.empty}><View style={styles.emptyIcon}><Ionicons name="file-tray-outline" size={28} color={colors.primaryDark} /></View><Text style={styles.emptyTitle}>No users found</Text><Text style={styles.muted}>Try another search or load the next users.</Text></View> : null}<View style={styles.pagination}><PrimaryButton title="Previous" variant="secondary" disabled={true} style={styles.pageButton} /><Text style={styles.pageLabel}>Loaded {users.length}</Text><PrimaryButton title={usersQuery.hasNextPage ? "Load next 20" : "All loaded"} icon={usersQuery.hasNextPage ? "arrow-down-outline" : undefined} loading={usersQuery.isFetchingNextPage} disabled={!usersQuery.hasNextPage} onPress={() => usersQuery.fetchNextPage()} style={styles.pageButton} /></View></View>
@@ -270,23 +248,24 @@ export function PlatformDetailView({ model }: { model: ReturnType<typeof usePlat
 }
 
 export function MemberRowView({ model }: { model: ReturnType<typeof useMemberRowPresentation> }): React.ReactNode {
+  const [expanded, setExpanded] = useState(false);
   if (model == null) return null;
   if (typeof model !== "object" || !("kind" in model)) return model;
   switch (model.kind) {
     case "view1": {
       const { styles, fullName, onView, member, membership, colors, onEdit, onDelete, isDeleting } = model.props;
+      const ps = pulseStyles(colors);
       return ((
-    <View style={styles.memberRow}>
-      <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
-        <Pressable accessibilityRole="button" accessibilityLabel={`View ${fullName}`} onPress={onView} style={({ pressed }) => [styles.memberInfo, { flex: 1, width: undefined }, pressed && styles.pressed]}>
-          <View style={styles.avatar}><Text style={styles.avatarText}>{initials(fullName)}</Text></View>
-          <View style={styles.memberIdentity}>
-            <Text style={styles.memberName}>{fullName}</Text>
-            <Text style={styles.memberMeta}>{member.member_code}</Text>
-          </View>
+    <View>
+      <View style={ps.row}>
+        <Pressable accessibilityRole="button" accessibilityLabel={`View ${fullName}`} onPress={onView} onLongPress={() => setExpanded(value => !value)} style={({ pressed }) => [{ flexDirection: "row", alignItems: "center", flex: 1, minHeight: 68, gap: 12 }, pressed && { opacity: 0.65 }]}>
+          <PulseAvatar name={fullName} uri={typeof member.extra_data?.profile_photo === "string" ? member.extra_data.profile_photo : undefined} />
+          <View style={ps.copy}><Text style={ps.name}>{fullName}</Text><Text style={ps.meta}>{relatedDisplayName(member.membership_plan_name, "No plan assigned")}</Text></View>
+          <StatusBadge label={member.status.charAt(0).toUpperCase() + member.status.slice(1)} tone={memberStatusTone(member.status)} />
         </Pressable>
-        <StatusBadge label={member.status} tone={memberStatusTone(member.status)} />
+        <Pressable accessibilityRole="button" accessibilityLabel={`Manage ${fullName}`} accessibilityState={{ expanded }} onPress={() => setExpanded(value => !value)} style={{ minHeight: 48, minWidth: 44, alignItems: "center", justifyContent: "center" }}><Ionicons name={expanded ? "chevron-down" : "chevron-forward"} size={16} color={colors.muted} /></Pressable>
       </View>
+      {expanded && <View style={{ gap: 10 }}>
       <View style={{ gap: 6 }}>
         <Text style={styles.cellText}>{member.phone || "No phone"}</Text>
         <Text style={styles.memberMeta}>{member.email || "No email"}</Text>
@@ -302,6 +281,7 @@ export function MemberRowView({ model }: { model: ReturnType<typeof useMemberRow
         {onEdit ? <Pressable accessibilityRole="button" accessibilityLabel={`Edit ${fullName}`} onPress={onEdit} style={styles.iconButton}><Ionicons name="create-outline" size={20} color={colors.primary} /></Pressable> : null}
         {onDelete ? <Pressable accessibilityRole="button" accessibilityLabel={`Delete ${fullName}`} accessibilityState={{ disabled: isDeleting }} disabled={isDeleting} onPress={onDelete} style={styles.iconButton}><Ionicons name="trash-outline" size={20} color={colors.danger} /></Pressable> : null}
       </View>
+      </View>}
     </View>
   ));
     }

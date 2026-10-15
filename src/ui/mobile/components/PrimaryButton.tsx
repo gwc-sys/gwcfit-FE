@@ -1,8 +1,9 @@
+import { Pressable } from "./NativePressable";
 import { Ionicons } from "@expo/vector-icons";
 import type { ReactNode } from "react";
 import { useMemo } from "react";
 import { useReducedMotion } from "react-native-reanimated";
-import { ActivityIndicator, Pressable, StyleProp, StyleSheet, Text, useWindowDimensions, View, ViewStyle } from "react-native";
+import { ActivityIndicator, StyleProp, StyleSheet, Text, useWindowDimensions, View, ViewStyle } from "react-native";
 import { useAppTheme } from "../../../theme/AppThemeProvider";
 import { controlMetrics, radius, shadows, spacing, typography } from "../theme/theme";
 import type { ThemeColors } from "../theme/theme";

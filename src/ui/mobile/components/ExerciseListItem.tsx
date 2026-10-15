@@ -1,5 +1,6 @@
+import { Pressable } from "./NativePressable";
 import { useMemo } from "react";
-import { Image, Pressable, StyleSheet, Text, View } from "react-native";
+import { Image, StyleSheet, Text, View } from "react-native";
 import { Clock, Flame } from "./icons";
 import type { Exercise } from "../../../types/fitness";
 import { useAppTheme } from "../../../theme/AppThemeProvider";

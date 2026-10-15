@@ -1,7 +1,9 @@
+import { ScreenHeader } from "../../components/ScreenHeader";
+import { Pressable } from "../../components/NativePressable";
 import { controlMetrics } from "../../theme/theme";
 import { showAlert } from "../../../../utils/appAlert";
 import { Ionicons } from "@expo/vector-icons";
-import { FlatList, Pressable, RefreshControl, Text, TextInput, View } from "react-native";
+import { FlatList, RefreshControl, Text, TextInput, View } from "react-native";
 import { DataState } from "../../components/DataState";
 import { FormTextField } from "../../components/FormTextField";
 import { PrimaryButton } from "../../components/PrimaryButton";
@@ -42,7 +44,7 @@ export function StaffScreenView({ model }: { model: ReturnType<typeof useStaffSc
       }
     >
       <View style={[styles.pageHeader, compact && styles.pageHeaderCompact]}>
-        <View><Text style={styles.pageTitle}>Staff</Text><Text style={styles.pageSubtitle}>{isSuperAdmin ? "Manage application developers and gym owners across the platform" : "Invite, manage and control staff for your gym"}</Text></View>
+        <View style={{ width: "100%" }}><ScreenHeader title="Staff" subtitle={isSuperAdmin ? "Manage application developers and gym owners across the platform" : "Invite, manage and control staff for your gym"} /></View>
         <View style={styles.headerActions}><Pressable accessibilityRole="button" style={styles.headerButton} onPress={() => showAlert("Export users", "User export is ready to connect to your backend export endpoint.")}><Ionicons name="download-outline" size={17} color={colors.ink} /><Text style={styles.headerButtonText}>Export</Text></Pressable><PrimaryButton title="Invite User" onPress={beginCreate} style={styles.addButton} /></View>
       </View>
 
@@ -209,7 +211,7 @@ export function StaffScreenView({ model }: { model: ReturnType<typeof useStaffSc
       {deactivateUser.error ? <Text style={styles.error}>{getApiErrorMessage(deactivateUser.error)}</Text> : null}
 
       <View style={styles.tableCard}>
-        <View style={styles.tableHeader}><Text style={[styles.columnHeader, styles.userColumn]}>User</Text><Text style={styles.columnHeader}>Role</Text><Text style={styles.columnHeader}>Gym</Text><Text style={styles.columnHeader}>Status</Text><Text style={styles.columnHeader}>Joined On</Text><Text style={[styles.columnHeader, styles.actionColumn]}>Actions</Text></View>
+        {!compact && <View style={styles.tableHeader}><Text style={[styles.columnHeader, styles.userColumn]}>User</Text><Text style={styles.columnHeader}>Role</Text><Text style={styles.columnHeader}>Gym</Text><Text style={styles.columnHeader}>Status</Text><Text style={styles.columnHeader}>Joined On</Text><Text style={[styles.columnHeader, styles.actionColumn]}>Actions</Text></View>}
       <DataState
         loading={usersQuery.isLoading}
         error={usersQuery.error ? getApiErrorMessage(usersQuery.error) : null}
