@@ -375,12 +375,14 @@ export function MemberProgressScreenView({ model }: { model: ReturnType<typeof u
   if (typeof model !== "object" || !("kind" in model)) return model;
   switch (model.kind) {
     case "view1": {
-      const { styles, queryRefresh, query, SectionTitle, weight, setWeight, bodyFat, setBodyFat, notes, setNotes, createLog, submit, QueryState, DetailGrid, ListSection } = model.props;
+      const { styles, queryRefresh, query, SectionTitle, weight, setWeight, bodyFat, setBodyFat, activeCalories, setActiveCalories, progressValidation, notes, setNotes, createLog, submit, QueryState, DetailGrid, ListSection } = model.props;
       return ((
     <Screen scroll contentContainerStyle={styles.screen} refreshControl={queryRefresh(query.isRefetching, () => query.refetch())}>
       <ScreenHeader title="Progress" subtitle="Logs and goal charts" icon="trending-up-outline" />
       <View style={styles.panel}>
         <SectionTitle title="Log Progress" />
+        <FormTextField label="Active calories burned (kcal)" value={activeCalories} keyboardType="numeric" onChangeText={setActiveCalories} leftIcon="flame-outline" />
+        <NoticeBanner message={progressValidation} tone="error" />
         <View style={styles.inputRow}>
           <FormTextField label="Weight" value={weight} keyboardType="numeric" onChangeText={setWeight} leftIcon="scale-outline" />
           <FormTextField label="Body fat %" value={bodyFat} keyboardType="numeric" onChangeText={setBodyFat} leftIcon="pulse-outline" />
@@ -578,13 +580,15 @@ export function MemberGoalsScreenView({ model }: { model: ReturnType<typeof useM
   if (typeof model !== "object" || !("kind" in model)) return model;
   switch (model.kind) {
     case "view1": {
-      const { styles, queryRefresh, query, SectionTitle, goalName, setGoalName, targetWeight, setTargetWeight, createGoal, submit, QueryState, ListSection, updateGoal } = model.props;
+      const { styles, queryRefresh, query, SectionTitle, goalName, setGoalName, targetWeight, setTargetWeight, caloriesGoal, setCaloriesGoal, goalValidation, createGoal, submit, QueryState, ListSection, updateGoal } = model.props;
       return ((
     <Screen scroll contentContainerStyle={styles.screen} refreshControl={queryRefresh(query.isRefetching, () => query.refetch())}>
       <ScreenHeader title="Goals" subtitle="Fitness targets" icon="flag-outline" />
       <View style={styles.panel}>
         <SectionTitle title="Create Goal" />
         <FormTextField label="Goal" value={goalName} onChangeText={setGoalName} leftIcon="flag-outline" />
+        <FormTextField label="Daily Move goal (kcal)" value={caloriesGoal} keyboardType="numeric" onChangeText={setCaloriesGoal} leftIcon="flame-outline" />
+        <NoticeBanner message={goalValidation} tone="error" />
         <FormTextField label="Target weight" value={targetWeight} keyboardType="numeric" onChangeText={setTargetWeight} leftIcon="scale-outline" />
         <PrimaryButton title="Create Goal" icon="add-circle-outline" loading={createGoal.isPending} onPress={submit} />
         <NoticeBanner message={createGoal.error ? getApiErrorMessage(createGoal.error) : createGoal.data ? "Goal created." : null} tone={createGoal.error ? "error" : "success"} />
@@ -606,8 +610,11 @@ export function MemberGoalsScreenView({ model }: { model: ReturnType<typeof useM
               <GoalProgressCard
                 title={goal.goal_name}
                 value={`${Math.round(goal.progress_percentage)}%`}
-                subtitle={`${goal.status} - target ${goal.target_weight ?? "--"} kg`}
-                onPress={() => updateGoal.mutate({ goalUuid: goal.goal_uuid, payload: { status: "completed", progress_percentage: 100 } })}
+                subtitle={goal.calories_goal ? `${goal.status} - Daily Move goal ${goal.calories_goal} kcal` : `${goal.status} - target ${goal.target_weight ?? "--"} kg`}
+                onPress={() => {
+                  if (goal.calories_goal) { setCaloriesGoal(String(goal.calories_goal)); setGoalName(goal.goal_name); }
+                  else updateGoal.mutate({ goalUuid: goal.goal_uuid, payload: { status: "completed", progress_percentage: 100 } });
+                }}
               />
             )}
           />

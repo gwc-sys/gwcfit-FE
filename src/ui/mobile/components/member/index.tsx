@@ -3,7 +3,7 @@ import { controlMetrics } from "../../theme/theme";
 import { Ionicons } from "@expo/vector-icons";
 import type { ReactNode } from "react";
 import { useMemo } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View, useWindowDimensions } from "react-native";
 import { SkeletonList } from "../DataState";
 import { EmptyState as BaseEmptyState } from "../EmptyState";
 import { SectionHeader as BaseSectionHeader } from "../SectionHeader";
@@ -131,6 +131,7 @@ export function ScrollListCard({
   statusTone = "neutral",
   description,
   actionLabel,
+  actionDisabled = false,
   onAction,
 }: {
   title: string;
@@ -140,42 +141,44 @@ export function ScrollListCard({
   statusTone?: Tone;
   description?: string;
   actionLabel?: string;
+  actionDisabled?: boolean;
   onAction?: () => void;
 }) {
   const { colors, styles } = useMemberStyles();
+  const { fontScale } = useWindowDimensions();
 
   return (
-    <View style={styles.listCard}>
+    <View style={[styles.listCard, fontScale > 1.3 && { flexDirection: "column", alignItems: "stretch" }]}>
       <View style={styles.listIcon}>
         <Ionicons name={icon} size={19} color={colors.primary} />
       </View>
       <View style={styles.flex}>
-        <Text style={styles.cardTitle} numberOfLines={2}>
+        <Text style={styles.cardTitle}>
           {title}
         </Text>
         {subtitle ? (
-          <Text style={styles.mutedText} numberOfLines={2}>
+          <Text style={styles.mutedText}>
             {subtitle}
           </Text>
         ) : null}
         {description ? (
-          <Text style={styles.description} numberOfLines={3}>
+          <Text style={styles.description}>
             {description}
           </Text>
         ) : null}
       </View>
-      <View style={styles.side}>
+      <View style={[styles.side, fontScale > 1.3 && { maxWidth: undefined, alignItems: "flex-start" }]}>
         {status ? <BaseStatusBadge label={status} tone={statusTone} /> : null}
         {actionLabel && onAction ? (
           <Pressable
             accessibilityRole="button"
+            disabled={actionDisabled}
+            accessibilityState={{ disabled: actionDisabled, busy: actionDisabled }}
             onPress={onAction}
             style={styles.smallButton}
           >
             <Text
               style={styles.smallButtonText}
-              numberOfLines={1}
-              adjustsFontSizeToFit
             >
               {actionLabel}
             </Text>

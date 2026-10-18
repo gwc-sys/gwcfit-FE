@@ -24,6 +24,7 @@ export const memberQueryKeys = {
   classes: () => ["member", "classes"] as const,
   notifications: (unreadOnly = false) =>
     ["member", "notifications", unreadOnly] as const,
+  activity: () => ["member", "activity"] as const,
   goals: () => ["member", "goals"] as const,
   rewards: () => ["member", "rewards"] as const,
 };
@@ -108,6 +109,7 @@ export function useCheckInMember() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: memberQueryKeys.attendance() });
       queryClient.invalidateQueries({ queryKey: memberQueryKeys.dashboard() });
+      queryClient.invalidateQueries({ queryKey: memberQueryKeys.activity() });
     },
   });
 }
@@ -120,6 +122,7 @@ export function useCheckOutMember() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: memberQueryKeys.attendance() });
       queryClient.invalidateQueries({ queryKey: memberQueryKeys.dashboard() });
+      queryClient.invalidateQueries({ queryKey: memberQueryKeys.activity() });
     },
   });
 }
@@ -147,6 +150,7 @@ export function useCompleteWorkout() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: memberQueryKeys.workouts() });
       queryClient.invalidateQueries({ queryKey: memberQueryKeys.dashboard() });
+      queryClient.invalidateQueries({ queryKey: memberQueryKeys.activity() });
     },
   });
 }
@@ -171,6 +175,7 @@ export function useCompleteMeal() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: memberQueryKeys.meals() });
       queryClient.invalidateQueries({ queryKey: memberQueryKeys.dashboard() });
+      queryClient.invalidateQueries({ queryKey: memberQueryKeys.activity() });
     },
   });
 }
@@ -192,6 +197,7 @@ export function useCreateProgressLog() {
       queryClient.invalidateQueries({ queryKey: memberQueryKeys.progress() });
       queryClient.invalidateQueries({ queryKey: memberQueryKeys.profile() });
       queryClient.invalidateQueries({ queryKey: memberQueryKeys.dashboard() });
+      queryClient.invalidateQueries({ queryKey: memberQueryKeys.activity() });
     },
   });
 }
@@ -212,6 +218,7 @@ export function useBookClass() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: memberQueryKeys.classes() });
       queryClient.invalidateQueries({ queryKey: memberQueryKeys.dashboard() });
+      queryClient.invalidateQueries({ queryKey: memberQueryKeys.activity() });
     },
   });
 }
@@ -224,6 +231,7 @@ export function useCancelClass() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: memberQueryKeys.classes() });
       queryClient.invalidateQueries({ queryKey: memberQueryKeys.dashboard() });
+      queryClient.invalidateQueries({ queryKey: memberQueryKeys.activity() });
     },
   });
 }
@@ -242,6 +250,7 @@ export function useMarkNotificationRead() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["member", "notifications"] });
       queryClient.invalidateQueries({ queryKey: memberQueryKeys.dashboard() });
+      queryClient.invalidateQueries({ queryKey: memberQueryKeys.activity() });
       queryClient.invalidateQueries({ queryKey: ["notifications"] });
     },
   });
@@ -259,6 +268,7 @@ export function useCreateGoal() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: memberQueryKeys.goals() });
       queryClient.invalidateQueries({ queryKey: memberQueryKeys.dashboard() });
+      queryClient.invalidateQueries({ queryKey: memberQueryKeys.activity() });
     },
   });
 }
@@ -277,6 +287,7 @@ export function useUpdateGoal() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: memberQueryKeys.goals() });
       queryClient.invalidateQueries({ queryKey: memberQueryKeys.dashboard() });
+      queryClient.invalidateQueries({ queryKey: memberQueryKeys.activity() });
     },
   });
 }
@@ -295,4 +306,9 @@ export function useCreateSupportTicket() {
       queryClient.invalidateQueries({ queryKey: memberQueryKeys.profile() });
     },
   });
+}
+
+
+export function useMemberActivity(limit = 30) {
+  return useMemberQuery([...memberQueryKeys.activity(), limit], () => memberApi.getActivity(limit));
 }

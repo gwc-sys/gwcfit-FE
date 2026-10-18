@@ -1,3 +1,6 @@
+import { useState } from "react";
+import { MemberServicesMenu } from "../../components/member/MemberServicesMenu";
+import { positiveNumberError } from "../../components/member/formValidation";
 import { RefreshControl, Text, View } from "react-native";
 import { FormTextField } from "../../components/FormTextField";
 import { NoticeBanner } from "../../components/NoticeBanner";
@@ -11,6 +14,7 @@ import type * as React from "react";
 import type { useMemberProfileScreenPresentation } from "../../../../screens/member/MemberProfileScreen";
 
 export function MemberProfileScreenView({ model }: { model: ReturnType<typeof useMemberProfileScreenPresentation> }): React.ReactNode {
+  const [validationError, setValidationError] = useState<string>();
   if (model == null) return null;
   if (typeof model !== "object" || !("kind" in model)) return model;
   switch (model.kind) {
@@ -24,6 +28,8 @@ export function MemberProfileScreenView({ model }: { model: ReturnType<typeof us
       refreshControl={<RefreshControl refreshing={profileQuery.isRefetching} onRefresh={() => profileQuery.refetch()} tintColor={colors.primary} />}
     >
       <ScreenHeader title="My Profile" subtitle={profile?.gym_name ?? "Member profile"} icon="id-card-outline" />
+
+      <MemberServicesMenu onNavigate={route => navigation.navigate(route)} />
 
       {profileQuery.isLoading ? <LoadingSkeleton rows={4} /> : null}
       {profileQuery.error ? <ErrorState message={getApiErrorMessage(profileQuery.error)} onRetry={() => profileQuery.refetch()} /> : null}
@@ -62,7 +68,7 @@ export function MemberProfileScreenView({ model }: { model: ReturnType<typeof us
 
           <View style={styles.formPanel}>
             <Text style={styles.formTitle}>Editable Details</Text>
-            <FormTextField label="Phone" value={form.phone} onChangeText={(phone) => setForm((current) => ({ ...current, phone }))} leftIcon="call-outline" />
+            <FormTextField label="Phone" keyboardType="phone-pad" autoComplete="tel" value={form.phone} onChangeText={(phone) => setForm((current) => ({ ...current, phone }))} leftIcon="call-outline" />
             <FormTextField
               label="Address"
               value={form.address}
@@ -101,6 +107,7 @@ export function MemberProfileScreenView({ model }: { model: ReturnType<typeof us
               />
               <FormTextField
                 label="Emergency phone"
+                keyboardType="phone-pad"
                 value={form.emergencyPhone}
                 onChangeText={(emergencyPhone) => setForm((current) => ({ ...current, emergencyPhone }))}
                 leftIcon="call-outline"
@@ -108,13 +115,19 @@ export function MemberProfileScreenView({ model }: { model: ReturnType<typeof us
             </View>
             <FormTextField
               label="Profile photo URL"
+              autoCapitalize="none"
+              keyboardType="url"
               value={form.profilePhoto}
               onChangeText={(profilePhoto) => setForm((current) => ({ ...current, profilePhoto }))}
               leftIcon="image-outline"
             />
             <NoticeBanner message={updateProfile.data ? "Profile updated." : null} />
             <NoticeBanner message={updateProfile.error ? getApiErrorMessage(updateProfile.error) : null} tone="error" />
-            <PrimaryButton title="Save Profile" icon="save-outline" loading={updateProfile.isPending} onPress={submit} />
+            <NoticeBanner message={validationError ?? null} tone="error" />
+            <PrimaryButton title="Save Profile" icon="save-outline" loading={updateProfile.isPending} onPress={() => {
+              const error = positiveNumberError(form.height, "Height") ?? positiveNumberError(form.weight, "Weight");
+              setValidationError(error); if (!error && !updateProfile.isPending) submit();
+            }} />
           </View>
 
           <PrimaryButton title="View Settings" icon="settings-outline" variant="secondary" onPress={() => navigation.navigate("MemberSettings")} />

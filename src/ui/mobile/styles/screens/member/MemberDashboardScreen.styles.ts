@@ -41,7 +41,7 @@ type DashboardPalette = {
 const MOBILE_STAT_CARD_WIDTH = 176;
 
 export const LIGHT_UI: DashboardPalette = {
-  background: "#EDF3FC",
+  background: "#F2F5FA",
   surface: "#FFFFFF",
   panel: "#FFFFFF",
   border: "#E5E5EA",
@@ -77,13 +77,13 @@ export const LIGHT_UI: DashboardPalette = {
 };
 
 export const DARK_UI: DashboardPalette = {
-  background: "#101114",
-  surface: "#1C1C1E",
-  panel: "#1C1C1E",
-  border: "rgba(84,84,88,0.55)",
+  background: "#090F18",
+  surface: "#111D2B",
+  panel: "#111D2B",
+  border: "#24374B",
   borderStrong: "rgba(0,122,255,0.30)",
   text: "#FFFFFF",
-  muted: "#AEAEB2",
+  muted: "#A8BED8",
   subtle: "#8E8E93",
   navLabel: "#D1D1D6",
   primary: "#0A84FF",
@@ -169,18 +169,18 @@ export function createStyles(ui: DashboardPalette) {
     },
     brandText: {
       color: ui.text,
-      fontSize: 34,
-      lineHeight: 41,
+      fontSize: 28,
+      lineHeight: 35,
       fontWeight: "700",
       letterSpacing: -0.8,
     },
     mobileBrand: {
-      minHeight: 128,
+      minHeight: 112,
       flexDirection: "row",
       alignItems: "flex-start",
       justifyContent: "space-between",
       paddingHorizontal: 20,
-      paddingTop: 24,
+      paddingTop: 20,
       backgroundColor: ui.background,
       borderBottomWidth: 0,
       borderBottomColor: ui.border,
@@ -230,7 +230,7 @@ export function createStyles(ui: DashboardPalette) {
     main: {
       flex: 1,
       minWidth: 0,
-      gap: 24,
+      gap: 16,
       padding: 20,
     },
     mainNarrow: {
@@ -279,7 +279,7 @@ export function createStyles(ui: DashboardPalette) {
     statsGrid: {
       flexDirection: "row",
       flexWrap: "wrap",
-      gap: 12
+      gap: 8
     },
     statsGridWide: {
       gap: 14
@@ -293,42 +293,46 @@ export function createStyles(ui: DashboardPalette) {
     },
     statTile: {
       flexGrow: 1,
-      flexBasis: "44%",
-      minWidth: 130,
-      minHeight: 148,
+      flexBasis: "20%",
+      minWidth: 0,
+      minHeight: 112,
       justifyContent: "space-between",
-      borderRadius: 20,
-      borderWidth: 0,
+      borderRadius: 14,
+      borderWidth: 1,
       borderColor: ui.border,
       backgroundColor: ui.surface,
-      padding: 16,
-      ...cardShadow
+      padding: 8,
+      ...cardShadow,
+      alignItems: "center",
     },
     statTopRow: {
-      minHeight: 50,
-      flexDirection: "row",
+      minHeight: 62,
+      flexDirection: "column",
       alignItems: "center",
-      gap: 14
+      gap: 8
     },
     statIconBox: {
-      width: 36,
-      height: 36,
+      width: 28,
+      height: 28,
       alignItems: "center",
       justifyContent: "center",
       borderRadius: 12,
+      backgroundColor: "transparent",
     },
     statValue: {
-      flex: 1,
+      flex: 0,
       color: ui.text,
-      fontSize: 30,
-      lineHeight: 36,
+      fontSize: 20,
+      lineHeight: 26,
       fontWeight: "700",
+      textAlign: "center",
     },
     statLabel: {
       color: ui.text,
-      fontSize: 15,
-      lineHeight: 20,
+      fontSize: 11,
+      lineHeight: 16,
       fontWeight: "600",
+      textAlign: "center",
     },
     statSubtitle: {
       color: ui.muted,
@@ -358,11 +362,11 @@ export function createStyles(ui: DashboardPalette) {
       alignItems: "stretch"
     },
     panel: {
-      borderRadius: 24,
+      borderRadius: 0,
       borderWidth: 0,
       borderColor: ui.border,
-      backgroundColor: ui.surface,
-      padding: 18,
+      backgroundColor: "transparent",
+      padding: 0,
       ...cardShadow
     },
     panelHeader: {
@@ -374,9 +378,9 @@ export function createStyles(ui: DashboardPalette) {
     },
     panelTitle: {
       color: ui.text,
-      fontSize: 20,
-      lineHeight: 26,
-      fontWeight: "700",
+      fontSize: 17,
+      lineHeight: 24,
+      fontWeight: "600",
       flexShrink: 1,
     },
     emptyPanelText: {
@@ -403,22 +407,23 @@ export function createStyles(ui: DashboardPalette) {
     quickGrid: {
       flexDirection: "row",
       flexWrap: "wrap",
-      gap: 0,
+      gap: 8,
       marginTop: 8,
     },
-    quickAction: { flexGrow: 1, flexBasis: "100%", minWidth: controlMetrics.minimumTouchSize, minHeight: 76, flexDirection: "row", alignItems: "center", gap: 12, borderRadius: 0, borderWidth: 0, borderColor: ui.border, backgroundColor: ui.surface, padding: 8, borderBottomWidth: StyleSheet.hairlineWidth },
+    quickAction: { flexGrow: 1, flexBasis: "20%", minWidth: 0, minHeight: 92, flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 10, borderRadius: 14, borderWidth: 1, borderColor: ui.border, backgroundColor: ui.surface, padding: 8 },
     quickIconBox: {
-      width: 40,
-      height: 40,
+      width: 30,
+      height: 30,
       alignItems: "center",
       justifyContent: "center",
       borderRadius: 12,
     },
     quickTitle: {
       color: ui.text,
-      fontSize: 17,
-      lineHeight: 23,
-      fontWeight: "600",
+      fontSize: 11,
+      lineHeight: 16,
+      fontWeight: "500",
+      textAlign: "center",
     },
     quickSubtitle: {
       marginTop: 3,
@@ -427,6 +432,9 @@ export function createStyles(ui: DashboardPalette) {
       lineHeight: 17
     },
     chevronButton: {
+      position: "absolute",
+      right: 10,
+      top: 18,
       width: 28,
       height: 28,
       alignItems: "center",
@@ -437,7 +445,12 @@ export function createStyles(ui: DashboardPalette) {
     },
     scheduleList: {
       gap: 12,
-      marginTop: 17
+      marginTop: 8,
+      borderWidth: 1,
+      borderColor: ui.border,
+      borderRadius: 16,
+      padding: 12,
+      backgroundColor: ui.surface,
     },
     scheduleRow: {
       minHeight: 60,
@@ -659,7 +672,12 @@ export function createStyles(ui: DashboardPalette) {
       gap: 13,
       borderBottomWidth: 1,
       borderBottomColor: ui.border,
-      paddingVertical: 11
+      paddingVertical: 11,
+      backgroundColor: ui.surface,
+      padding: 12,
+      borderWidth: 1,
+      borderColor: ui.border,
+      borderRadius: 16,
     },
     workoutImage: {
       width: 64,

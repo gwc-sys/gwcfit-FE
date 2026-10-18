@@ -24,7 +24,10 @@
       "userInterfaceStyle": "automatic",
       "adaptiveIcon": {
         "backgroundColor": "#007AFF"
-      }
+      },
+      "permissions": [
+        "android.permission.ACTIVITY_RECOGNITION"
+      ]
     },
     "plugins": [
       "expo-asset",
@@ -50,7 +53,13 @@
         }
       ],
       "expo-font",
-      "expo-status-bar"
+      "expo-status-bar",
+      [
+        "expo-sensors",
+        {
+          "motionPermission": "Allow PulseFit to count your steps and estimate walking distance."
+        }
+      ]
     ]
   }
 }

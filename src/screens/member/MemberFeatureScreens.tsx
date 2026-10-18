@@ -260,18 +260,25 @@ export function useMemberProgressScreenPresentation() {
   const createLog = useCreateProgressLog();
   const [weight, setWeight] = useState("");
   const [bodyFat, setBodyFat] = useState("");
+  const [activeCalories, setActiveCalories] = useState("");
+  const [progressValidation, setProgressValidation] = useState<string | null>(null);
   const [notes, setNotes] = useState("");
 
   const submit = () => {
+    if (activeCalories && (!/^\d+$/.test(activeCalories) || Number(activeCalories) > 100000)) {
+      setProgressValidation("Enter a calorie amount from 0 to 100000 kcal."); return;
+    }
+    setProgressValidation(null);
     createLog.mutate({
       weight: weight ? Number(weight) : null,
       body_fat_percentage: bodyFat ? Number(bodyFat) : null,
+      calories_burned: activeCalories ? Number(activeCalories) : null,
       notes,
       measurements: {}
     });
   };
 
-  return { kind: "view1" as const, props: { styles, queryRefresh, query, SectionTitle, weight, setWeight, bodyFat, setBodyFat, notes, setNotes, createLog, submit, QueryState, DetailGrid, ListSection } };
+  return { kind: "view1" as const, props: { styles, queryRefresh, query, SectionTitle, weight, setWeight, bodyFat, setBodyFat, activeCalories, setActiveCalories, progressValidation, notes, setNotes, createLog, submit, QueryState, DetailGrid, ListSection } };
 }
 
 export function MemberProgressScreen(...args: Parameters<typeof useMemberProgressScreenPresentation>): React.JSX.Element {
@@ -330,17 +337,27 @@ export function useMemberGoalsScreenPresentation() {
   const createGoal = useCreateGoal();
   const updateGoal = useUpdateGoal();
   const [goalName, setGoalName] = useState("");
+  const [caloriesGoal, setCaloriesGoal] = useState("");
+  const [goalValidation, setGoalValidation] = useState<string | null>(null);
   const [targetWeight, setTargetWeight] = useState("");
 
   const submit = () => {
+    if (caloriesGoal && (!/^\d+$/.test(caloriesGoal) || Number(caloriesGoal) < 1 || Number(caloriesGoal) > 100000)) {
+      setGoalValidation("Enter a daily calorie target between 1 and 100000 kcal."); return;
+    }
+    if (targetWeight && (!Number.isFinite(Number(targetWeight)) || Number(targetWeight) <= 0)) {
+      setGoalValidation("Enter a valid target weight."); return;
+    }
+    setGoalValidation(null);
     createGoal.mutate({
       goal_name: goalName.trim() || "Fitness goal",
       target_weight: targetWeight ? Number(targetWeight) : null,
+      calories_goal: caloriesGoal ? Number(caloriesGoal) : null,
       progress_percentage: 0
     });
   };
 
-  return { kind: "view1" as const, props: { styles, queryRefresh, query, SectionTitle, goalName, setGoalName, targetWeight, setTargetWeight, createGoal, submit, QueryState, ListSection, updateGoal } };
+  return { kind: "view1" as const, props: { styles, queryRefresh, query, SectionTitle, goalName, setGoalName, targetWeight, setTargetWeight, caloriesGoal, setCaloriesGoal, goalValidation, createGoal, submit, QueryState, ListSection, updateGoal } };
 }
 
 export function MemberGoalsScreen(...args: Parameters<typeof useMemberGoalsScreenPresentation>): React.JSX.Element {

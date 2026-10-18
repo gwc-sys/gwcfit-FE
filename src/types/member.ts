@@ -315,3 +315,22 @@ export type MemberDashboardSummary = {
   fitness_goal_progress: number;
   quick_actions: string[];
 };
+export type MemberActivityDay = {
+  activity_date: string;
+  steps: number;
+  distance_km: number;
+  hourly_steps: number[];
+  calories_completed: number;
+  calories_logged?: number;
+  calories_estimated?: number;
+  calories_source?: "steps" | "logged" | "none";
+  calorie_estimate_weight_kg?: number;
+  calorie_estimate_uses_default_weight?: boolean;
+  calories_target: number;
+  calories_remaining: number;
+  completion_percentage: number;
+  source?: string | null;
+  updated_at?: string | null;
+};
+export type MemberActivityHistory = { today: MemberActivityDay; items: MemberActivityDay[]; total: number };
+export type MemberActivitySync = { activity_date: string; utc_offset_minutes: number; device_id: string; hourly_steps?: number[]; source: "ios_pedometer" | "android_foreground" | "dashboard" };

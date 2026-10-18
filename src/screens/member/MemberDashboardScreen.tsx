@@ -23,6 +23,7 @@ import Svg, { Circle } from "react-native-svg";
 import { images } from "../../assets/images";
 import { Screen } from "../../components/Screen";
 import {
+  useMemberActivity,
   useMemberAttendance,
   useMemberClasses,
   useMemberDashboard,
@@ -32,6 +33,7 @@ import {
   useMemberRewards,
   useMemberWorkouts
 } from "../../hooks/useMember";
+import { memberApi } from "../../services/api/member";
 import { getApiErrorMessage } from "../../services/api/client";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useAppTheme } from "../../theme/AppThemeProvider";
@@ -432,6 +434,7 @@ export function useMemberDashboardScreenPresentation() {
   const statsScrollRef = useRef<ScrollView>(null);
   const activeStatIndexRef = useRef(0);
   const dashboardQuery = useMemberDashboard();
+  const activityQuery = useMemberActivity();
   const attendanceQuery = useMemberAttendance();
   const workoutsQuery = useMemberWorkouts();
   const progressQuery = useMemberProgress();
@@ -465,7 +468,17 @@ export function useMemberDashboardScreenPresentation() {
   const visitsThisMonth = attendance?.monthly_attendance_count ?? 0;
   const activeDays = getActiveDays(attendance?.history ?? []);
   const goalProgress = clamp(Math.round(dashboard?.fitness_goal_progress ?? latestGoalProgress(progressLogs) ?? 0));
-  const caloriesTarget = goals.find((goal) => goal.status === "active" && typeof goal.calories_goal === "number")?.calories_goal ?? 0;
+  const caloriesTarget = activityQuery.data?.today.calories_target ?? goals.find((goal) => goal.status === "active" && (goal.calories_goal ?? 0) > 0)?.calories_goal ?? 0;
+  const todayCalories = activityQuery.data?.today.calories_completed ?? 0;
+  const activityLoading = activityQuery.isLoading;
+  const activityUnavailable = Boolean(activityQuery.error);
+  useEffect(() => {
+    if (Platform.OS !== "web" || !activityQuery.isSuccess || !user?.id) return;
+    const now = new Date();
+    const activity_date = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+    void memberApi.syncActivity({ activity_date, utc_offset_minutes: -now.getTimezoneOffset(), device_id: "web-dashboard", source: "dashboard" }).catch(() => {});
+  }, [todayCalories, caloriesTarget, activityQuery.isSuccess, user?.id, activityQuery.data?.today.activity_date]);
+
   const caloriesProgress = caloriesTarget > 0 ? clamp(Math.round((monthlyCalories / caloriesTarget) * 100)) : 0;
   const achievements = buildAchievementPreviews(rewards, ui);
   const upcomingWorkouts = buildWorkoutPreviews(workouts);
@@ -484,6 +497,7 @@ export function useMemberDashboardScreenPresentation() {
 
   const refreshAll = () => {
     dashboardQuery.refetch();
+    activityQuery.refetch();
     attendanceQuery.refetch();
     workoutsQuery.refetch();
     progressQuery.refetch();
@@ -600,7 +614,7 @@ export function useMemberDashboardScreenPresentation() {
     } : null
   ].filter((item): item is ScheduleItem => item !== null);
 
-  return { kind: "view1" as const, props: { DashboardThemeContext, dashboardTheme, styles, isRefreshing, refreshAll, ui, isDesktop, memberName, navigateTo, unreadNotifications, isNarrow, dashboardQuery, DashboardState, dashboard, isTablet, statTiles, StatTile, statsScrollRef, MOBILE_STAT_SNAP_INTERVAL, activeStatIndexRef, Panel, quickActions, QuickActionTile, scheduleItems, ScheduleRow, ProgressCircle, goalProgress, completedWorkouts, workoutsTarget, clamp, caloriesTarget, formatNumber, monthlyCalories, caloriesProgress, upcomingWorkouts, achievements } };
+  return { kind: "view1" as const, props: { dailyActivity: activityQuery.data?.today, todayCalories, activityLoading, activityUnavailable, DashboardThemeContext, dashboardTheme, styles, isRefreshing, refreshAll, ui, isDesktop, memberName, navigateTo, unreadNotifications, isNarrow, dashboardQuery, DashboardState, dashboard, isTablet, statTiles, StatTile, statsScrollRef, MOBILE_STAT_SNAP_INTERVAL, activeStatIndexRef, Panel, quickActions, QuickActionTile, scheduleItems, ScheduleRow, ProgressCircle, goalProgress, completedWorkouts, workoutsTarget, clamp, caloriesTarget, formatNumber, monthlyCalories, caloriesProgress, upcomingWorkouts, achievements } };
 }
 
 export function MemberDashboardScreen(...args: Parameters<typeof useMemberDashboardScreenPresentation>): React.JSX.Element {

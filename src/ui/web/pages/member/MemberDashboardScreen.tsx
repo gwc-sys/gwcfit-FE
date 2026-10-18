@@ -1,3 +1,4 @@
+import { MemberActivityHero } from "../../../../components/member/MemberActivityHero";
 import { Ionicons } from "@expo/vector-icons";
 import type { ReactNode } from "react";
 import { Image, Pressable, RefreshControl, ScrollView, Text, View } from "react-native";
@@ -204,7 +205,7 @@ export function MemberDashboardScreenView({ model }: { model: ReturnType<typeof 
   if (typeof model !== "object" || !("kind" in model)) return model;
   switch (model.kind) {
     case "view1": {
-      const { DashboardThemeContext, dashboardTheme, styles, isRefreshing, refreshAll, ui, isDesktop, memberName, navigateTo, unreadNotifications, isNarrow, dashboardQuery, DashboardState, dashboard, isTablet, statTiles, StatTile, statsScrollRef, MOBILE_STAT_SNAP_INTERVAL, activeStatIndexRef, Panel, quickActions, QuickActionTile, scheduleItems, ScheduleRow, ProgressCircle, goalProgress, completedWorkouts, workoutsTarget, clamp, caloriesTarget, formatNumber, monthlyCalories, caloriesProgress, upcomingWorkouts, achievements } = model.props;
+      const { dailyActivity, todayCalories, activityLoading, activityUnavailable, DashboardThemeContext, dashboardTheme, styles, isRefreshing, refreshAll, ui, isDesktop, memberName, navigateTo, unreadNotifications, isNarrow, dashboardQuery, DashboardState, dashboard, isTablet, statTiles, StatTile, statsScrollRef, MOBILE_STAT_SNAP_INTERVAL, activeStatIndexRef, Panel, quickActions, QuickActionTile, scheduleItems, ScheduleRow, ProgressCircle, goalProgress, completedWorkouts, workoutsTarget, clamp, caloriesTarget, formatNumber, monthlyCalories, caloriesProgress, upcomingWorkouts, achievements } = model.props;
       return ((
     <DashboardThemeContext.Provider value={dashboardTheme}>
     <Screen
@@ -238,6 +239,9 @@ export function MemberDashboardScreenView({ model }: { model: ReturnType<typeof 
         ) : null}
 
         <View style={[styles.main, isNarrow && styles.mainNarrow]}>
+          <MemberActivityHero activity={dailyActivity} calories={todayCalories} target={caloriesTarget}
+            loading={activityLoading} unavailable={activityUnavailable}
+            onGoal={() => navigateTo("MemberGoals")} onWorkout={() => navigateTo("MemberWorkout")} />
           {dashboardQuery.isLoading ? <DashboardState title="Loading dashboard" message="Preparing your member workspace." icon="pulse-outline" /> : null}
           {dashboardQuery.error ? (
             <DashboardState title="Dashboard unavailable" message={getApiErrorMessage(dashboardQuery.error)} icon="alert-circle-outline" onRetry={() => dashboardQuery.refetch()} />

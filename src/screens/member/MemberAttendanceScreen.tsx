@@ -2,14 +2,14 @@ import type * as React from "react";
 import { MemberAttendanceScreenView, StatCardView, ActionCardView, HistoryRowView } from "./MemberAttendanceScreen.presentation";
 import { styles } from "./MemberAttendanceScreen.styles";
 import { Ionicons } from "@expo/vector-icons";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ActivityIndicator, Modal, Pressable, RefreshControl, ScrollView, StyleSheet, Text, useWindowDimensions, View } from "react-native";
 import QRCode from "react-native-qrcode-svg";
 import { CameraView, useCameraPermissions } from "expo-camera";
 
 import { Screen } from "../../components/Screen";
-import { useCheckInMember, useCheckOutMember, useMemberAttendance } from "../../hooks/useMember";
+import { useCheckInMember, useCheckOutMember, useMemberAttendance, memberQueryKeys } from "../../hooks/useMember";
 import { getApiErrorMessage } from "../../services/api/client";
 import { memberApi } from "../../services/api/member";
 import { attendanceApi } from "../../services/api/operations";
@@ -27,6 +27,8 @@ export function useMemberAttendanceScreenPresentation() {
   const { colors } = useAppTheme();
   const user = useAuthStore((state) => state.user);
   const query = useMemberAttendance();
+  const queryClient = useQueryClient();
+  const [cameraError, setCameraError] = useState<Error | null>(null);
   const checkIn = useCheckInMember();
   const checkOut = useCheckOutMember();
   const [qrAction, setQrAction] = useState<AttendanceAction | null>(null);
@@ -41,8 +43,17 @@ export function useMemberAttendanceScreenPresentation() {
   const qrMutation = useMutation({ mutationFn: memberApi.createAttendanceQr });
   const [scannerOpen, setScannerOpen] = useState(false);
   const [cameraPermission, requestCameraPermission] = useCameraPermissions();
-  const scanMutation = useMutation({ mutationFn: attendanceApi.scanDailyQr, onSuccess: (record) => { setScannerOpen(false); void query.refetch(); }, onError: () => setScannerOpen(false) });
-  const openScanner = async () => { if (!cameraPermission?.granted) { const result = await requestCameraPermission(); if (!result.granted) return; } setScannerOpen(true); };
+  const scanMutation = useMutation({ mutationFn: attendanceApi.scanDailyQr, onSuccess: (record) => { setScannerOpen(false); void query.refetch(); void queryClient.invalidateQueries({ queryKey: memberQueryKeys.dashboard() }); }, onError: () => setScannerOpen(false) });
+  const openScanner = async () => {
+    setCameraError(null);
+    try {
+      if (!cameraPermission?.granted) {
+        const result = await requestCameraPermission();
+        if (!result.granted) { setCameraError(new Error("Camera access is required to scan the gym QR. Enable camera permission in your device settings, then try again.")); return; }
+      }
+      setScannerOpen(true);
+    } catch { setCameraError(new Error("The camera could not be opened. Check device permissions and try again.")); }
+  };
 
   const showQr = (action: AttendanceAction) => {
     qrMutation.mutate(action, { onSuccess: (result) => { setQrAction(action); setQrToken(result.token); } });
@@ -50,7 +61,7 @@ export function useMemberAttendanceScreenPresentation() {
   const confirm = () => qrAction === "check_in"
     ? checkIn.mutate(undefined, { onSuccess: () => setQrAction(null) })
     : checkOut.mutate(undefined, { onSuccess: () => setQrAction(null) });
-  const error = query.error ?? scanMutation.error ?? checkIn.error ?? checkOut.error ?? qrMutation.error;
+  const error = cameraError ?? query.error ?? scanMutation.error ?? checkIn.error ?? checkOut.error ?? qrMutation.error;
 
   useEffect(() => {
     if (!compact) {

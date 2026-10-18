@@ -1,5 +1,6 @@
 import { apiClient } from "./client";
 import type {
+  MemberActivityHistory, MemberActivityDay, MemberActivitySync,
   MemberAttendance,
   MemberAttendanceSummary,
   MemberAttendanceQrToken,
@@ -36,6 +37,12 @@ function cleanProfilePayload(payload: MemberProfileUpdate): MemberProfileUpdate 
 }
 
 export const memberApi = {
+  async getActivity(limit = 30, offset = 0) {
+    return (await apiClient.get<MemberActivityHistory>("/member/activity", { params: { utc_offset_minutes: -new Date().getTimezoneOffset(), limit, offset } })).data;
+  },
+  async syncActivity(payload: MemberActivitySync) {
+    return (await apiClient.put<MemberActivityDay>("/member/activity", payload)).data;
+  },
   async getMemberDashboard() {
     const response = await apiClient.get<MemberDashboardSummary>("/member/dashboard");
     return response.data;

@@ -13,10 +13,10 @@ export const createFeatureStyles = (colors: ThemeColors) => StyleSheet.create({
   },
   panel: {
     gap: spacing.md,
-    borderRadius: radius.md,
+    borderRadius: 20,
     borderWidth: 1,
     borderColor: colors.border,
-    backgroundColor: colors.darkCard,
+    backgroundColor: colors.card,
     padding: spacing.md
   },
   panelHeader: {
@@ -62,7 +62,7 @@ export const createFeatureStyles = (colors: ThemeColors) => StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: spacing.md,
-    borderRadius: radius.sm,
+    borderRadius: 18,
     backgroundColor: colors.surface,
     padding: spacing.md
   },

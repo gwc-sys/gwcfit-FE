@@ -1,3 +1,7 @@
+import { useState } from "react";
+import { positiveNumberError, progressFormError, supportFormError } from "../../components/member/formValidation";
+import { changePasswordSchema } from "../../../../validation/auth";
+import { MemberProgressOverview, useMemberReferenceColors } from "../../components/member/MemberReference";
 import { getMemberPaymentTotals, getCompletedWorkoutCount, getRewardPoints, getRewardBadgeCount } from "../../../../utils/memberFeatureMetrics";
 import { FlatList, RefreshControl, Switch, Text, View } from "react-native";
 import type { ReactNode } from "react";
@@ -370,23 +374,32 @@ export function MemberMealPlanScreenView({ model }: { model: ReturnType<typeof u
 }
 
 export function MemberProgressScreenView({ model }: { model: ReturnType<typeof useMemberProgressScreenPresentation> }): React.ReactNode {
+  const [validationError, setValidationError] = useState<string>();
+  const memberColors = useMemberReferenceColors();
   const { colors } = useAppTheme();
   if (model == null) return null;
   if (typeof model !== "object" || !("kind" in model)) return model;
   switch (model.kind) {
     case "view1": {
-      const { styles, queryRefresh, query, SectionTitle, weight, setWeight, bodyFat, setBodyFat, notes, setNotes, createLog, submit, QueryState, DetailGrid, ListSection } = model.props;
+      const { styles, queryRefresh, query, SectionTitle, weight, setWeight, bodyFat, setBodyFat, activeCalories, setActiveCalories, progressValidation, notes, setNotes, createLog, submit, QueryState, DetailGrid, ListSection } = model.props;
       return ((
-    <Screen scroll contentContainerStyle={styles.screen} refreshControl={queryRefresh(query.isRefetching, () => query.refetch())}>
-      <ScreenHeader title="Progress" subtitle="Logs and goal charts" icon="trending-up-outline" />
+    <Screen scroll keyboard reference={false} style={{ backgroundColor: memberColors.background }} contentContainerStyle={styles.screen} refreshControl={queryRefresh(query.isRefetching, () => query.refetch())}>
+      <ScreenHeader title="Your progress" subtitle="Small steps. Stronger you." />
+      <MemberProgressOverview logs={query.data ?? []} loading={query.isLoading} failed={Boolean(query.error)} />
       <View style={styles.panel}>
         <SectionTitle title="Log Progress" />
+        <FormTextField label="Active calories burned (kcal)" value={activeCalories} keyboardType="numeric" onChangeText={setActiveCalories} leftIcon="flame-outline" />
+        <NoticeBanner message={progressValidation} tone="error" />
         <View style={styles.inputRow}>
-          <FormTextField label="Weight" value={weight} keyboardType="numeric" onChangeText={setWeight} leftIcon="scale-outline" />
+          <FormTextField label="Weight (kg)" helper="Enter your measured weight in kilograms." value={weight} keyboardType="numeric" onChangeText={setWeight} leftIcon="scale-outline" />
           <FormTextField label="Body fat %" value={bodyFat} keyboardType="numeric" onChangeText={setBodyFat} leftIcon="pulse-outline" />
         </View>
         <FormTextField label="Notes" value={notes} onChangeText={setNotes} leftIcon="create-outline" multiline />
-        <PrimaryButton title="Save Log" icon="save-outline" loading={createLog.isPending} onPress={submit} />
+        <NoticeBanner message={validationError ?? null} tone="error" />
+        <PrimaryButton title="Save Log" icon="save-outline" loading={createLog.isPending} onPress={() => {
+          const error = progressFormError(weight, bodyFat, notes, activeCalories); setValidationError(error);
+          if (!error && !createLog.isPending) submit();
+        }} />
         <NoticeBanner message={createLog.error ? getApiErrorMessage(createLog.error) : createLog.data ? "Progress logged." : null} tone={createLog.error ? "error" : "success"} />
       </View>
       <QueryState
@@ -504,7 +517,8 @@ export function MemberClassesScreenView({ model }: { model: ReturnType<typeof us
                     status={item.booking_status}
                     statusTone={toneForStatus(item.booking_status)}
                     actionLabel={booked ? "Cancel" : "Book"}
-                    onAction={() => (booked ? cancelClass.mutate(item.class_uuid) : bookClass.mutate(item.class_uuid))}
+                    actionDisabled={bookClass.isPending || cancelClass.isPending}
+                    onAction={() => { if (!bookClass.isPending && !cancelClass.isPending) { if (booked) cancelClass.mutate(item.class_uuid); else bookClass.mutate(item.class_uuid); } }}
                   />
                 );
               }}
@@ -534,7 +548,7 @@ export function MemberNotificationsScreenView({ model }: { model: ReturnType<typ
           <Text style={styles.rowTitle}>Unread only</Text>
           <Text style={styles.rowText}>Filter current alerts</Text>
         </View>
-        <Switch value={unreadOnly} onValueChange={setUnreadOnly} trackColor={{ true: colors.primary, false: colors.surfaceStrong }} thumbColor={colors.white} />
+        <Switch accessibilityLabel="Show unread notifications only" value={unreadOnly} onValueChange={setUnreadOnly} trackColor={{ true: colors.primary, false: colors.surfaceStrong }} thumbColor={colors.white} />
       </View>
       <QueryState
         loading={query.isLoading}
@@ -558,7 +572,8 @@ export function MemberNotificationsScreenView({ model }: { model: ReturnType<typ
                   status={item.status}
                   statusTone={item.status === "unread" ? "warning" : "neutral"}
                   actionLabel={item.status === "unread" ? "Read" : undefined}
-                  onAction={() => markRead.mutate(item.notification_uuid)}
+                  actionDisabled={markRead.isPending}
+                  onAction={() => { if (!markRead.isPending && item.status === "unread") markRead.mutate(item.notification_uuid); }}
                 />
               )}
             />
@@ -573,20 +588,27 @@ export function MemberNotificationsScreenView({ model }: { model: ReturnType<typ
 }
 
 export function MemberGoalsScreenView({ model }: { model: ReturnType<typeof useMemberGoalsScreenPresentation> }): React.ReactNode {
+  const [validationError, setValidationError] = useState<string>();
   const { colors } = useAppTheme();
   if (model == null) return null;
   if (typeof model !== "object" || !("kind" in model)) return model;
   switch (model.kind) {
     case "view1": {
-      const { styles, queryRefresh, query, SectionTitle, goalName, setGoalName, targetWeight, setTargetWeight, createGoal, submit, QueryState, ListSection, updateGoal } = model.props;
+      const { styles, queryRefresh, query, SectionTitle, goalName, setGoalName, targetWeight, setTargetWeight, caloriesGoal, setCaloriesGoal, goalValidation, createGoal, submit, QueryState, ListSection, updateGoal } = model.props;
       return ((
-    <Screen scroll contentContainerStyle={styles.screen} refreshControl={queryRefresh(query.isRefetching, () => query.refetch())}>
+    <Screen scroll keyboard contentContainerStyle={styles.screen} refreshControl={queryRefresh(query.isRefetching, () => query.refetch())}>
       <ScreenHeader title="Goals" subtitle="Fitness targets" icon="flag-outline" />
       <View style={styles.panel}>
         <SectionTitle title="Create Goal" />
         <FormTextField label="Goal" value={goalName} onChangeText={setGoalName} leftIcon="flag-outline" />
+        <FormTextField label="Daily Move goal (kcal)" value={caloriesGoal} keyboardType="numeric" onChangeText={setCaloriesGoal} leftIcon="flame-outline" />
+        <NoticeBanner message={goalValidation} tone="error" />
         <FormTextField label="Target weight" value={targetWeight} keyboardType="numeric" onChangeText={setTargetWeight} leftIcon="scale-outline" />
-        <PrimaryButton title="Create Goal" icon="add-circle-outline" loading={createGoal.isPending} onPress={submit} />
+        <NoticeBanner message={validationError ?? null} tone="error" />
+        <PrimaryButton title="Create Goal" icon="add-circle-outline" loading={createGoal.isPending} onPress={() => {
+          const error = positiveNumberError(targetWeight, "Target weight"); setValidationError(error);
+          if (!error && !createGoal.isPending) submit();
+        }} />
         <NoticeBanner message={createGoal.error ? getApiErrorMessage(createGoal.error) : createGoal.data ? "Goal created." : null} tone={createGoal.error ? "error" : "success"} />
       </View>
       <QueryState
@@ -606,8 +628,11 @@ export function MemberGoalsScreenView({ model }: { model: ReturnType<typeof useM
               <GoalProgressCard
                 title={goal.goal_name}
                 value={`${Math.round(goal.progress_percentage)}%`}
-                subtitle={`${goal.status} - target ${goal.target_weight ?? "--"} kg`}
-                onPress={() => updateGoal.mutate({ goalUuid: goal.goal_uuid, payload: { status: "completed", progress_percentage: 100 } })}
+                subtitle={goal.calories_goal ? `${goal.status} - Daily Move goal ${goal.calories_goal} kcal` : `${goal.status} - target ${goal.target_weight ?? "--"} kg`}
+                onPress={() => {
+                  if (goal.calories_goal) { setCaloriesGoal(String(goal.calories_goal)); setGoalName(goal.goal_name); }
+                  else updateGoal.mutate({ goalUuid: goal.goal_uuid, payload: { status: "completed", progress_percentage: 100 } });
+                }}
               />
             )}
           />
@@ -662,6 +687,7 @@ export function MemberRewardsScreenView({ model }: { model: ReturnType<typeof us
 }
 
 export function MemberSupportScreenView({ model }: { model: ReturnType<typeof useMemberSupportScreenPresentation> }): React.ReactNode {
+  const [validationError, setValidationError] = useState<string>();
   const { colors } = useAppTheme();
   if (model == null) return null;
   if (typeof model !== "object" || !("kind" in model)) return model;
@@ -669,20 +695,25 @@ export function MemberSupportScreenView({ model }: { model: ReturnType<typeof us
     case "view1": {
       const { styles, SectionTitle, category, setCategory, subject, setSubject, message, setMessage, createTicket, submit } = model.props;
       return ((
-    <Screen scroll contentContainerStyle={styles.screen}>
+    <Screen scroll keyboard contentContainerStyle={styles.screen}>
       <ScreenHeader title="Support" subtitle="Trainer and gym contact" icon="chatbubbles-outline" />
       <View style={styles.panel}>
         <SectionTitle title="New Request" />
-        <FormTextField label="Category" value={category} onChangeText={setCategory} leftIcon="pricetag-outline" />
-        <FormTextField label="Subject" value={subject} onChangeText={setSubject} leftIcon="text-outline" />
-        <FormTextField label="Message" value={message} onChangeText={setMessage} leftIcon="chatbubble-outline" multiline />
-        <PrimaryButton title="Send Request" icon="send-outline" loading={createTicket.isPending} onPress={submit} />
+        <FormTextField required maxLength={80} label="Category" value={category} onChangeText={setCategory} leftIcon="pricetag-outline" />
+        <FormTextField required maxLength={180} label="Subject" value={subject} onChangeText={setSubject} leftIcon="text-outline" />
+        <FormTextField required maxLength={2000} label="Message" value={message} onChangeText={setMessage} leftIcon="chatbubble-outline" multiline />
+        <NoticeBanner message={validationError ?? null} tone="error" />
+        <PrimaryButton title="Send Request" icon="send-outline" loading={createTicket.isPending} onPress={() => {
+          const error = supportFormError(category, subject, message); setValidationError(error);
+          if (!error && !createTicket.isPending) submit();
+        }} />
         <NoticeBanner message={createTicket.error ? getApiErrorMessage(createTicket.error) : createTicket.data ? "Request sent." : null} tone={createTicket.error ? "error" : "success"} />
       </View>
-      <ScrollListCard title="Trainer message" subtitle="Send a request to your assigned trainer" icon="person-outline" />
-      <ScrollListCard title="Reception" subtitle="Contact the gym desk" icon="call-outline" />
-      <ScrollListCard title="Feedback" subtitle="Share feedback with your gym" icon="heart-outline" />
-      <ScrollListCard title="FAQ" subtitle="Common membership and billing questions" icon="help-circle-outline" />
+      <Text style={styles.rowText}>Requests are sent to your gym. This screen does not provide live chat or phone calls.</Text>
+      <ScrollListCard title="Trainer request" subtitle="Prepare a request about training" icon="person-outline" actionLabel="Select" onAction={() => { setCategory("trainer"); setSubject("Training support"); }} />
+      <ScrollListCard title="Reception" subtitle="Prepare a front desk request" icon="call-outline" actionLabel="Select" onAction={() => { setCategory("reception"); setSubject("Front desk support"); }} />
+      <ScrollListCard title="Feedback" subtitle="Prepare feedback for your gym" icon="heart-outline" actionLabel="Select" onAction={() => { setCategory("feedback"); setSubject("Gym feedback"); }} />
+
     </Screen>
   ));
     }
@@ -690,6 +721,7 @@ export function MemberSupportScreenView({ model }: { model: ReturnType<typeof us
 }
 
 export function MemberSettingsScreenView({ model }: { model: ReturnType<typeof useMemberSettingsScreenPresentation> }): React.ReactNode {
+  const [validationError, setValidationError] = useState<string>();
   const { colors } = useAppTheme();
   if (model == null) return null;
   if (typeof model !== "object" || !("kind" in model)) return model;
@@ -697,38 +729,32 @@ export function MemberSettingsScreenView({ model }: { model: ReturnType<typeof u
     case "view1": {
       const { styles, themeColors, oldPassword, setOldPassword, newPassword, setNewPassword, changePassword, submitPassword, notifications, setNotifications, privacy, setPrivacy, isDark, setColorScheme, navigation, logout } = model.props;
       return ((
-    <Screen scroll contentContainerStyle={styles.screen}>
+    <Screen scroll keyboard contentContainerStyle={styles.screen}>
       <ScreenHeader title="Settings" subtitle="Member preferences" icon="settings-outline" />
       <View style={[styles.panel, { backgroundColor: themeColors.surface, borderColor: themeColors.border }]}>
         <Text style={[styles.sectionTitle, { color: themeColors.ink }]}>Security</Text>
-        <FormTextField label="Old password" value={oldPassword} onChangeText={setOldPassword} secureTextEntry leftIcon="lock-open-outline" />
-        <FormTextField label="New password" value={newPassword} onChangeText={setNewPassword} secureTextEntry leftIcon="lock-closed-outline" />
-        <PrimaryButton title="Change Password" icon="key-outline" loading={changePassword.isPending} onPress={submitPassword} />
+        <FormTextField autoCapitalize="none" autoComplete="current-password" label="Old password" value={oldPassword} onChangeText={setOldPassword} secureTextEntry leftIcon="lock-open-outline" />
+        <FormTextField autoCapitalize="none" autoComplete="new-password" label="New password" value={newPassword} onChangeText={setNewPassword} secureTextEntry leftIcon="lock-closed-outline" />
+        <NoticeBanner message={validationError ?? null} tone="error" />
+        <PrimaryButton title="Change Password" icon="key-outline" loading={changePassword.isPending} onPress={() => {
+          const parsed = changePasswordSchema.safeParse({ old_password: oldPassword, new_password: newPassword });
+          const error = !oldPassword ? "Enter your current password." : !parsed.success ? parsed.error.issues[0]?.message : oldPassword === newPassword ? "Choose a different new password." : undefined;
+          setValidationError(error); if (!error && !changePassword.isPending) submitPassword();
+        }} />
         <NoticeBanner message={changePassword.error ? getApiErrorMessage(changePassword.error) : changePassword.data?.message ?? null} tone={changePassword.error ? "error" : "success"} />
       </View>
 
       <View style={[styles.panel, { backgroundColor: themeColors.surface, borderColor: themeColors.border }]}>
         <Text style={[styles.sectionTitle, { color: themeColors.ink }]}>Preferences</Text>
-        <View style={[styles.settingRow, { backgroundColor: themeColors.surfaceMuted }]}>
-          <View style={styles.flex}>
-            <Text style={[styles.rowTitle, { color: themeColors.ink }]}>Notifications</Text>
-            <Text style={[styles.rowText, { color: themeColors.muted }]}>Reminders and gym updates</Text>
-          </View>
-          <Switch value={notifications} onValueChange={setNotifications} trackColor={{ true: themeColors.primary, false: themeColors.surfaceStrong }} thumbColor={themeColors.white} ios_backgroundColor={themeColors.surfaceStrong} />
-        </View>
-        <View style={[styles.settingRow, { backgroundColor: themeColors.surfaceMuted }]}>
-          <View style={styles.flex}>
-            <Text style={[styles.rowTitle, { color: themeColors.ink }]}>Privacy</Text>
-            <Text style={[styles.rowText, { color: themeColors.muted }]}>Use display names in shared views</Text>
-          </View>
-          <Switch value={privacy} onValueChange={setPrivacy} trackColor={{ true: themeColors.primary, false: themeColors.surfaceStrong }} thumbColor={themeColors.white} ios_backgroundColor={themeColors.surfaceStrong} />
-        </View>
+        <ScrollListCard title="Notifications" subtitle="View gym updates and manage unread messages" icon="notifications-outline" actionLabel="Open" onAction={() => navigation.navigate("MemberNotifications")} />
+        <Text style={[styles.rowText, { color: themeColors.muted }]}>Notification delivery and shared-profile privacy preferences are not configurable in this version. Changing appearance below only changes this app's theme.</Text>
         <View style={[styles.settingRow, { backgroundColor: themeColors.surfaceMuted }]}>
           <View style={styles.flex}>
             <Text style={[styles.rowTitle, { color: themeColors.ink }]}>Dark mode</Text>
             <Text style={[styles.rowText, { color: themeColors.muted }]}>{isDark ? "Dark mode is on" : "Light mode is on"}</Text>
           </View>
           <Switch
+            accessibilityLabel="Dark mode"
             value={isDark}
             onValueChange={(enabled) => setColorScheme(enabled ? "dark" : "light")}
             trackColor={{ true: themeColors.primary, false: themeColors.surfaceStrong }}
@@ -737,7 +763,7 @@ export function MemberSettingsScreenView({ model }: { model: ReturnType<typeof u
           />
         </View>
         <ScrollListCard title="Language" subtitle="English" icon="language-outline" />
-        <ScrollListCard title="Connected devices" subtitle="Not connected" icon="watch-outline" />
+        <ScrollListCard title="Connected devices" subtitle="Device connections are not available in this version" icon="watch-outline" />
       </View>
 
       <View style={styles.buttonRow}>

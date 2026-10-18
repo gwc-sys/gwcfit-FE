@@ -1,8 +1,12 @@
+import { MemberMobileActivity } from "../../components/member/MemberMobileActivity";
+import { MemberServicesMenu } from "../../components/member/MemberServicesMenu";
+import { MemberReferenceHeader } from "../../components/member/MemberReference";
+import { useState } from "react";
 import { useAuthStore } from "../../../../store/useAuthStore";
 import { Pressable } from "../../components/NativePressable";
 import { Ionicons } from "@expo/vector-icons";
 import type { ReactNode } from "react";
-import { Image, RefreshControl, Text, View } from "react-native";
+import { Image, RefreshControl, Text, View, useWindowDimensions } from "react-native";
 import Svg, { Circle } from "react-native-svg";
 import { Screen } from "../../components/Screen";
 import { getApiErrorMessage } from "../../../../services/api/client";
@@ -20,7 +24,7 @@ export function PanelView({ model }: { model: ReturnType<typeof usePanelPresenta
     <View style={[styles.panel, style]}>
       <View style={styles.panelHeader}>
         <Text accessibilityRole="header" style={styles.panelTitle}>{title}</Text>
-        {action ? (
+        {action && onAction ? (
           <Pressable accessibilityRole="button" onPress={onAction} style={({ pressed }) => [{ minHeight: 44, justifyContent: "center", flexShrink: 1 }, pressed && styles.pressed]}>
             <Text style={styles.panelAction}>{action}</Text>
           </Pressable>
@@ -34,18 +38,19 @@ export function PanelView({ model }: { model: ReturnType<typeof usePanelPresenta
 }
 
 export function StatTileView({ model }: { model: ReturnType<typeof useStatTilePresentation> }): React.ReactNode {
+  const { width, fontScale } = useWindowDimensions();
   if (model == null) return null;
   if (typeof model !== "object" || !("kind" in model)) return model;
   switch (model.kind) {
     case "view1": {
       const { styles, softColor, icon, color, value, label, subtitle, trend, isDown, ui } = model.props;
       return ((
-    <View style={styles.statTile}>
+    <View style={[styles.statTile, (width < 350 || fontScale > 1.2) && { flexBasis: "44%" }]}>
       <View style={styles.statTopRow}>
         <View style={[styles.statIconBox, { backgroundColor: softColor }]}>
-          <Ionicons name={icon} size={26} color={color} />
+          <Ionicons name={icon} size={22} color={color} />
         </View>
-        <Text numberOfLines={1} adjustsFontSizeToFit style={styles.statValue}>
+        <Text style={styles.statValue}>
           {value}
         </Text>
       </View>
@@ -74,21 +79,17 @@ export function QuickActionTileView({ model }: { model: ReturnType<typeof useQui
     case "view1": {
       const { onPress, styles, action, ui } = model.props;
       return ((
-    <Pressable accessibilityRole="button" onPress={onPress} style={({ pressed }) => [styles.quickAction, pressed && styles.pressedLift]}>
+    <Pressable accessibilityRole="button" accessibilityLabel={`${action.title}. ${action.subtitle}`} onPress={onPress} style={({ pressed }) => [styles.quickAction, pressed && styles.pressedLift]}>
       <View style={[styles.quickIconBox, { backgroundColor: action.softColor }]}>
         <Ionicons name={action.icon} size={27} color={action.color} />
       </View>
       <View style={styles.flex}>
-        <Text numberOfLines={1} style={styles.quickTitle}>
-          {action.title}
+        <Text style={styles.quickTitle}>
+          {({ "Start Workout": "Workout", "Meal Plan": "Meal plan", "Log Progress": "Log progress", "Ask AI Coach": "AI coach" } as Record<string, string>)[action.title] ?? action.title}
         </Text>
-        <Text numberOfLines={1} style={styles.quickSubtitle}>
-          {action.subtitle}
-        </Text>
+
       </View>
-      <View style={styles.chevronButton}>
-        <Ionicons name="chevron-forward" size={18} color={ui.subtle} />
-      </View>
+
     </Pressable>
   ));
     }
@@ -203,15 +204,17 @@ export function DashboardStateView({ model }: { model: ReturnType<typeof useDash
 
 export function MemberDashboardScreenView({ model }: { model: ReturnType<typeof useMemberDashboardScreenPresentation> }): React.ReactNode {
   const user = useAuthStore(state => state.user);
+  const [showAllActions, setShowAllActions] = useState(false);
   if (model == null) return null;
   if (typeof model !== "object" || !("kind" in model)) return model;
   switch (model.kind) {
     case "view1": {
-      const { DashboardThemeContext, dashboardTheme, styles, isRefreshing, refreshAll, ui, isDesktop: _isDesktop, memberName, navigateTo, unreadNotifications, isNarrow, dashboardQuery, DashboardState, dashboard, isTablet, statTiles, StatTile, statsScrollRef, MOBILE_STAT_SNAP_INTERVAL, activeStatIndexRef, Panel, quickActions, QuickActionTile, scheduleItems, ScheduleRow, ProgressCircle, goalProgress, completedWorkouts, workoutsTarget, clamp, caloriesTarget, formatNumber, monthlyCalories, caloriesProgress, upcomingWorkouts, achievements } = model.props;
+      const { todayCalories, activityLoading, activityUnavailable, DashboardThemeContext, dashboardTheme, styles, isRefreshing, refreshAll, ui, isDesktop: _isDesktop, memberName, navigateTo, unreadNotifications, isNarrow, dashboardQuery, DashboardState, dashboard, isTablet, statTiles, StatTile, statsScrollRef, MOBILE_STAT_SNAP_INTERVAL, activeStatIndexRef, Panel, quickActions, QuickActionTile, scheduleItems, ScheduleRow, ProgressCircle, goalProgress, completedWorkouts, workoutsTarget, clamp, caloriesTarget, formatNumber, monthlyCalories, caloriesProgress, upcomingWorkouts, achievements } = model.props;
       const isDesktop = false;
       return ((
     <DashboardThemeContext.Provider value={dashboardTheme}>
     <Screen
+      reference={false}
       scroll
       noPadding
       style={styles.root}
@@ -219,26 +222,14 @@ export function MemberDashboardScreenView({ model }: { model: ReturnType<typeof 
       refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={refreshAll} tintColor={ui.primary} />}
     >
       <View style={[styles.dashboard, isDesktop && styles.dashboardDesktop]}>
-        {!isDesktop ? (
-          <View style={styles.mobileBrand}>
-            <View style={styles.mobileBrandContent}>
-              <Text style={styles.mobileIdentityRole}>YOUR FITNESS</Text>
-              <Text accessibilityRole="header" style={styles.brandText}>{dashboard?.gym_name?.trim() || user?.gym_name?.trim() || "Your gym"}</Text>
-              <Text style={styles.mobileIdentityName}>{memberName}</Text>
-            </View>
-            <View style={styles.mobileBrandActions}>
-              <Pressable accessibilityRole="button" accessibilityLabel="Notifications" onPress={() => navigateTo("MemberNotifications")} style={styles.mobileSettingsButton}>
-                <Ionicons name="notifications-outline" size={19} color={ui.primary} />
-                {unreadNotifications.length > 0 ? <View style={styles.mobileNotificationDot} /> : null}
-              </Pressable>
-              <Pressable accessibilityRole="button" accessibilityLabel="Profile" onPress={() => navigateTo("MemberProfileHome")} style={styles.mobileSettingsButton}>
-                <Ionicons name="person-outline" size={19} color={ui.primary} />
-              </Pressable>
-            </View>
-          </View>
-        ) : null}
+        <MemberReferenceHeader gym={dashboard?.gym_name?.trim() || user?.gym_name?.trim() || "Your gym"}
+          name={memberName} unread={unreadNotifications.length}
+          onNotifications={() => navigateTo("MemberNotifications")} onProfile={() => navigateTo("MemberProfileHome")} />
 
         <View style={[styles.main, isNarrow && styles.mainNarrow]}>
+          <MemberMobileActivity calories={todayCalories} target={caloriesTarget}
+            loading={activityLoading} unavailable={activityUnavailable}
+            onGoal={() => navigateTo("MemberGoals")} onWorkout={() => navigateTo("MemberWorkout")} />
           {dashboardQuery.isLoading ? <DashboardState title="Loading dashboard" message="Preparing your member workspace." icon="pulse-outline" /> : null}
           {dashboardQuery.error ? (
             <DashboardState title="Dashboard unavailable" message={getApiErrorMessage(dashboardQuery.error)} icon="alert-circle-outline" onRetry={() => dashboardQuery.refetch()} />
@@ -248,19 +239,19 @@ export function MemberDashboardScreenView({ model }: { model: ReturnType<typeof 
           ) : null}
 
           <View style={styles.statsGrid} accessibilityLabel="Monthly fitness statistics">
-            {statTiles.map((item) => <StatTile key={item.label} {...item} />)}
+            {statTiles.slice(0, 4).map((item) => <StatTile key={item.label} {...item} />)}
           </View>
 
           <View style={[styles.middleGrid, isDesktop && styles.middleGridDesktop]}>
-            <Panel title="Quick Actions" style={styles.quickPanel}>
+            <Panel title="Quick actions" action={showAllActions ? "Show less" : "See all"} onAction={() => setShowAllActions(value => !value)} style={styles.quickPanel}>
               <View style={styles.quickGrid}>
-                {quickActions.map((action) => (
+                {(showAllActions ? quickActions : [quickActions[0], quickActions[1], quickActions[2], quickActions[5]]).filter(Boolean).map((action) => (
                   <QuickActionTile key={action.title} action={action} onPress={() => navigateTo(action.route)} />
                 ))}
               </View>
             </Panel>
 
-            <Panel title="Today's Schedule" action="View full schedule" onAction={() => navigateTo("MemberClasses")} style={styles.schedulePanel}>
+            <Panel title="Today" action="View plan" onAction={() => navigateTo("MemberClasses")} style={styles.schedulePanel}>
               <View style={styles.scheduleList}>
                 {scheduleItems.length ? scheduleItems.map((item, index) => (
                   <ScheduleRow key={`${item.time}-${item.title}`} item={item} isLast={index === scheduleItems.length - 1} />
@@ -268,6 +259,8 @@ export function MemberDashboardScreenView({ model }: { model: ReturnType<typeof 
               </View>
             </Panel>
           </View>
+
+          <MemberServicesMenu collapsible onNavigate={route => navigateTo(route)} />
 
           <View style={[styles.lowerGrid, isDesktop && styles.lowerGridDesktop]}>
             <Panel title="Progress Overview" action="This Month" onAction={() => navigateTo("MemberProgress")} style={styles.progressPanel}>
@@ -330,6 +323,7 @@ export function MemberDashboardScreenView({ model }: { model: ReturnType<typeof 
               </View>
             </Panel>
 
+            <View style={styles.statsGrid}>{statTiles.slice(4).map(item => <StatTile key={item.label} {...item} />)}</View>
             <Panel title="Achievements" action="View all" onAction={() => navigateTo("MemberRewards")} style={styles.achievementPanel}>
               <View style={styles.achievementList}>
                 {achievements.length ? achievements.map((item) => (

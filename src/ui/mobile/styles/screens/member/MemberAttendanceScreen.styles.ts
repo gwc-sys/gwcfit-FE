@@ -22,7 +22,7 @@ export const styles = adaptPageStyles(StyleSheet.create({
       fontSize: 21,
       fontWeight: "700"
     }, statDetail: { marginTop: 8, fontSize: 11 },
-  actionShell: { position: "relative", flexDirection: "row", overflow: "hidden", borderWidth: 1, borderRadius: 14 }, actionShellCompact: { flexDirection: "column" }, actionCard: { flex: 1, minHeight: 300, alignItems: "center", padding: 24 }, actionHeading: { flexDirection: "row", alignItems: "center", gap: 12 }, actionIcon: { width: 52, height: 52, alignItems: "center", justifyContent: "center", borderRadius: 26, borderWidth: 1 }, actionTitle: {
+  actionShell: { position: "relative", flexDirection: "row", overflow: "hidden", borderWidth: 1, borderRadius: 18 }, actionShellCompact: { flexDirection: "column" }, actionCard: { flex: 1, minHeight: 300, alignItems: "center", padding: 24 }, actionHeading: { flexDirection: "row", alignItems: "center", gap: 12 }, actionIcon: { width: 52, height: 52, alignItems: "center", justifyContent: "center", borderRadius: 26, borderWidth: 1 }, actionTitle: {
       fontSize: 18,
       fontWeight: "700"
     }, actionSubtitle: { marginTop: 4, fontSize: 12 }, actionTime: {

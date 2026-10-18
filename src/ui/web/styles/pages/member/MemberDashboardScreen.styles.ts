@@ -39,7 +39,7 @@ type DashboardPalette = {
 const MOBILE_STAT_CARD_WIDTH = 176;
 
 export const LIGHT_UI: DashboardPalette = {
-  background: "#F7F8FA",
+  background: "#F2F5FA",
   surface: "#FFFFFF",
   panel: "#FFFFFF",
   border: "#E5E5EA",
@@ -75,7 +75,7 @@ export const LIGHT_UI: DashboardPalette = {
 };
 
 export const DARK_UI: DashboardPalette = {
-  background: "#101114",
+  background: "#0C111B",
   surface: "#191B20",
   panel: "#2C2C2E",
   border: "rgba(0,122,255,0.18)",
@@ -167,17 +167,17 @@ export function createStyles(ui: DashboardPalette) {
     },
     brandText: {
       color: ui.text,
-      fontSize: 27,
-      lineHeight: 33,
+      fontSize: 28,
+      lineHeight: 35,
       fontWeight: "900"
     },
     mobileBrand: {
-      minHeight: 72,
+      minHeight: 112,
       flexDirection: "row",
       alignItems: "center",
       justifyContent: "space-between",
       paddingHorizontal: 18,
-      paddingTop: 12,
+      paddingTop: 20,
       backgroundColor: ui.surface,
       borderBottomWidth: 1,
       borderBottomColor: ui.border
@@ -302,9 +302,9 @@ export function createStyles(ui: DashboardPalette) {
       flexGrow: 1,
       flexBasis: 176,
       minWidth: 156,
-      minHeight: 150,
+      minHeight: 126,
       justifyContent: "space-between",
-      borderRadius: 8,
+      borderRadius: 18,
       borderWidth: 1,
       borderColor: ui.border,
       backgroundColor: ui.surface,
@@ -327,9 +327,9 @@ export function createStyles(ui: DashboardPalette) {
     statValue: {
       flex: 1,
       color: ui.text,
-      fontSize: 26,
+      fontSize: 28,
       lineHeight: 32,
-      fontWeight: "900"
+      fontWeight: "700"
     },
     statLabel: {
       color: ui.text,
@@ -365,11 +365,11 @@ export function createStyles(ui: DashboardPalette) {
       alignItems: "stretch"
     },
     panel: {
-      borderRadius: 8,
+      borderRadius: 22,
       borderWidth: 1,
       borderColor: ui.border,
       backgroundColor: ui.panel,
-      padding: 20,
+      padding: 18,
       ...cardShadow
     },
     panelHeader: {
@@ -381,9 +381,9 @@ export function createStyles(ui: DashboardPalette) {
     },
     panelTitle: {
       color: ui.text,
-      fontSize: 19,
-      lineHeight: 25,
-      fontWeight: "900"
+      fontSize: 17,
+      lineHeight: 24,
+      fontWeight: "600"
     },
     emptyPanelText: {
       color: ui.muted,
@@ -409,21 +409,21 @@ export function createStyles(ui: DashboardPalette) {
     quickGrid: {
       flexDirection: "row",
       flexWrap: "wrap",
-      gap: 14,
+      gap: 10,
       marginTop: 18
     },
     quickAction: {
       flexGrow: 1,
       flexBasis: 230,
       minWidth: 220,
-      minHeight: 88,
+      minHeight: 108,
       flexDirection: "row",
       alignItems: "center",
       gap: 12,
-      borderRadius: 8,
+      borderRadius: 16,
       borderWidth: 1,
       borderColor: ui.border,
-      backgroundColor: ui.surface,
+      backgroundColor: ui.background,
       padding: 14
     },
     quickIconBox: {
@@ -436,7 +436,7 @@ export function createStyles(ui: DashboardPalette) {
     quickTitle: {
       color: ui.text,
       fontSize: 14,
-      lineHeight: 19,
+      lineHeight: 20,
       fontWeight: "900"
     },
     quickSubtitle: {

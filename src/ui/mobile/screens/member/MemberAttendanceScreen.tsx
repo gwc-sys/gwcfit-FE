@@ -1,3 +1,4 @@
+import { useRef, useState } from "react";
 import { Pressable } from "../../components/NativePressable";
 import { Ionicons } from "@expo/vector-icons";
 import { ActivityIndicator, Modal, RefreshControl, ScrollView, Text, View } from "react-native";
@@ -9,6 +10,8 @@ import type * as React from "react";
 import type { useMemberAttendanceScreenPresentation, useStatCardPresentation, useActionCardPresentation, useHistoryRowPresentation } from "../../../../screens/member/MemberAttendanceScreen";
 
 export function MemberAttendanceScreenView({ model }: { model: ReturnType<typeof useMemberAttendanceScreenPresentation> }): React.ReactNode {
+  const [showAllHistory, setShowAllHistory] = useState(false);
+  const scanInFlight = useRef(false);
   if (model == null) return null;
   if (typeof model !== "object" || !("kind" in model)) return model;
   switch (model.kind) {
@@ -53,14 +56,18 @@ export function MemberAttendanceScreenView({ model }: { model: ReturnType<typeof
           <View style={[styles.actionCard, { backgroundColor: `${colors.primary}12` }]}><Ionicons name="scan-outline" size={48} color={colors.primary} /><Text style={[styles.actionTitle, { color: colors.ink }]}>Scan the gym's daily QR</Text><Text style={[styles.actionSubtitle, { color: colors.textSecondary }]}>Each pair of scans completes one visit. You can visit up to {data.daily_visit_limit} times per day.</Text><Pressable accessibilityRole="button" disabled={!data.can_check_in && !data.can_check_out} onPress={openScanner} style={[styles.actionButton, { backgroundColor: colors.primary }, !data.can_check_in && !data.can_check_out && styles.disabled]} accessibilityState={{ disabled: !data.can_check_in && !data.can_check_out }}><Ionicons name="camera-outline" size={23} color="#fff" /><Text style={styles.actionButtonText}>{data.today_visit_count >= data.daily_visit_limit && !data.can_check_out ? "Daily limit reached" : "Open QR scanner"}</Text></Pressable></View>
         </View>
 
-        <View style={styles.historyHeader}><Text style={[styles.historyTitle, { color: colors.ink }]}>Recent History</Text><Text style={[styles.viewAll, { color: colors.primary }]}>View All →</Text></View>
+        <View style={styles.historyHeader}><Text style={[styles.historyTitle, { color: colors.ink }]}>Recent History</Text><Pressable accessibilityRole="button" accessibilityLabel="Toggle full attendance history" accessibilityState={{ expanded: showAllHistory }} onPress={() => setShowAllHistory(value => !value)} style={{ minHeight: 44, justifyContent: "center" }}><Text style={[styles.viewAll, { color: colors.primary }]}>{showAllHistory ? "Show less" : "View all"}</Text></Pressable></View>
         <View style={[styles.historyCard, { borderColor: colors.border, backgroundColor: colors.card }]}>
-          {data.history.length ? data.history.slice(0, 6).map((record, index) => <HistoryRow key={record.attendance_uuid} record={record} last={index === Math.min(data.history.length, 6) - 1} colors={colors} />) : <Text style={[styles.empty, { color: colors.textSecondary }]}>No attendance history yet.</Text>}
+          {data.history.length ? data.history.slice(0, showAllHistory ? undefined : 6).map((record, index) => <HistoryRow key={record.attendance_uuid} record={record} last={index === (showAllHistory ? data.history.length : Math.min(data.history.length, 6)) - 1} colors={colors} />) : <Text style={[styles.empty, { color: colors.textSecondary }]}>No attendance history yet.</Text>}
         </View>
       </> : null}
 
       <Modal visible={scannerOpen} animationType="slide" onRequestClose={() => setScannerOpen(false)}>
-        <View style={{ flex: 1, backgroundColor: "#000" }}><CameraView style={{ flex: 1 }} facing="back" barcodeScannerSettings={{ barcodeTypes: ["qr"] }} onBarcodeScanned={scanMutation.isPending ? undefined : ({ data }) => scanMutation.mutate(data)} /><Pressable accessibilityRole="button" accessibilityLabel="Close" onPress={() => setScannerOpen(false)} style={{ position: "absolute", top: 50, right: 20, padding: 14, borderRadius: 30, backgroundColor: "rgba(0,0,0,.65)" }}><Ionicons name="close" size={28} color="#fff" /></Pressable><Text style={{ position: "absolute", bottom: 60, alignSelf: "center", color: "#fff", fontWeight: "800" }}>{scanMutation.isPending ? "Recording attendance…" : "Point at the reception QR code"}</Text></View>
+        <View style={{ flex: 1, backgroundColor: "#000" }}><CameraView style={{ flex: 1 }} facing="back" barcodeScannerSettings={{ barcodeTypes: ["qr"] }} onBarcodeScanned={scanMutation.isPending ? undefined : ({ data }) => {
+          if (scanInFlight.current) return;
+          scanInFlight.current = true;
+          scanMutation.mutate(data, { onSettled: () => { scanInFlight.current = false; } });
+        }} /><Pressable accessibilityRole="button" accessibilityLabel="Close" onPress={() => setScannerOpen(false)} style={{ position: "absolute", top: 50, right: 20, padding: 14, borderRadius: 30, backgroundColor: "rgba(0,0,0,.65)" }}><Ionicons name="close" size={28} color="#fff" /></Pressable><Text style={{ position: "absolute", bottom: 60, alignSelf: "center", color: "#fff", fontWeight: "800" }}>{scanMutation.isPending ? "Recording attendance…" : "Point at the reception QR code"}</Text></View>
       </Modal>
 
       <Modal visible={qrAction !== null} transparent animationType="fade" onRequestClose={() => setQrAction(null)}>

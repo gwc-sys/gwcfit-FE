@@ -15,7 +15,7 @@ export const createStyles = (colors: ThemeColors) =>
     flexDirection: "row",
     alignItems: "center",
     gap: spacing.md,
-    borderRadius: radius.md,
+    borderRadius: 20,
     borderWidth: 1,
     borderColor: colors.border,
     backgroundColor: colors.surface,
@@ -55,7 +55,7 @@ export const createStyles = (colors: ThemeColors) =>
   },
   formPanel: {
     gap: spacing.md,
-    borderRadius: radius.md,
+    borderRadius: 20,
     borderWidth: 1,
     borderColor: colors.border,
     backgroundColor: colors.surface,

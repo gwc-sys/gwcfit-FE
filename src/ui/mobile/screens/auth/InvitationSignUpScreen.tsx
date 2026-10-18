@@ -18,7 +18,7 @@ export function InvitationSignUpScreenView({ model }: { model: ReturnType<typeof
     case "view1": {
       const { styles, navigation, colors, token, updateToken, invite, validation, roleLabels, gymName, setGymName, fullName, setFullName, email, setEmail, password, setPassword, passwordVisible, setPasswordVisible, formError, registration } = model.props;
       return ((
-    <Screen scroll keyboard>
+    <Screen scroll keyboard reference={false}>
       <View style={styles.container}>
         <AppHeader title="Create account" subtitle="Invitation-only access" onBack={() => navigation.goBack()} />
         <View style={styles.card}>
@@ -26,7 +26,7 @@ export function InvitationSignUpScreenView({ model }: { model: ReturnType<typeof
             <View style={styles.icon}><Ionicons name="ticket-outline" size={24} color={colors.primary} /></View>
             <View style={styles.headingCopy}>
               <Text style={styles.title}>Use your invitation</Text>
-              <Text style={styles.subtitle}>Your invitation securely assigns your gym and role. You cannot select them manually.</Text>
+              <Text style={styles.subtitle}>Your invitation connects you to the right gym and role. Paste your token below to get started.</Text>
             </View>
           </View>
           <FormTextField
@@ -36,7 +36,8 @@ export function InvitationSignUpScreenView({ model }: { model: ReturnType<typeof
             autoCapitalize="none"
             autoCorrect={false}
             leftIcon="key-outline"
-            required
+            placeholder="Paste invitation token"
+            accessibilityLabel="Invitation token, required"
           />
           <PrimaryButton
             title={invite ? "Invitation verified" : "Verify invitation"}
@@ -89,7 +90,7 @@ export function InvitationSignUpScreenView({ model }: { model: ReturnType<typeof
             </View>
           ) : null}
         </View>
-        <Pressable accessibilityRole="button" onPress={() => navigation.navigate("Login")}><Text style={styles.signIn}>Already registered? Sign in</Text></Pressable>
+        <Pressable accessibilityRole="button" onPress={() => navigation.navigate("Login")} style={styles.signInButton}><Text style={styles.signIn}>Already registered? <Text style={styles.signInLink}>Sign in</Text></Text></Pressable>
       </View>
     </Screen>
   ));
