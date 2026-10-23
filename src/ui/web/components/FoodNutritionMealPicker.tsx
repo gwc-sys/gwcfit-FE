@@ -1,194 +1,72 @@
+import { useState } from "react";
+import { createBasketStyles } from "../styles/components/FoodNutritionMealPicker.styles";
+import { FoodIcon } from "../../../components/FoodIcon";
+import { foodDisplayName } from "../../../utils/foodNames";
 import { Ionicons } from "@expo/vector-icons";
-import { Modal, Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import { foodNutritionCatalog, foodNutritionCategories } from "../../../data/foodNutritionCatalog";
 import type * as React from "react";
 import type { useFoodNutritionMealPickerPresentation, useMacroPresentation } from "../../../components/FoodNutritionMealPicker";
 
 export function FoodNutritionMealPickerView({ model }: { model: ReturnType<typeof useFoodNutritionMealPickerPresentation> }): React.ReactNode {
+  const [pickerWidth, setPickerWidth] = useState(0);
+  const sideBySide = pickerWidth >= 800;
   if (model == null) return null;
   if (typeof model !== "object" || !("kind" in model)) return model;
   switch (model.kind) {
     case "view1": {
-      const { styles, buildDay, targetCalories, Macro, totals, round, colors, search, setSearch, category, setCategoryPanelOpen, categoryPanelOpen, setCategory, visibleFoods, addFood, selected, changeServings, save } = model.props;
+      const { foodCount, simpleFoods, styles, buildDay, colors, search, setSearch, category, setCategory, visibleFoods, addFood, selected, changeServings, save } = model.props;
+      const basketStyles = createBasketStyles(colors);
       return ((
-    <View style={styles.container}>
+    <View style={styles.container} onLayout={event => setPickerWidth(event.nativeEvent.layout.width)}>
       <View style={styles.headingRow}>
         <View style={styles.headingCopy}>
-          <Text style={styles.title}>Food nutrition library</Text>
+          <Text style={{ color: colors.muted, fontSize: 13, fontWeight: "600", letterSpacing: 0.8 }}>03 / DAILY NUTRITION</Text>
+          <Text accessibilityRole="header" style={styles.title}>Choose your foods</Text>
           <Text style={styles.subtitle}>
-            {foodNutritionCatalog.length} foods · nutrition values per 100 g
+            {foodCount} foods / choose foods to add
           </Text>
         </View>
-        <Pressable accessibilityRole="button" onPress={buildDay} style={styles.generateButton}>
+        {!simpleFoods ? <Pressable accessibilityRole="button" onPress={buildDay} style={styles.generateButton}>
           <Ionicons name="sparkles" size={17} color="#FFFFFF" />
           <Text style={styles.generateText}>
-            Build {targetCalories || 2000} kcal day
+            Auto-build day
           </Text>
-        </Pressable>
+        </Pressable> : null}
       </View>
 
-      <View style={styles.summary}>
-        <Macro
-          label="Calories"
-          value={`${Math.round(totals.calories)} kcal`}
-          color="#F59E0B"
-        />
-        <Macro
-          label="Protein"
-          value={`${round(totals.protein)} g`}
-          color="#22C55E"
-        />
-        <Macro
-          label="Carbs"
-          value={`${round(totals.carbs)} g`}
-          color="#38BDF8"
-        />
-        <Macro label="Fat" value={`${round(totals.fat)} g`} color="#64D2FF" />
-      </View>
-
+      <View style={[basketStyles.browserLayout, { flexDirection: sideBySide ? "row" : "column-reverse" }]} >
+      <View style={basketStyles.catalog}>
       <View style={styles.searchBox}>
         <Ionicons name="search-outline" size={19} color={colors.muted} />
         <TextInput
           value={search}
           onChangeText={setSearch}
-          placeholder="Search food, cuisine or diet type"
+          placeholder="Search foods"
+          accessibilityLabel="Search foods"
           placeholderTextColor={colors.subtle}
           style={styles.searchInput}
         />
         {search ? (
-          <Pressable accessibilityRole="button" onPress={() => setSearch("")}>
+          <Pressable accessibilityRole="button" accessibilityLabel="Clear food search" onPress={() => setSearch("")} style={styles.addButton}>
             <Ionicons name="close-circle" size={19} color={colors.muted} />
           </Pressable>
         ) : null}
       </View>
 
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={`Food category, ${category}`}
-        onPress={() => setCategoryPanelOpen(true)}
-        style={styles.categorySelector}
-      >
-        <View style={styles.categorySelectorIcon}>
-          <Ionicons name="options-outline" size={18} color={colors.primary} />
-        </View>
-        <View style={styles.categorySelectorCopy}>
-          <Text style={styles.categorySelectorLabel}>Food category</Text>
-          <Text style={styles.categorySelectorValue}>{category}</Text>
-        </View>
-        <View style={styles.categoryCount}>
-          <Text style={styles.categoryCountText}>
-            {foodNutritionCategories.length + 1}
-          </Text>
-        </View>
-        <Ionicons name="chevron-down" size={18} color={colors.muted} />
-      </Pressable>
-
-      <Modal
-        animationType="fade"
-        transparent
-        visible={categoryPanelOpen}
-        onRequestClose={() => setCategoryPanelOpen(false)}
-      >
-        <Pressable accessibilityRole="button"
-          style={styles.categoryBackdrop}
-          onPress={() => setCategoryPanelOpen(false)}
-        >
-          <Pressable accessibilityRole="button" onPress={() => undefined} style={styles.categoryPanel}>
-            <View style={styles.categoryPanelHeader}>
-              <View style={styles.categoryPanelTitleRow}>
-                <View style={styles.categoryPanelIcon}>
-                  <Ionicons
-                    name="restaurant-outline"
-                    size={21}
-                    color={colors.primary}
-                  />
-                </View>
-                <View>
-                  <Text style={styles.categoryPanelTitle}>
-                    Choose food category
-                  </Text>
-                  <Text style={styles.categoryPanelSubtitle}>
-                    Filter foods by cuisine or diet type
-                  </Text>
-                </View>
-              </View>
-              <Pressable accessibilityRole="button"
-                accessibilityLabel="Close categories"
-                onPress={() => setCategoryPanelOpen(false)}
-                style={styles.categoryClose}
-              >
-                <Ionicons name="close" size={20} color={colors.ink} />
-              </Pressable>
-            </View>
-            <ScrollView
-              contentContainerStyle={styles.categoryGrid}
-              showsVerticalScrollIndicator
-            >
-              {["All Foods", ...foodNutritionCategories].map((item) => {
-                const active = category === item;
-                return (
-                  <Pressable accessibilityRole="button"
-                    key={item}
-                    onPress={() => {
-                      setCategory(item);
-                      setCategoryPanelOpen(false);
-                    }}
-                    style={[
-                      styles.categoryOption,
-                      active && styles.categoryOptionActive,
-                    ]}
-                  >
-                    <View
-                      style={[
-                        styles.categoryRadio,
-                        active && styles.categoryRadioActive,
-                      ]}
-                    >
-                      {active ? (
-                        <Ionicons name="checkmark" size={14} color="#FFFFFF" />
-                      ) : null}
-                    </View>
-                    <Text
-                      style={[
-                        styles.categoryOptionText,
-                        active && styles.categoryOptionTextActive,
-                      ]}
-                    >
-                      {item}
-                    </Text>
-                  </Pressable>
-                );
-              })}
-            </ScrollView>
-          </Pressable>
-        </Pressable>
-      </Modal>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, paddingVertical: 4 }}>
+        {["All Foods", ...foodNutritionCategories].map(item => <Pressable key={item} accessibilityRole="button" accessibilityState={{ selected: category === item }} onPress={() => setCategory(item)} style={{ minHeight: 44, paddingHorizontal: 16, justifyContent: "center", borderRadius: 22, backgroundColor: category === item ? colors.ink : colors.surface }}><Text style={{ color: category === item ? colors.background : colors.muted, fontSize: 14, fontWeight: "600" }}>{item}</Text></Pressable>)}
+      </ScrollView>
 
       <View style={styles.foodGrid}>
+        {!visibleFoods.length ? <Text style={{ width: "100%", color: colors.muted, padding: 20, fontSize: 15 }}>No foods match. Try a different search or category.</Text> : null}
         {visibleFoods.map((food) => (
           <View key={food.id} style={styles.foodCard}>
-            <View style={styles.foodTitleRow}>
-              <Text numberOfLines={2} style={styles.foodName}>
-                {food.name}
-              </Text>
-              <Pressable accessibilityRole="button"
-                accessibilityLabel={`Add ${food.name}`}
-                onPress={() => addFood(food)}
-                style={styles.addButton}
-              >
-                <Ionicons name="add" size={19} color="#FFFFFF" />
-              </Pressable>
-            </View>
-            <Text style={styles.calories}>{food.calories} kcal</Text>
-            <Text style={styles.macros}>
-              P {food.proteinG}g C {food.carbsG}g F {food.fatG}g
-            </Text>
-            <Text numberOfLines={1} style={styles.tags}>
-              {food.mainCategory} · {food.subcategory}
-            </Text>
-            <Text numberOfLines={1} style={styles.benefit}>
-              {food.primaryBenefit}
-            </Text>
+            <FoodIcon name={food.name} category={food.mainCategory} subcategory={food.subcategory} />
+            <Text style={styles.foodName}>{foodDisplayName(food.name)}</Text>
+            <Pressable accessibilityRole="button" accessibilityLabel={`Add ${foodDisplayName(food.name)}`} onPress={() => addFood(food)} style={styles.addButton}>
+              <Ionicons name="add-circle" size={26} color={colors.primary} />
+            </Pressable>
           </View>
         ))}
       </View>
@@ -197,12 +75,16 @@ export function FoodNutritionMealPickerView({ model }: { model: ReturnType<typeo
         any food in the full catalog.
       </Text>
 
-      {selected.length ? (
-        <View style={styles.planBlock}>
-          <View style={styles.planHeader}>
-            <Text style={styles.title}>Daily meal plan</Text>
-            <Text style={styles.planCount}>{selected.length} foods</Text>
-          </View>
+      </View>
+      <View style={[basketStyles.basket, sideBySide && { width: 300, alignSelf: "flex-start" }]}>
+        <View style={basketStyles.basketHeading}>
+          <Ionicons name="basket-outline" size={24} color={colors.primary} />
+          <Text accessibilityRole="header" style={basketStyles.basketTitle}>Food basket</Text>
+        </View>
+        <Text accessibilityLiveRegion="polite" style={basketStyles.basketCount}>
+          {selected.length} {selected.length === 1 ? "food" : "foods"} added
+        </Text>
+        {selected.length ? (
           <View style={styles.mealGroup}>
             {selected.map((item, index) => (
               <View
@@ -210,23 +92,21 @@ export function FoodNutritionMealPickerView({ model }: { model: ReturnType<typeo
                 style={styles.selectedRow}
               >
                 <View style={styles.selectedCopy}>
-                  <Text numberOfLines={1} style={styles.selectedName}>
-                    {item.food_name}
-                  </Text>
-                  <Text style={styles.selectedMeta}>
-                    {Math.round(item.calories)} kcal · {item.protein_g}g protein
-                  </Text>
+                  <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+                    <FoodIcon name={item.food_name} category={item.main_category} subcategory={item.subcategory} size={36} />
+                    <Text style={[styles.selectedName, { flex: 1 }]}>{foodDisplayName(item.food_name)}</Text>
+                  </View>
                 </View>
                 <View style={styles.stepper}>
                   <Pressable accessibilityRole="button"
-                    onPress={() => changeServings(index, -0.25)}
+                    accessibilityLabel={`Decrease servings of ${item.food_name}`} onPress={() => changeServings(index, -0.25)}
                     style={styles.stepButton}
                   >
                     <Ionicons name="remove" size={15} color={colors.ink} />
                   </Pressable>
                   <Text style={styles.servings}>{item.servings}x</Text>
                   <Pressable accessibilityRole="button"
-                    onPress={() => changeServings(index, 0.25)}
+                    accessibilityLabel={`Increase servings of ${item.food_name}`} onPress={() => changeServings(index, 0.25)}
                     style={styles.stepButton}
                   >
                     <Ionicons name="add" size={15} color={colors.ink} />
@@ -248,16 +128,13 @@ export function FoodNutritionMealPickerView({ model }: { model: ReturnType<typeo
               </View>
             ))}
           </View>
-        </View>
       ) : (
         <Text style={styles.empty}>
-          Add foods or generate a full day automatically.
+          Your basket is empty. Tap + on a food to add it.
         </Text>
       )}
-      <Text style={styles.basisNote}>
-        Nutrition values are calculated per 100 g and scale with the serving
-        multiplier.
-      </Text>
+      </View>
+      </View>
     </View>
   ));
     }
@@ -275,7 +152,7 @@ export function MacroView({ model }: { model: ReturnType<typeof useMacroPresenta
       <View style={[stylesShared.dot, { backgroundColor: color }]} />
       <View>
         <Text style={stylesShared.macroLabel}>{label}</Text>
-        <Text style={stylesShared.macroValue}>{value}</Text>
+        <Text style={[stylesShared.macroValue, { color }]}>{value}</Text>
       </View>
     </View>
   ));

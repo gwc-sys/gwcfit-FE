@@ -4,6 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { Controller } from "react-hook-form";
 import { FlatList, Image, ImageBackground, RefreshControl, ScrollView, Text, TextInput, View } from "react-native";
 import { EmptyState } from "../../components/EmptyState";
+import { DataState } from "../../components/DataState";
 import { DatePickerField } from "../../../../components/DatePickerField";
 import { FoodNutritionMealPicker } from "../../../../components/FoodNutritionMealPicker";
 import { FormTextField } from "../../components/FormTextField";
@@ -26,15 +27,25 @@ export function ResourceCrudPanelView<TRead extends { id: string }, TCreate, TUp
   switch (model.kind) {
     case "view1": {
       const { config, formOnly, showForm, beginCreate, styles, records, formTitle, closeForm, colors, autoAssignCurrentTrainer, currentUser, visibleFields, control, errors, setDietScheduleMode, setValue, dietStartDate, dietScheduleMode, dietEndDate, dietCaloriesByTitle, getRelationState, getRelationIcon, relationOptions, GenderWorkoutSessionPicker, dietTargetCalories, createMutation, updateMutation, isMutating, submit, editingRecord, notice, listQuery, deleteMutation, setSearch, search, setSortDirection, sortDirection, filteredRecords, LoadingRows, beginEdit, confirmDelete, page, setPage } = model.props;
+      const diet = config.key === "diet-plans";
+      const workout = config.title === "Workout Plans";
+      const dietLayout = {
+        schedule: { padding: 16, borderWidth: 0, borderRadius: 18, gap: 16, backgroundColor: colors.surface },
+        notice: { padding: 14, borderWidth: 0, borderRadius: 14, backgroundColor: colors.surface, minHeight: 56 },
+        goal: { width: "48%" as const, flexGrow: 1, minHeight: 50, borderRadius: 12, paddingHorizontal: 14, justifyContent: "flex-start" as const },
+        label: { color: colors.muted, fontSize: 13, fontWeight: "600" as const, letterSpacing: 0.8 },
+      };
       return ((
     <SurfacePanel
-      title={config.title === "Workout Plans" ? "Your plans" : config.title}
-      kicker={config.subtitle}
+      hideHeader={(formOnly && config.key === "diet-plans") || workout}
+      style={workout ? { padding: 0, borderWidth: 0, backgroundColor: "transparent" } : formOnly && config.key === "diet-plans" ? { backgroundColor: "transparent", padding: 0 } : config.key === "attendance" ? { backgroundColor: "transparent", padding: 0 } : undefined}
+      title={config.key === "membership-plans" ? "Your plans" : config.title === "Workout Plans" ? "Your plans" : config.title}
+      kicker={config.key === "membership-plans" || config.key === "attendance" ? undefined : config.subtitle}
       icon={config.icon}
       actionLabel={formOnly || showForm ? undefined : "New"}
       onAction={formOnly || showForm ? undefined : beginCreate}
     >
-      {!formOnly ? (
+      {!formOnly && !workout && config.key !== "membership-plans" && config.key !== "attendance" ? (
         <View style={styles.summaryRow}>
           <StatusBadge label={`${records.length} loaded`} tone="neutral" />
           <StatusBadge
@@ -45,8 +56,8 @@ export function ResourceCrudPanelView<TRead extends { id: string }, TCreate, TUp
       ) : null}
 
       {showForm ? (
-        <View style={styles.formBlock}>
-          <View style={styles.formHeader}>
+        <View style={[styles.formBlock, formOnly && config.key === "diet-plans" && { padding: 0, backgroundColor: "transparent", gap: 24 }]}>
+          {!(formOnly && config.key === "diet-plans") ? <View style={styles.formHeader}>
             <Text style={styles.blockTitle}>{formTitle}</Text>
             <Pressable accessibilityLabel="Close"
               accessibilityRole="button"
@@ -55,10 +66,10 @@ export function ResourceCrudPanelView<TRead extends { id: string }, TCreate, TUp
             >
               <Ionicons name="close" size={20} color={colors.ink} />
             </Pressable>
-          </View>
+          </View> : null}
 
           {autoAssignCurrentTrainer ? (
-            <View style={styles.autoTrainerNotice}>
+            <View style={[styles.autoTrainerNotice, diet && dietLayout.notice]}>
               <View style={styles.autoTrainerIcon}>
                 <Ionicons
                   name="person-circle-outline"
@@ -68,7 +79,7 @@ export function ResourceCrudPanelView<TRead extends { id: string }, TCreate, TUp
               </View>
               <View style={styles.autoTrainerCopy}>
                 <Text style={styles.autoTrainerTitle}>
-                  Trainer assigned automatically
+                  Assigned trainer
                 </Text>
                 <Text style={styles.autoTrainerText}>
                   {currentUser?.full_name ?? "Current trainer"} will be assigned
@@ -107,7 +118,7 @@ export function ResourceCrudPanelView<TRead extends { id: string }, TCreate, TUp
                       }
                     };
                     return (
-                      <View style={styles.scheduleBlock}>
+                      <View style={[styles.scheduleBlock, dietLayout.schedule]}>
                         <View style={styles.scheduleHeading}>
                           <View style={styles.scheduleTitleWrap}>
                             <Ionicons
@@ -116,15 +127,15 @@ export function ResourceCrudPanelView<TRead extends { id: string }, TCreate, TUp
                               color={colors.primary}
                             />
                             <View>
-                              <Text style={styles.scheduleTitle}>
-                                When will this plan be used?
+                              <Text style={[styles.scheduleTitle, { fontSize: 18, fontWeight: "600" }]}>
+                                02 / SCHEDULE
                               </Text>
                               <Text style={styles.scheduleHint}>
-                                Choose one day or a date range.
+                                Choose when this plan is active.
                               </Text>
                             </View>
                           </View>
-                          <View style={styles.modeSwitch}>
+                          <View style={[styles.modeSwitch, { borderRadius: 10, padding: 3 }]}>
                             <Pressable accessibilityRole="button"
                               onPress={() => chooseMode("single")}
                               style={[
@@ -243,13 +254,14 @@ export function ResourceCrudPanelView<TRead extends { id: string }, TCreate, TUp
                   if (field.choices) {
                     return (
                       <View style={styles.choiceField}>
-                        <Text style={styles.choiceLabel}>{field.label}</Text>
+                        <Text style={[styles.choiceLabel, diet && dietLayout.label]}>{diet && field.name === "title" ? "01 / NUTRITION GOAL" : field.label}</Text>
                         <View style={styles.choiceRow}>
                           {field.choices.map((choice) => {
                             const active = String(value ?? "") === choice;
                             return (
                               <Pressable accessibilityRole="button"
                                 key={choice}
+                                accessibilityState={{ selected: active }}
                                 onPress={() => {
                                   onChange(choice);
                                   if (field.syncField)
@@ -269,6 +281,7 @@ export function ResourceCrudPanelView<TRead extends { id: string }, TCreate, TUp
                                 }}
                                 style={[
                                   styles.choiceOption,
+                                  diet && dietLayout.goal,
                                   active && styles.choiceOptionActive,
                                 ]}
                               >
@@ -307,7 +320,7 @@ export function ResourceCrudPanelView<TRead extends { id: string }, TCreate, TUp
                         helperText={
                           field.helperText ??
                           (field.createOnly
-                            ? "Required when creating a new record."
+                            ? diet ? "Choose the client for this plan." : "Required when creating a new record."
                             : undefined)
                         }
                         icon={getRelationIcon(field.relation)}
@@ -333,6 +346,7 @@ export function ResourceCrudPanelView<TRead extends { id: string }, TCreate, TUp
                   if (field.catalog === "food") {
                     return (
                       <FoodNutritionMealPicker
+                        simpleFoods={autoAssignCurrentTrainer}
                         onChange={onChange}
                         targetCalories={dietTargetCalories || 2000}
                         value={String(value ?? "[]")}
@@ -358,7 +372,7 @@ export function ResourceCrudPanelView<TRead extends { id: string }, TCreate, TUp
                       helper={
                         field.helperText ??
                         (field.createOnly
-                          ? "Required when creating a new record."
+                          ? diet ? "Choose the client for this plan." : "Required when creating a new record."
                           : undefined)
                       }
                       keyboardType={field.keyboardType}
@@ -386,12 +400,12 @@ export function ResourceCrudPanelView<TRead extends { id: string }, TCreate, TUp
               {getApiErrorMessage(updateMutation.error)}
             </Text>
           ) : null}
-          <View style={styles.actionRow}>
+          <View style={[styles.actionRow, diet && { flexDirection: "row", gap: 12, borderTopWidth: 1, borderTopColor: colors.border, paddingTop: 20 }]}>
             <PrimaryButton
               disabled={isMutating}
               loading={createMutation.isPending || updateMutation.isPending}
               onPress={submit}
-              title={editingRecord ? "Save Changes" : "Create"}
+              title={editingRecord ? "Save changes" : diet ? "Create plan" : "Create"}
               style={styles.actionButton}
             />
             <PrimaryButton
@@ -417,15 +431,16 @@ export function ResourceCrudPanelView<TRead extends { id: string }, TCreate, TUp
 
       {!formOnly ? (
         <>
-          <View style={styles.toolbar}>
-            <View style={styles.searchWrap}>
+          <View style={[styles.toolbar, (config.key === "membership-plans" || config.key === "attendance") && { flexDirection: "row", alignItems: "center", gap: 8 }]}>
+            <View style={[styles.searchWrap, (config.key === "membership-plans" || config.key === "attendance") && { flex: 1, minWidth: 0 }]}>
               <Ionicons name="search-outline" size={20} color={colors.muted} />
               <TextInput
                 autoCapitalize="none"
                 onChangeText={setSearch}
-                placeholder={`Search ${config.title.toLowerCase()}`}
+                accessibilityLabel={`Search ${config.title.toLowerCase()}`}
+                placeholder={workout ? "Search plans" : `Search ${config.title.toLowerCase()}`}
                 placeholderTextColor={colors.subtle}
-                style={styles.searchInput}
+                style={[styles.searchInput, workout && { minWidth: 0, fontSize: 16 }]}
                 value={search}
               />
               {search ? (
@@ -446,7 +461,8 @@ export function ResourceCrudPanelView<TRead extends { id: string }, TCreate, TUp
               onPress={() =>
                 setSortDirection((value) => (value === "az" ? "za" : "az"))
               }
-              style={styles.sortButton}
+              accessibilityLabel={`Sort plans ${sortDirection === "az" ? "Z to A" : "A to Z"}`}
+              style={[styles.sortButton, workout && { minWidth: 64, minHeight: 48, borderWidth: 0, borderRadius: 12, backgroundColor: colors.surface }]}
             >
               <Ionicons
                 name={sortDirection === "az" ? "arrow-down" : "arrow-up"}
@@ -463,6 +479,20 @@ export function ResourceCrudPanelView<TRead extends { id: string }, TCreate, TUp
             ListEmptyComponent={
               listQuery.isLoading ? (
                 <LoadingRows />
+              ) : workout ? (
+                <View style={{ paddingVertical: 40, paddingHorizontal: 16, alignItems: "center", gap: 12 }}>
+                  <Ionicons name={listQuery.error ? "cloud-offline-outline" : search ? "search-outline" : "barbell-outline"} size={44} color={colors.muted} />
+                  <Text accessibilityRole="header" style={{ color: colors.ink, fontSize: 22, fontWeight: "600", textAlign: "center" }}>{listQuery.error ? "Unable to load plans" : search ? "No matching plans" : "Your next program starts here"}</Text>
+                  <Text style={{ color: colors.muted, fontSize: 15, lineHeight: 22, textAlign: "center", maxWidth: 300 }}>{listQuery.error ? "Try loading your workout plans again." : search ? "Try another name or clear your search." : "Create a workout plan to organise sessions and assign a program to a member."}</Text>
+                  {search || listQuery.error ? <Pressable accessibilityRole="button" onPress={listQuery.error ? () => { void listQuery.refetch(); } : () => setSearch("")} style={{ minHeight: 44, justifyContent: "center", paddingHorizontal: 16 }}><Text style={{ color: colors.primary, fontSize: 16 }}>{listQuery.error ? "Try again" : "Clear search"}</Text></Pressable> : null}
+                </View>
+              ) : config.key === "attendance" ? (
+                <DataState compact empty emptyTitle={search ? "No matching visits" : "No visits recorded"} emptyMessage={search ? "Try another search." : "Recorded check-ins will appear here."} emptyActionLabel={search ? "Clear search" : "New visit"} onEmptyAction={search ? () => setSearch("") : beginCreate} />
+              ) : config.key === "membership-plans" ? (
+                <View style={{ paddingVertical: 24, gap: 8 }}>
+                  <Text style={{ color: colors.ink, fontSize: 17, fontWeight: "600" }}>{search ? "No matching plans" : "No saved plans yet"}</Text>
+                  <Text style={{ color: colors.muted, fontSize: 14, lineHeight: 21 }}>{search ? "Try another name or clear the search." : "Tap New to create a plan, or browse the starter templates below."}</Text>
+                </View>
               ) : (
                 <EmptyState
                   title={
@@ -557,7 +587,7 @@ export function ResourceCrudPanelView<TRead extends { id: string }, TCreate, TUp
             scrollEnabled={false}
           />
 
-          <View style={styles.pagination}>
+          {(!workout && config.key !== "membership-plans" && config.key !== "attendance") || page > 0 || records.length >= 50 ? <View style={styles.pagination}>
             <PrimaryButton
               disabled={page === 0 || listQuery.isFetching}
               onPress={() => setPage((value) => Math.max(0, value - 1))}
@@ -573,7 +603,7 @@ export function ResourceCrudPanelView<TRead extends { id: string }, TCreate, TUp
               variant="secondary"
               style={styles.pageButton}
             />
-          </View>
+          </View> : null}
         </>
       ) : null}
     </SurfacePanel>
@@ -733,7 +763,7 @@ export function GenderWorkoutSessionPickerView({ model }: { model: ReturnType<ty
                   color: active ? colors.primary : colors.ink,
                 }}
               >
-                {active ? "✓ " : ""}
+                {active ? "ÃƒÂ¢Ã…â€œÃ¢â‚¬Å“ " : ""}
                 {item.title}
               </Text>
             </Pressable>

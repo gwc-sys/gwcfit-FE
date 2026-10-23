@@ -302,24 +302,24 @@ export const colors = {
   info: "#64D2FF",
   warning: "#FF9F0A",
   danger: "#FF453A",
-  background: "#101114",
-  surface: "#191B20",
-  card: "#191B20",
-  border: "rgba(84,84,88,0.65)",
+  background: "#000000",
+  surface: "#000000",
+  card: "#000000",
+  border: "rgba(84,84,88,0.35)",
   white: "#FFFFFF",
   ink: "#F5F5F7",
   inkSoft: "#D1D1D6",
   textPrimary: "#F5F5F7",
   textSecondary: "#AEAEB2",
   textMuted: "#8E8E93",
-  primaryDark: "#64D2FF",
+  primaryDark: "#0A84FF",
   dark: "#000000",
 
   // Compat keys used across the codebase
   muted: "#AEAEB2",
   subtle: "#8E8E93",
-  surfaceElevated: "#2C2C2E",
-  surfaceMuted: "#2C2C2E",
+  surfaceElevated: "#000000",
+  surfaceMuted: "#000000",
   surfaceStrong: "#3A3A3C",
   borderMuted: "rgba(84,84,88,0.35)",
 
@@ -336,7 +336,7 @@ export const colors = {
   lightSurface: "#FFFFFF",
   lightBorder: "rgba(60,60,67,0.15)",
   // additional compatibility
-  darkCard: "#1C1C1E",
+  darkCard: "#000000",
   darkCardBorder: "rgba(84,84,88,0.65)",
   text: "#FFFFFF"
 };
@@ -401,3 +401,6 @@ export const type = {
 };
 
 export default {};
+
+
+

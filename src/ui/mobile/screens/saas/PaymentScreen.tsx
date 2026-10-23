@@ -1,3 +1,4 @@
+import { OwnerMembershipPayments } from "../../../../features/operations/MembershipCheckout";
 import { Pressable } from "../../components/NativePressable";
 import { controlMetrics } from "../../theme/theme";
 import { useAppTheme } from "../../../../theme/AppThemeProvider";
@@ -57,6 +58,7 @@ export function PaymentScreenView({ model }: { model: ReturnType<typeof usePayme
           <PrimaryButton title="Record Payment" icon="add" />
         </View>
       </View>
+      <OwnerMembershipPayments />
       <View style={styles.metrics}>
         <Metric
           s={styles}

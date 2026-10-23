@@ -25,7 +25,10 @@ function render(logs, { range = 'Month', loading = false, failed = false } = {})
     if (name === 'expo-linear-gradient') return { LinearGradient: 'Gradient' };
     if (name.includes('NativePressable')) return { Pressable: 'Pressable' };
     if (name === '../WeekCalendar') return { WeekCalendar: 'WeekCalendar' };
-    if (name.includes('AppThemeProvider')) return { useAppTheme: () => ({ isDark: true }) };
+    if (name.includes('AppThemeProvider')) return { useAppTheme: () => ({ isDark: true, colors: {
+      background: '#000000', card: '#1C1C1E', border: '#38383A', ink: '#F5F5F7',
+      muted: '#A1A1A8', primary: '#0A84FF', primaryButton: '#0A84FF', surfaceStrong: '#3A3A3C'
+    } }) };
     if (name.endsWith('.jpg')) return {};
     throw Error(`Unexpected dependency: ${name}`);
   } });
@@ -76,6 +79,7 @@ test('all mobile member services are reachable through real menu callbacks', () 
     'react-native': { Text: 'Text', View: 'View' },
     '../NativePressable': { Pressable: 'Pressable' },
     './MemberReference': { useMemberReferenceColors: () => ({ text: 'white', card: 'navy', border: 'gray', blue: 'blue', muted: 'gray' }) },
+    '../../../../data/memberServices': loadPureTs('../src/data/memberServices.ts'),
   });
   const calls = [];
   const root = menu.MemberServicesMenu({ onNavigate: route => calls.push(route) });
@@ -84,6 +88,29 @@ test('all mobile member services are reachable through real menu callbacks', () 
   visit(root);
   buttons.forEach(button => button.props.onPress());
   assert.deepEqual(calls.sort(), ['MemberMembership', 'MemberPayments', 'MemberMealPlan', 'MemberTrainer', 'MemberClasses', 'MemberGoals', 'MemberRewards', 'MemberNotifications', 'MemberSupport', 'MemberSettings'].sort());
+});
+
+test('web services expose every mobile destination through real navigation callbacks', () => {
+  const services = loadPureTs('../src/data/memberServices.ts');
+  const menu = loadPureTs('../src/ui/web/components/member/MemberServicesMenu.tsx', {
+    '@expo/vector-icons': { Ionicons: 'Icon' },
+    'react-native': { Pressable: 'Pressable', Text: 'Text', View: 'View' },
+    '../../../../data/memberServices': services,
+    '../../../../theme/AppThemeProvider': { useAppTheme: () => ({ colors: {} }) },
+  });
+  const calls = [];
+  const buttons = [];
+  function visit(node) {
+    if (Array.isArray(node)) return node.forEach(visit);
+    if (!node || typeof node !== 'object') return;
+    if (node.props?.accessibilityRole === 'button') buttons.push(node);
+    visit(node.props?.children);
+  }
+  visit(menu.MemberServicesMenu({ onNavigate: route => calls.push(route) }));
+  buttons.forEach(button => button.props.onPress());
+  assert.equal(buttons.length, 10);
+  assert.deepEqual(calls, Array.from(services.memberServices, item => item.route));
+  assert.equal(new Set(calls).size, 10);
 });
 test('member form validation rejects invalid measurements and matches support API limits', () => {
   const { positiveNumberError, progressFormError, supportFormError } = loadPureTs('../src/ui/mobile/components/member/formValidation.ts');

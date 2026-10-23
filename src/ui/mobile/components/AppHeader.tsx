@@ -26,7 +26,7 @@ export function AppHeader({
   const { colors } = useAppTheme();
   const { width } = useWindowDimensions();
   const styles = useMemo(() => createStyles(colors), [colors]);
-  const iconColor = light ? colors.white : colors.ink;
+  const iconColor = light ? colors.white : colors.primary;
 
   return (
     <View style={styles.row}>
@@ -36,7 +36,7 @@ export function AppHeader({
           onPress={onBack}
           style={[styles.iconButton, light && styles.lightIconButton]}
         >
-          <Ionicons name="arrow-back" size={24} color={iconColor} />
+          <Ionicons name="chevron-back" size={24} color={iconColor} />
         </Pressable>
       ) : (
         <View style={styles.placeholder} />
@@ -87,7 +87,7 @@ const createStyles = (colors: ThemeColors) =>
       alignItems: "center",
       justifyContent: "center",
       borderRadius: radius.pill,
-      backgroundColor: colors.surface,
+      backgroundColor: "transparent",
     },
     lightIconButton: {
       backgroundColor: "rgba(255,255,255,0.2)",

@@ -1,4 +1,6 @@
 import { RefreshControl, Text, View } from "react-native";
+import { MemberMembershipDetails } from "../../../../components/member/MemberMembershipDetails";
+import { MemberServicesMenu } from "../../components/member/MemberServicesMenu";
 import { FormTextField } from "../../components/FormTextField";
 import { NoticeBanner } from "../../components/NoticeBanner";
 import { PrimaryButton } from "../../components/PrimaryButton";
@@ -15,13 +17,13 @@ export function MemberProfileScreenView({ model }: { model: ReturnType<typeof us
   if (typeof model !== "object" || !("kind" in model)) return model;
   switch (model.kind) {
     case "view1": {
-      const { styles, profileQuery, colors, profile, form, setForm, updateProfile, submit, navigation } = model.props;
+      const { styles, profileQuery, membershipQuery, refreshProfile, colors, profile, form, setForm, updateProfile, submit, navigation } = model.props;
       return ((
     <Screen
       scroll
       keyboard
       contentContainerStyle={styles.screen}
-      refreshControl={<RefreshControl refreshing={profileQuery.isRefetching} onRefresh={() => profileQuery.refetch()} tintColor={colors.primary} />}
+      refreshControl={<RefreshControl refreshing={profileQuery.isRefetching || membershipQuery.isRefetching} onRefresh={refreshProfile} tintColor={colors.primary} />}
     >
       <ScreenHeader title="My Profile" subtitle={profile?.gym_name ?? "Member profile"} icon="id-card-outline" />
 
@@ -50,7 +52,6 @@ export function MemberProfileScreenView({ model }: { model: ReturnType<typeof us
           <View style={styles.detailList}>
             <ScrollListCard title="Email" subtitle={profile.email ?? "Not set"} icon="mail-outline" />
             <ScrollListCard title="Assigned trainer" subtitle={profile.trainer_name ?? "Not assigned"} icon="barbell-outline" status="Trainer" statusTone="info" />
-            <ScrollListCard title="Membership plan" subtitle={profile.membership_plan_name ?? "Not assigned"} icon="ribbon-outline" />
             <ScrollListCard title="Date of birth" subtitle={formatDate(profile.date_of_birth)} icon="calendar-outline" />
             <ScrollListCard title="BMI" subtitle={profile.bmi ? `${profile.bmi}` : "Not available"} icon="pulse-outline" />
             <ScrollListCard
@@ -59,6 +60,15 @@ export function MemberProfileScreenView({ model }: { model: ReturnType<typeof us
               icon="medkit-outline"
             />
           </View>
+
+          <MemberMembershipDetails
+            planName={membershipQuery.data ? membershipQuery.data.membership_plan_name : profile.membership_plan_name}
+            startDate={membershipQuery.data?.start_date}
+            endDate={membershipQuery.data?.expiry_date}
+            loading={membershipQuery.isLoading}
+            error={membershipQuery.error}
+            onRetry={() => { void membershipQuery.refetch(); }}
+          />
 
           <View style={styles.formPanel}>
             <Text style={styles.formTitle}>Editable Details</Text>
@@ -117,9 +127,9 @@ export function MemberProfileScreenView({ model }: { model: ReturnType<typeof us
             <PrimaryButton title="Save Profile" icon="save-outline" loading={updateProfile.isPending} onPress={submit} />
           </View>
 
-          <PrimaryButton title="View Settings" icon="settings-outline" variant="secondary" onPress={() => navigation.navigate("MemberSettings")} />
         </>
       ) : null}
+      <MemberServicesMenu onNavigate={route => navigation.navigate(route)} />
     </Screen>
   ));
     }

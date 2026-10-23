@@ -14,100 +14,18 @@ export function DailyAttendancePanelView({ model }: { model: ReturnType<typeof u
       const { styles, setPanelWidth, expiryLabel, qr, stats, colors, error, panelWidth, setShowQr, Metric, showQr, width } = model.props;
       return ((
     <>
-      <View style={styles.panel} onLayout={(event) => setPanelWidth(event.nativeEvent.layout.width)}>
-        <View style={styles.panelHeader}>
-          <View style={{ flex: 1, minWidth: 160 }}>
-            <Text style={styles.panelTitle}>Today&apos;s Attendance QR</Text>
-            <Text style={styles.panelSubtitle}>
-              One code for every member. Expires {expiryLabel}.
-            </Text>
-          </View>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Refresh attendance"
-            accessibilityState={{ busy: qr.isFetching || stats.isFetching }}
-            disabled={qr.isFetching || stats.isFetching}
-            style={styles.refreshButton}
-            onPress={() => { void qr.refetch(); void stats.refetch(); }}
-          >
-            <Ionicons name="refresh-outline" size={17} color={colors.ink} />
-            <Text style={styles.refreshText}>Refresh</Text>
-          </Pressable>
+      <View onLayout={event => setPanelWidth(event.nativeEvent.layout.width)} style={{ gap: 16, paddingVertical: 8 }}>
+        <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
+          <View style={{ flex: 1, minWidth: 0 }}><Text accessibilityRole="header" style={{ color: colors.ink, fontSize: 22, fontWeight: "600" }}>Member check-in QR</Text><Text style={{ color: colors.muted, fontSize: 14, lineHeight: 20, marginTop: 4 }}>Scan on arrival to record a visit.</Text></View>
+          <Pressable accessibilityRole="button" accessibilityLabel="Refresh attendance QR" accessibilityState={{ busy: qr.isFetching || stats.isFetching, disabled: qr.isFetching || stats.isFetching }} disabled={qr.isFetching || stats.isFetching} onPress={() => { void qr.refetch(); void stats.refetch(); }} style={{ minWidth: 44, minHeight: 44, justifyContent: "center", alignItems: "center" }}><Ionicons name="refresh-outline" size={23} color={colors.primary} /></Pressable>
         </View>
-        {error ? (
-          <Text accessibilityRole="alert" style={styles.error}>{getApiErrorMessage(error)}</Text>
-        ) : null}
-        <View style={styles.layout}>
-          <Pressable
-            style={[styles.qr, { width: Math.max(160, Math.min(250, panelWidth - 48)) }]}
-            onPress={() => setShowQr(true)}
-            accessibilityLabel="Open attendance QR"
-            accessibilityRole="button"
-            disabled={!qr.data}
-           accessibilityState={{ disabled: !qr.data }}>
-            {qr.data ? (
-              <QRCode
-                value={qr.data.token}
-                size={Math.max(120, Math.min(220, panelWidth - 88))}
-                backgroundColor="#fff"
-                color="#07111f"
-              />
-            ) : (
-              <Text style={styles.muted}>Generating today's secure code…</Text>
-            )}
+        {error ? <Text accessibilityRole="alert" style={styles.error}>{getApiErrorMessage(error)}</Text> : null}
+        <View style={{ backgroundColor: colors.surface, borderRadius: 20, padding: 20, gap: 16, alignItems: "center" }}>
+          <Text style={{ color: colors.ink, fontSize: 17, fontWeight: "600", textAlign: "center" }}>{qr.data?.gym_name ?? "Your gym"}</Text>
+          <Pressable accessibilityRole="button" accessibilityLabel="Enlarge attendance QR code" accessibilityState={{ disabled: !qr.data }} disabled={!qr.data} onPress={() => setShowQr(true)} style={{ padding: 16, backgroundColor: "#FFFFFF", borderRadius: 12 }}>
+            {qr.data ? <QRCode value={qr.data.token} size={Math.max(100, Math.min(220, panelWidth - 84))} backgroundColor="#FFFFFF" color="#000000" /> : <Text style={{ color: "#1C1C1E", padding: 12 }}>{qr.error ? "QR code unavailable" : "Generating code..."}</Text>}
           </Pressable>
-          <View style={styles.body}>
-            <Text style={styles.title}>{qr.data?.gym_name ?? "Your gym"}</Text>
-            <Text style={styles.muted}>
-              Share this QR code with members for quick check-in.
-            </Text>
-            <View style={styles.metrics}>
-              <Metric
-                label="Check-ins"
-                value={stats.data?.total_check_ins}
-                tone="#0A84FF"
-              />
-              <Metric
-                label="Check-outs"
-                value={stats.data?.total_check_outs}
-                tone="#22C55E"
-              />
-              <Metric
-                label="Inside now"
-                value={stats.data?.currently_checked_in}
-                tone="#38BDF8"
-              />
-            </View>
-            <View style={styles.validRow}>
-              <Text style={styles.muted}>◷ Valid Until</Text>
-              <Text style={styles.validText}>
-                {qr.data
-                  ? new Date(qr.data.expires_at).toLocaleTimeString([], {
-                      hour: "numeric",
-                      minute: "2-digit",
-                    })
-                  : "Today"}
-              </Text>
-            </View>
-            <Text style={styles.heading}>Currently checked in</Text>
-            {stats.data?.checked_in_members.length ? (
-              stats.data.checked_in_members.map((x) => (
-                <View key={x.id} style={styles.row}>
-                  <Text style={styles.name}>{x.member_name ?? "Member"}</Text>
-                  <Text style={styles.muted}>
-                    {new Date(x.check_in_at).toLocaleTimeString([], {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </Text>
-                </View>
-              ))
-            ) : (
-              <Text style={styles.muted}>
-                {stats.isPending ? "Loading attendance…" : stats.isError ? "Attendance could not be loaded." : "No members are currently checked in."}
-              </Text>
-            )}
-          </View>
+          <Text style={{ color: colors.muted, fontSize: 13, lineHeight: 19, textAlign: "center" }}>Tap to enlarge. Valid until {expiryLabel}.</Text>
         </View>
       </View>
       <Modal

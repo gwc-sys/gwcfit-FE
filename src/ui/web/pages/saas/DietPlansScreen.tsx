@@ -1,7 +1,8 @@
 import { showAlert } from "../../../../utils/appAlert";
 import { Ionicons } from "@expo/vector-icons";
-import { ActivityIndicator, Image, Modal, Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { ActivityIndicator, Image, Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import { Screen } from "../../components/Screen";
+import { NutritionAppearance } from "../../components/NutritionAppearance";
 import { ResourceCrudPanel } from "../../../../features/operations/ResourceCrudPanel";
 import { dietPlanConfig } from "../../../../features/operations/resourceConfigs";
 import { getApiErrorMessage } from "../../../../services/api/client";
@@ -19,6 +20,34 @@ export function DietPlansScreenView({ model }: { model: ReturnType<typeof useDie
     }
     case "view2": {
       const { styles, colors, navigation, setEditRecordId, setFormModalOpen, setCreateRequest, Stat, plans, activePlans, assignedClients, averageCalories, search, setSearch, setPage, setActiveOnly, activeOnly, setAscending, ascending, categories, setCategory, category, listQuery, visiblePlans, PlanCard, formModalOpen, editRecordId, createRequest, planCategory, filteredPlans, safePage, pageSize, pageCount } = model.props;
+      if (formModalOpen) return (
+        <NutritionAppearance>{(colors) => (
+        <Screen scroll keyboard maxWidth="dashboard" contentContainerStyle={{ gap: 24, paddingBottom: 48 }}>
+          <View style={{ gap: 12 }}>
+            <Pressable accessibilityRole="button" accessibilityLabel="Back to diet plans" onPress={() => { setFormModalOpen(false); setEditRecordId(null); }} style={{ minHeight: 44, flexDirection: "row", alignItems: "center", gap: 6, alignSelf: "flex-start" }}>
+              <Ionicons name="chevron-back" size={22} color={colors.primary} />
+              <Text style={{ color: colors.primary, fontSize: 17 }}>Diet plans</Text>
+            </Pressable>
+            <Text accessibilityRole="header" style={{ color: colors.ink, fontSize: 28, lineHeight: 34, fontWeight: "700", letterSpacing: -0.7 }}>{editRecordId ? "Edit diet plan" : "Create diet plan"}</Text>
+            <Text style={{ color: colors.muted, fontSize: 17, lineHeight: 24 }}>A daily plan, tailored to your client.</Text>
+          </View>
+              <ResourceCrudPanel
+                config={dietPlanConfig}
+                formOnly
+                createRequest={createRequest}
+                editRecordId={editRecordId}
+                onEditRecordOpened={() => undefined}
+                onFormClosed={() => { setFormModalOpen(false); setEditRecordId(null); }}
+                onRecordSaved={(plan) => {
+                  setSearch("");
+                  setCategory(planCategory(plan));
+                  setActiveOnly(false);
+                  setPage(0);
+                }}
+              />
+        </Screen>
+        )}</NutritionAppearance>
+      );
       return ((
     <Screen scroll maxWidth="none" contentContainerStyle={[styles.screen, { backgroundColor: colors.background }]}>
       <View style={[styles.header, { borderColor: colors.border, backgroundColor: colors.surface }]}>
@@ -43,32 +72,7 @@ export function DietPlansScreenView({ model }: { model: ReturnType<typeof useDie
 
       {listQuery.isLoading ? <View style={styles.state}><ActivityIndicator size="large" color={colors.primary} /><Text style={styles.stateText}>Loading diet plans...</Text></View> : listQuery.error ? <View style={styles.state}><Ionicons name="alert-circle-outline" size={30} color="#EF4444" /><Text style={styles.stateText}>{getApiErrorMessage(listQuery.error)}</Text></View> : visiblePlans.length ? <View style={styles.cardGrid}>{visiblePlans.map((plan, index) => <PlanCard key={plan.id} plan={plan} index={index} onEdit={() => { setEditRecordId(plan.id); setFormModalOpen(true); }} />)}</View> : <View style={styles.state}><Ionicons name="restaurant-outline" size={34} color="#0A84FF" /><Text style={styles.stateTitle}>No diet plans found</Text><Text style={styles.stateText}>Change the filters or create a new nutrition plan.</Text></View>}
 
-      <Modal animationType="fade" transparent visible={formModalOpen} onRequestClose={() => setFormModalOpen(false)}>
-        <View style={styles.modalBackdrop}>
-          <View style={[styles.modalWindow, { borderColor: colors.border, backgroundColor: colors.background }]}>
-            <View style={[styles.modalHeader, { borderBottomColor: colors.border, backgroundColor: colors.surface }]}>
-              <View><Text style={[styles.modalTitle, { color: colors.ink }]}>{editRecordId ? "Edit Diet Plan" : "Create New Diet Plan"}</Text><Text style={[styles.modalSubtitle, { color: colors.muted }]}>Build and assign a nutrition plan</Text></View>
-              <Pressable accessibilityRole="button" accessibilityLabel="Close diet plan window" onPress={() => setFormModalOpen(false)} style={styles.modalClose}><Ionicons name="close" size={22} color="#FFFFFF" /></Pressable>
-            </View>
-            <ScrollView contentContainerStyle={styles.modalScroll} showsVerticalScrollIndicator>
-              {formModalOpen ? <ResourceCrudPanel
-                config={dietPlanConfig}
-                formOnly
-                createRequest={createRequest}
-                editRecordId={editRecordId}
-                onEditRecordOpened={() => undefined}
-                onFormClosed={() => { setFormModalOpen(false); setEditRecordId(null); }}
-                onRecordSaved={(plan) => {
-                  setSearch("");
-                  setCategory(planCategory(plan));
-                  setActiveOnly(false);
-                  setPage(0);
-                }}
-              /> : null}
-            </ScrollView>
-          </View>
-        </View>
-      </Modal>
+
 
       <View style={styles.footer}><Text style={styles.footerText}>{filteredPlans.length ? `Showing ${safePage * pageSize + 1} to ${Math.min((safePage + 1) * pageSize, filteredPlans.length)} of ${filteredPlans.length} plans` : "Showing 0 plans"}</Text><View style={styles.pagination}><Pressable accessibilityRole="button" accessibilityLabel="Previous" disabled={safePage === 0} onPress={() => setPage((value) => Math.max(0, value - 1))} style={[styles.pageButton, safePage === 0 && styles.disabled]}><Ionicons name="chevron-back" size={18} color="#B8C6D9" /></Pressable>{Array.from({ length: Math.min(3, pageCount) }, (_, index) => index).map((number) => <Pressable accessibilityRole="button" key={number} onPress={() => setPage(number)} style={[styles.pageButton, safePage === number && styles.pageButtonActive]}><Text style={[styles.pageText, safePage === number && styles.pageTextActive]}>{number + 1}</Text></Pressable>)}<Pressable accessibilityRole="button" accessibilityLabel="Next" disabled={safePage >= pageCount - 1} onPress={() => setPage((value) => Math.min(pageCount - 1, value + 1))} style={[styles.pageButton, safePage >= pageCount - 1 && styles.disabled]}><Ionicons name="chevron-forward" size={18} color="#B8C6D9" /></Pressable></View><View style={styles.perPage}><Text style={styles.filterText}>5 / page</Text><Ionicons name="chevron-down" size={17} color="#B8C6D9" /></View></View>
     </Screen>

@@ -1,3 +1,4 @@
+import { MemberMoveScreen } from "../../components/member/MemberMoveScreen";
 import type * as React from "react";
 import { QueryRefreshView, QueryStateView, ListSectionView, DetailGridView, SectionTitleView, MemberMembershipScreenView, MemberPaymentsScreenView, MemberAttendanceScreenView, MemberWorkoutScreenView, MemberMealPlanScreenView, MemberProgressScreenView, MemberTrainerScreenView, MemberClassesScreenView, MemberNotificationsScreenView, MemberGoalsScreenView, MemberRewardsScreenView, MemberSupportScreenView, MemberSettingsScreenView } from "./MemberFeatureScreens.presentation";
 import { createFeatureStyles } from "./MemberFeatureScreens.styles";
@@ -361,7 +362,7 @@ export function useMemberGoalsScreenPresentation() {
 }
 
 export function MemberGoalsScreen(...args: Parameters<typeof useMemberGoalsScreenPresentation>): React.JSX.Element {
-  return <MemberGoalsScreenView model={useMemberGoalsScreenPresentation(...args)} />;
+  return <MemberMoveScreen />;
 }
 
 export function useMemberRewardsScreenPresentation() {

@@ -107,8 +107,11 @@ export const gymsApi = {
     const response = await apiClient.get<DeveloperGym[]>("/developer/gyms");
     return response.data;
   },
-  async suspend(gymId: string) {
-    const response = await apiClient.post<Gym>(`/gyms/${gymId}/suspend`);
+  async reactivate(gymId: string, platform_plan_id?: string, activation_type?: "paid" | "free") {
+    return (await apiClient.post<Gym>(`/gyms/${gymId}/reactivate`, { platform_plan_id, activation_type })).data;
+  },
+  async suspend(gymId: string, reason: "manual" | "platform_unpaid" = "manual") {
+    const response = await apiClient.post<Gym>(`/gyms/${gymId}/suspend`, null, { params: { reason } });
     return response.data;
   },
   async remove(gymId: string) {

@@ -14,55 +14,55 @@ export const controlMetrics = {
 export const palette = {
   // Semantic system colors. Keep the compatibility names below so existing
   // feature screens inherit the redesign without changing their data flows.
-  primary: "#1677FF",
+  primary: "#007AFF",
   success: "#34C759",
   warning: "#FF9500",
   danger: "#FF3B30",
 
   // Backwards-compatible palette tokens used by existing components
-  blue: "#1677FF",
+  blue: "#007AFF",
   blueDark: "#0066CC",
   blueSoft: "rgba(0,122,255,0.14)",
   teal: "#0D9488",
   tealDark: "#0F766E",
   tealSoft: "rgba(13,148,136,0.18)",
-  green: "#16A34A",
+  green: "#34C759",
   greenDark: "#15803D",
   greenSoft: "rgba(22,163,74,0.18)",
-  coral: "#E11D48",
+  coral: "#FF3B30",
   coralSoft: "rgba(225,29,72,0.16)",
   amber: "#D97706",
   amberSoft: "rgba(217,119,6,0.16)",
-  indigo: "#4F46E5",
+  indigo: "#5856D6",
   indigoSoft: "rgba(79,70,229,0.18)",
 
   // Dark theme tokens
   darkBackground: "#000000",
-  darkSurface: "#17212D",
-  darkCard: "#1D2936",
-  darkCardBorder: "#263241",
+  darkSurface: "#1C1C1E",
+  darkCard: "#2C2C2E",
+  darkCardBorder: "#38383A",
 
   // Light theme tokens
   lightBackground: "#F2F2F7",
   lightSurface: "#FFFFFF",
-  lightBorder: "#E5EAF2",
+  lightBorder: "#E5E5EA",
 
   // Text
-  textLight: "#F5F7FA",
-  textSecondaryLight: "#9BAABD",
+  textLight: "#F5F5F7",
+  textSecondaryLight: "#A1A1A8",
   textMutedLight: "#8E8E93",
 
-  textDark: "#111318",
-  textSecondaryDark: "#5E6C82",
+  textDark: "#1C1C1E",
+  textSecondaryDark: "#6C6C70",
   textMutedDark: "#8E8E93",
 
   // Convenience
   black: "#000000",
   dark: "#000000",
-  border: "#E5EAF2",
-  muted: "#5E6C82",
+  border: "#E5E5EA",
+  muted: "#6C6C70",
   subtle: "#8E8E93",
-  text: "#111318",
+  text: "#1C1C1E",
   white: "#FFFFFF"
 };
 
@@ -71,8 +71,8 @@ export const spacing = {
   xs: 4,
   sm: 8,
   md: 16,
-  lg: 22,
-  xl: 26,
+  lg: 20,
+  xl: 24,
   xxl: 24,
 
   // extended scale
@@ -96,10 +96,10 @@ export const spacing = {
 
 export const radii = {
   sm: 10,
-  md: 16,
-  lg: 22,
-  xl: 26,
-  card: 16, // grouped mobile surfaces
+  md: 12,
+  lg: 16,
+  xl: 20,
+  card: 12, // grouped mobile surfaces
   container: 20, // large container
   pill: 999
 };
@@ -113,13 +113,13 @@ export const font = {
 export const typography = {
   // primary headings
   title: {
-    fontSize: 28,
-    lineHeight: 34,
+    fontSize: 34,
+    lineHeight: 41,
     fontWeight: "700" as const
   },
   h1: {
-    fontSize: 28,
-    lineHeight: 34,
+    fontSize: 34,
+    lineHeight: 41,
     fontWeight: "700" as const
   },
   h2: {
@@ -144,7 +144,7 @@ export const typography = {
   },
   body: {
     fontSize: 17,
-    lineHeight: 25,
+    lineHeight: 24,
     fontWeight: "400" as const
   },
   small: {
@@ -179,7 +179,7 @@ export const shadows = {
     Platform.OS === "web"
       ? { boxShadow: "0 4px 12px rgba(0,122,255,0.18)" }
       : {
-          shadowColor: "#1677FF",
+          shadowColor: "#007AFF",
           shadowOffset: { width: 0, height: 4 },
           shadowOpacity: 0.18,
           shadowRadius: 10,
@@ -301,34 +301,34 @@ export function getFloatingTabBarMetrics(
 
 export const colors = {
   // Dark theme
-  primary: "#318DFF",
-  primaryButton: "#0066CC",
-  accent: "#1677FF",
+  primary: "#0A84FF",
+  primaryButton: "#0A84FF",
+  accent: "#0A84FF",
   success: "#30D158",
   info: "#64D2FF",
   warning: "#FF9F0A",
   danger: "#FF453A",
   dangerButton: "#C9342A",
-  background: "#0B1119",
-  surface: "#17212D",
-  card: "#17212D",
-  border: "#263241",
+  background: "#000000",
+  surface: "#1C1C1E",
+  card: "#1C1C1E",
+  border: "#38383A",
   white: "#FFFFFF",
-  ink: "#F5F7FA",
+  ink: "#F5F5F7",
   inkSoft: "#D1D1D6",
-  textPrimary: "#F5F7FA",
-  textSecondary: "#9BAABD",
+  textPrimary: "#F5F5F7",
+  textSecondary: "#A1A1A8",
   textMuted: "#8E8E93",
   primaryDark: "#64D2FF",
   dark: "#000000",
 
   // Compat keys used across the codebase
-  muted: "#9BAABD",
+  muted: "#A1A1A8",
   subtle: "#8E8E93",
-  surfaceElevated: "#1D2936",
-  surfaceMuted: "#1D2936",
+  surfaceElevated: "#2C2C2E",
+  surfaceMuted: "#2C2C2E",
   surfaceStrong: "#3A3A3C",
-  borderMuted: "#263241",
+  borderMuted: "#38383A",
 
   // Soft variants for semantic colors
   dangerSoft: "rgba(255,69,58,0.16)",
@@ -341,17 +341,17 @@ export const colors = {
   // Light fallbacks (used when theme switches)
   lightBackground: "#F2F2F7",
   lightSurface: "#FFFFFF",
-  lightBorder: "#E5EAF2",
+  lightBorder: "#E5E5EA",
   // additional compatibility
-  darkCard: "#17212D",
-  darkCardBorder: "#263241",
+  darkCard: "#1C1C1E",
+  darkCardBorder: "#38383A",
   text: "#FFFFFF"
 };
 
 export const lightColors = {
   primary: "#0066CC",
   primaryButton: "#0066CC",
-  accent: "#1677FF",
+  accent: "#007AFF",
   info: "#0066CC",
   success: "#1E7835",
   warning: "#8A5100",
@@ -360,18 +360,18 @@ export const lightColors = {
   background: "#F2F2F7",
   surface: "#FFFFFF",
   card: "#FFFFFF",
-  border: "#E5EAF2",
-  textPrimary: "#111318",
-  textSecondary: "#5E6C82",
-  textMuted: "#5E6C82",
+  border: "#E5E5EA",
+  textPrimary: "#1C1C1E",
+  textSecondary: "#6C6C70",
+  textMuted: "#6C6C70",
 
   // Compatibility keys
   white: "#FFFFFF",
-  ink: "#111318",
+  ink: "#1C1C1E",
   inkSoft: "#3A3A3C",
-  muted: "#5E6C82",
-  subtle: "#5E6C82",
-  surfaceElevated: "#F8FAFD",
+  muted: "#6C6C70",
+  subtle: "#6C6C70",
+  surfaceElevated: "#FFFFFF",
   surfaceMuted: "#F2F2F7",
   surfaceStrong: "#E5E5EA",
   borderMuted: "rgba(60,60,67,0.08)",
@@ -384,7 +384,7 @@ export const lightColors = {
   primarySoft: "rgba(0,122,255,0.12)",
   accentSoft: "rgba(0,122,255,0.08)",
   // compatibility
-  text: "#111318",
+  text: "#1C1C1E",
   primaryDark: "#0066CC",
   dark: "#000000",
   darkCard: "#FFFFFF",

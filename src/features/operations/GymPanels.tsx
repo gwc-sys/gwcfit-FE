@@ -1,10 +1,11 @@
+import { platformPlansApi } from "../../services/api/platformPlans";
 import type * as React from "react";
 import { GymManagementPanelView, GymMetricView, GymDetailsPanelView, DetailMetricView, MyGymPanelView, GymFieldView } from "./GymPanels.presentation";
 import { createStyles, createDetailStyles } from "./GymPanels.styles";
 import { showAlert } from "../../utils/appAlert";
 import { Ionicons } from "@expo/vector-icons";
 import { useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Controller,
   useForm,
@@ -163,6 +164,11 @@ export function useGymManagementPanelPresentation({
   });
 
   const confirmSuspend = (gym: Gym) => {
+    if (gym.status !== "active" || !gym.is_active) {
+      onSelectGym?.(gym);
+      setNotice("Select a Platform Membership Plan in the gym profile to activate access.");
+      return;
+    }
     showAlert("Suspend gym", gym.name, [
       { text: "Cancel", style: "cancel" },
       {
@@ -231,7 +237,29 @@ function GymMetric(...args: Parameters<typeof useGymMetricPresentation>): React.
   return <GymMetricView model={useGymMetricPresentation(...args)} />;
 }
 
-export function useGymDetailsPanelPresentation({ gym }: { gym: Gym }) {
+export function useGymDetailsPanelPresentation({ gym: initialGym }: { gym: Gym }) {
+  const client = useQueryClient();
+  const isSuperAdmin = useAuthStore(state => state.user?.role === "super_admin");
+  const gymQuery = useQuery({ queryKey: ["gym-profile", initialGym.id], queryFn: () => gymsApi.get(initialGym.id), enabled: isSuperAdmin });
+  const gym = gymQuery.data ?? initialGym;
+  const [activationPlan, setActivationPlan] = useState("");
+  const [activationType, setActivationType] = useState<"paid" | "free">("free");
+  const activationPlansQuery = useQuery({ queryKey: ["activation-platform-plans"], queryFn: platformPlansApi.list, enabled: isSuperAdmin });
+  const statusMutation = useMutation({
+    mutationFn: async (action: "reactivate" | "suspend" | "unpaid" | "delete") => {
+      if (action === "reactivate") await gymsApi.reactivate(gym.id, activationPlan, activationType);
+      else if (action === "unpaid") await gymsApi.suspend(gym.id, "platform_unpaid");
+      else if (action === "suspend") await gymsApi.suspend(gym.id);
+      else await gymsApi.remove(gym.id);
+    },
+    onSuccess: () => { client.invalidateQueries(); },
+  });
+  const changeStatus = (action: "reactivate" | "suspend" | "unpaid" | "delete") => {
+    showAlert(action === "reactivate" ? "Activate gym" : action === "suspend" ? "Suspend gym" : action === "unpaid" ? "Suspend for unpaid platform plan" : "Delete gym", `${gym.name}: ${action === "reactivate" ? "Activate the selected Platform Membership Plan? Free activation records no payment; paid activation records payment confirmed by super admin." : "This blocks access for the owner and all gym users."}`, [
+      { text: "Cancel", style: "cancel" },
+      { text: "Confirm", onPress: () => statusMutation.mutate(action) },
+    ]);
+  };
   const { colors } = useAppTheme();
   const { width } = useWindowDimensions();
   const styles = useMemo(
@@ -343,7 +371,7 @@ export function useGymDetailsPanelPresentation({ gym }: { gym: Gym }) {
       ? Math.ceil((new Date(value).getTime() - Date.now()) / 86400000)
       : null;
 
-  return { kind: "view1" as const, props: { styles, colors, gym, DetailMetric, usersQuery, activeMembers, plansQuery, expiringSoon, trial, trialProgress, trialCompletedDays, trialRemainingDays, trialEndsAt, monthStart, leadingDays, monthDays, expiryByDay, trialDayState, daysRemaining, dateLabel, paymentsQuery } };
+  return { kind: "view1" as const, props: { activationPlan, setActivationPlan, activationType, setActivationType, activationPlansQuery, isSuperAdmin, statusMutation, changeStatus, styles, colors, gym, DetailMetric, usersQuery, activeMembers, plansQuery, expiringSoon, trial, trialProgress, trialCompletedDays, trialRemainingDays, trialEndsAt, monthStart, leadingDays, monthDays, expiryByDay, trialDayState, daysRemaining, dateLabel, paymentsQuery } };
 }
 
 export function GymDetailsPanel(...args: Parameters<typeof useGymDetailsPanelPresentation>): React.JSX.Element {

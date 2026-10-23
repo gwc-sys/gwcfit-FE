@@ -11,10 +11,10 @@ type AppProvidersProps = {
 
 export function AppProviders({ children }: AppProvidersProps) {
   return (
-    <AppThemeProvider>
-      <AppErrorBoundary>
-        <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-      </AppErrorBoundary>
-    </AppThemeProvider>
+    <QueryClientProvider client={queryClient}>
+      <AppThemeProvider>
+        <AppErrorBoundary>{children}</AppErrorBoundary>
+      </AppThemeProvider>
+    </QueryClientProvider>
   );
 }

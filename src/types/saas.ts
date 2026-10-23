@@ -511,6 +511,7 @@ export type MembershipPlan = EnterpriseRead & {
   gym_name?: string | null;
   name: string;
   description: string | null;
+  daily_visit_limit?: number;
   duration_days: number;
   price_cents: number;
   currency: string;
@@ -520,6 +521,7 @@ export type MembershipPlan = EnterpriseRead & {
 export type MembershipPlanCreatePayload = {
   name: string;
   description?: string | null;
+  daily_visit_limit?: number;
   duration_days: number;
   price_cents: number;
   currency?: string;
@@ -529,6 +531,7 @@ export type MembershipPlanCreatePayload = {
 export type MembershipPlanUpdatePayload = {
   name?: string;
   description?: string | null;
+  daily_visit_limit?: number | null;
   duration_days?: number | null;
   price_cents?: number | null;
   currency?: string | null;

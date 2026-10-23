@@ -86,6 +86,8 @@ export function useMyGym(enabled = true) {
   return useQuery({
     queryKey: operationsQueryKeys.myGym(),
     queryFn: gymsApi.getMyGym,
+    refetchInterval: 30000,
+    refetchOnWindowFocus: true,
     enabled,
     retry: shouldRetryRequest
   });
@@ -108,7 +110,7 @@ export function useUpdateMyGym() {
     mutationFn: (payload: GymUpdatePayload) => gymsApi.updateMyGym(payload),
     retry: false,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: operationsQueryKeys.myGym() });
+      queryClient.invalidateQueries();
       queryClient.invalidateQueries({ queryKey: ["operations", "gyms"] });
     }
   });

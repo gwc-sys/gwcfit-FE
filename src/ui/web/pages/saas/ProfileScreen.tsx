@@ -28,10 +28,10 @@ export function ProfileScreenView({ model }: { model: ReturnType<typeof useProfi
 
       <View style={styles.hero}>
         <View style={styles.avatar}>
-          <Text style={styles.avatarText}>{initials(user.full_name)}</Text>
+          <Text style={styles.avatarText}>{initials(user.role === "gym_owner" ? user.gym_name || "Gym" : user.full_name)}</Text>
         </View>
         <View style={styles.heroBody}>
-          <Text style={styles.name}>{user.full_name}</Text>
+          <Text style={styles.name}>{user.role === "gym_owner" ? user.gym_name || "Your gym" : user.full_name}</Text>
           <Text style={styles.email}>{user.email}</Text>
           <StatusBadge
             label={formatRole(user.role)}

@@ -45,6 +45,7 @@ type DisplayPlan = {
   gym_name?: string | null;
   name: string;
   description: string | null;
+  daily_visit_limit?: number;
   duration_days: number;
   price_cents: number;
   currency: string;
@@ -172,9 +173,12 @@ export function useMembershipPlanScreenPresentation() {
         is_popular: plan.is_popular,
         is_active: plan.is_active,
       }))
-    : query.data?.length
-      ? query.data
-      : starterPlans;
+    : [
+        ...(query.data ?? []),
+        ...starterPlans.filter(template => !(query.data ?? []).some(saved =>
+          saved.name.trim().toLowerCase() === template.name.trim().toLowerCase()
+        )),
+      ];
   return { kind: "view2" as const, props: { isSuperAdmin, styles, query, installStarters, setPlatformPlanDraft, platformQuery, colors, plans, PlanCard, setEditingPlan, setDetailsPlan, PlanActionModal, detailsPlan, PlanEditModal, editingPlan, queryClient, PlatformPlanCrudModal, platformPlanDraft } };
 }
 
@@ -299,6 +303,7 @@ export function usePlanEditModalPresentation({
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [duration, setDuration] = useState("");
+  const [visitLimit, setVisitLimit] = useState("4");
   const [price, setPrice] = useState("");
   const [features, setFeatures] = useState("");
   useEffect(() => {
@@ -306,6 +311,7 @@ export function usePlanEditModalPresentation({
       setName(plan.name);
       setDescription(plan.description ?? "");
       setDuration(String(plan.duration_days));
+      setVisitLimit(String(plan.daily_visit_limit ?? 4));
       setPrice(String(plan.price_cents / 100));
       setFeatures(plan.features.join(", "));
     }
@@ -315,6 +321,7 @@ export function usePlanEditModalPresentation({
       if (!plan) throw new Error("No plan selected.");
       const days = Number(duration);
       const amount = Number(price);
+      if (!Number.isInteger(Number(visitLimit)) || Number(visitLimit) < 1 || Number(visitLimit) > 24) throw new Error("Daily visit limit must be between 1 and 24.");
       if (
         !name.trim() ||
         !Number.isFinite(days) ||
@@ -327,6 +334,7 @@ export function usePlanEditModalPresentation({
         name: name.trim(),
         description: description.trim() || null,
         duration_days: Math.round(days),
+        daily_visit_limit: Number(visitLimit),
         price_cents: Math.round(amount * 100),
         currency: plan.currency,
         features: features
@@ -349,6 +357,7 @@ export function usePlanEditModalPresentation({
     ["Description", description, setDescription],
     ["Price", price, setPrice],
     ["Duration (days)", duration, setDuration],
+    ["Daily visit limit (1 to 24)", visitLimit, setVisitLimit],
     ["Features (comma separated)", features, setFeatures],
   ];
   return { kind: "view1" as const, props: { onClose, styles, plan, fields, mutation } };

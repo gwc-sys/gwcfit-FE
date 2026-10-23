@@ -112,34 +112,13 @@ export const createStyles = (colors: any, compactHeader: boolean) =>
     metricGrid: {
       flexDirection: "row",
       flexWrap: "wrap",
-      gap: spacing.md,
+      gap: 10,
       alignItems: "stretch"
     },
-    quickGrid: {
-      flexDirection: "row",
-      flexWrap: "wrap",
-      gap: spacing.md,
-      alignItems: "stretch"
-    },
-    rowList: {
-      flexDirection: "row",
-      flexWrap: "wrap",
-      gap: spacing.md
-    },
-    listItem: {
-      flexGrow: 1,
-      flexBasis: 244,
-      minHeight: 150,
-      flexDirection: "row",
-      flexWrap: "wrap",
-      alignItems: "center",
-      gap: spacing.md,
-      borderRadius: radius.md,
-      borderWidth: 1,
-      borderColor: colors.border,
-      padding: spacing.md,
-      backgroundColor: colors.surfaceElevated
-    },
+    groupTitle: { fontSize: 20, lineHeight: 26, fontWeight: "600", color: colors.ink, marginTop: 8, marginBottom: -8 },
+    quickGrid: { borderRadius: 12, overflow: "hidden", backgroundColor: colors.card },
+    rowList: { gap: 0 },
+    listItem: { width: "100%", minHeight: 88, flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 14, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.border },
     avatar: {
       width: 42,
       height: 42,
@@ -153,10 +132,14 @@ export const createStyles = (colors: any, compactHeader: boolean) =>
       color: colors.primary
     },
     memberInfo: {
+      minWidth: 0,
+      gap: 2,
       flex: 1
     },
     memberName: {
-      ...typography.h3,
+      fontSize: 17,
+      lineHeight: 23,
+      fontWeight: "600",
       color: colors.ink
     },
     memberMeta: {
@@ -167,24 +150,23 @@ export const createStyles = (colors: any, compactHeader: boolean) =>
       borderRadius: radius.pill,
       paddingHorizontal: spacing.sm,
       paddingVertical: spacing.xs,
-      backgroundColor: colors.surface,
-      borderWidth: 1,
-      borderColor: colors.surfaceMuted
+      backgroundColor: colors.successSoft,
+      maxWidth: "30%"
     },
     statusChipText: {
       ...typography.small,
-      color: colors.ink
+      color: colors.success
     },
     cardRow: {
-      minHeight: 84,
+      minHeight: 66,
       flexDirection: "row",
       alignItems: "center",
       justifyContent: "space-between",
       gap: spacing.md,
       borderRadius: radius.sm,
-      borderWidth: 1,
-      borderColor: colors.surfaceMuted,
-      padding: spacing.md,
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      borderBottomColor: colors.border,
+      paddingVertical: 12,
       backgroundColor: colors.surface
     },
     planInfo: {

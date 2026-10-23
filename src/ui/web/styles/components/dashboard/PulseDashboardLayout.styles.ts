@@ -81,7 +81,7 @@ export const createStyles = (
       color: colors.ink,
       fontSize: 20,
       lineHeight: 25,
-      fontWeight: "900",
+      fontWeight: "600",
     },
     mobileIdentityCopy: {
       flex: 1,
@@ -92,7 +92,7 @@ export const createStyles = (
       color: colors.ink,
       fontSize: 12,
       lineHeight: 16,
-      fontWeight: "800",
+      fontWeight: "600",
     },
     mobileIdentityRole: {
       color: colors.textSecondary,
@@ -161,7 +161,7 @@ export const createStyles = (
       borderRadius: 12,
       backgroundColor: colors.primary,
     },
-    ownerBrandName: { fontSize: 24, color: colors.ink, fontWeight: "900" },
+    ownerBrandName: { fontSize: 24, color: colors.ink, fontWeight: "600" },
     ownerBrandAccent: { color: colors.primaryDark },
     ownerBrandRole: { fontSize: 11, color: colors.textSecondary, marginTop: 1 },
     ownerGymSwitcher: {
@@ -184,7 +184,7 @@ export const createStyles = (
       backgroundColor: colors.primarySoft,
     },
     ownerGymCopy: { flex: 1 },
-    ownerGymName: { fontSize: 14, color: colors.ink, fontWeight: "900" },
+    ownerGymName: { fontSize: 14, color: colors.ink, fontWeight: "600" },
     ownerGymMeta: { fontSize: 11, color: colors.textSecondary, marginTop: 3 },
     ownerNavList: { gap: 3, marginTop: 8 },
     ownerNavItem: {
@@ -215,7 +215,7 @@ export const createStyles = (
       flex: 1,
       fontSize: 14,
       color: colors.primaryDark,
-      fontWeight: "900",
+      fontWeight: "600",
     },
     ownerSubNav: {
       height: 34,
@@ -235,7 +235,7 @@ export const createStyles = (
     },
     ownerSubDotActive: { backgroundColor: colors.primary },
     ownerSubText: { fontSize: 12, color: colors.textSecondary },
-    ownerSubTextActive: { color: colors.primaryDark, fontWeight: "900" },
+    ownerSubTextActive: { color: colors.primaryDark, fontWeight: "600" },
     ownerSupport: {
       flexDirection: "row",
       alignItems: "center",
@@ -263,7 +263,7 @@ export const createStyles = (
       backgroundColor: "#F6B38A",
     },
     ownerAccountCopy: { flex: 1, minWidth: 0 },
-    ownerAccountName: { fontSize: 12, color: colors.ink, fontWeight: "900" },
+    ownerAccountName: { fontSize: 12, color: colors.ink, fontWeight: "600" },
     ownerAccountEmail: {
       fontSize: 10,
       color: colors.textSecondary,
@@ -312,7 +312,7 @@ export const createStyles = (
     ownerAccountAvatarText: {
       fontSize: 16,
       color: "#FFFFFF",
-      fontWeight: "900",
+      fontWeight: "600",
     },
     ownerAccountDivider: {
       height: 1,
@@ -329,7 +329,7 @@ export const createStyles = (
     ownerAccountItemText: {
       fontSize: 13,
       color: colors.ink,
-      fontWeight: "800",
+      fontWeight: "600",
     },
     trainerAccountBackdrop: {
       alignItems: "flex-end",
@@ -360,14 +360,14 @@ export const createStyles = (
       borderRadius: 25,
       backgroundColor: "#FFAD7F",
     },
-    trainerAccountName: { fontSize: 16, color: colors.ink, fontWeight: "900" },
+    trainerAccountName: { fontSize: 16, color: colors.ink, fontWeight: "600" },
     trainerAccountEmail: {
       fontSize: 11,
       color: colors.textSecondary,
       marginTop: 2,
     },
     trainerAccountItem: { minHeight: 52, gap: 16, paddingHorizontal: 18 },
-    trainerAccountItemText: { fontSize: 15, fontWeight: "900" },
+    trainerAccountItemText: { fontSize: 15, fontWeight: "600" },
     sharedTrainerHeader: {
       zIndex: 50,
       position: Platform.OS === "web" ? ("sticky" as any) : "relative",
@@ -399,12 +399,12 @@ export const createStyles = (
       color: colors.ink,
       fontSize: 24,
       lineHeight: 28,
-      fontWeight: "900",
+      fontWeight: "600",
     },
     sharedTrainerMessage: {
       color: colors.primary,
       fontSize: 11,
-      fontWeight: "800",
+      fontWeight: "600",
       marginTop: 1,
     },
     sharedTrainerActions: {
@@ -446,7 +446,7 @@ export const createStyles = (
     sharedTrainerDateText: {
       color: colors.ink,
       fontSize: 13,
-      fontWeight: "900",
+      fontWeight: "600",
     },
     sharedTrainerIcon: {
       width: 48,
@@ -498,7 +498,7 @@ export const createStyles = (
       color: colors.ink,
       fontSize: 25,
       lineHeight: 30,
-      fontWeight: "900",
+      fontWeight: "600",
     },
     sharedOwnerSubtitle: {
       color: colors.textSecondary,
@@ -523,7 +523,7 @@ export const createStyles = (
       paddingHorizontal: 14,
       backgroundColor: colors.surfaceElevated,
     },
-    sharedOwnerDateText: { color: colors.ink, fontSize: 12, fontWeight: "900" },
+    sharedOwnerDateText: { color: colors.ink, fontSize: 12, fontWeight: "600" },
     sharedOwnerIcon: {
       width: 48,
       height: 48,
@@ -545,7 +545,7 @@ export const createStyles = (
       borderRadius: 10,
       backgroundColor: colors.primary,
     },
-    sharedOwnerBadgeText: { color: colors.white, fontSize: 10, fontWeight: "900" },
+    sharedOwnerBadgeText: { color: colors.white, fontSize: 10, fontWeight: "600" },
     sharedOwnerAdd: {
       minHeight: 48,
       flexDirection: "row",
@@ -556,7 +556,7 @@ export const createStyles = (
       paddingHorizontal: 18,
       backgroundColor: colors.primary,
     },
-    sharedOwnerAddText: { color: colors.ink, fontSize: 13, fontWeight: "800" },
+    sharedOwnerAddText: { color: colors.ink, fontSize: 13, fontWeight: "600" },
     sharedOwnerProfile: {
       minHeight: 48,
       maxWidth: 190,
@@ -576,13 +576,13 @@ export const createStyles = (
     sharedOwnerAvatarText: {
       color: "#FFFFFF",
       fontSize: 13,
-      fontWeight: "900",
+      fontWeight: "600",
     },
     sharedOwnerProfileCopy: { maxWidth: 92 },
     sharedOwnerProfileName: {
       color: colors.ink,
       fontSize: 12,
-      fontWeight: "900",
+      fontWeight: "600",
     },
     sharedOwnerProfileRole: {
       color: colors.textSecondary,
@@ -603,7 +603,7 @@ export const createStyles = (
     ownerQuickTitle: {
       fontSize: 14,
       color: colors.primaryDark,
-      fontWeight: "900",
+      fontWeight: "600",
       marginBottom: 3,
     },
     ownerQuickRow: { flexDirection: "row", alignItems: "center", gap: 12 },
@@ -653,13 +653,13 @@ export const createStyles = (
     brandName: {
       ...typography.h2,
       color: colors.ink,
-      fontWeight: "900",
+      fontWeight: "600",
     },
     brandRole: {
       ...typography.small,
       color: colors.textSecondary,
       letterSpacing: 3,
-      fontWeight: "800",
+      fontWeight: "600",
     },
     navList: {
       gap: spacing.xs,
@@ -737,7 +737,7 @@ export const createStyles = (
     },
     navLabelActive: {
       color: colors.ink,
-      fontWeight: "900",
+      fontWeight: "600",
     },
     sidebarFooter: {
       flex: 1,
@@ -783,7 +783,7 @@ export const createStyles = (
     avatarText: {
       ...typography.h3,
       color: "#0F172A",
-      fontWeight: "900",
+      fontWeight: "600",
     },
     profileCopy: {
       flex: 1,
@@ -800,10 +800,10 @@ export const createStyles = (
     mainPanel: {
       flex: 1,
       minWidth: 0,
-      borderRadius: isDesktop ? radius.xl : 0,
-      borderWidth: isDesktop ? 1 : 0,
+      borderRadius: 0,
+      borderWidth: 0,
       borderColor: colors.border,
-      backgroundColor: isDesktop ? colors.surface : "transparent",
+      backgroundColor: colors.background,
       padding: compact ? spacing.md : isDesktop ? spacing.xxl : spacing.lg,
       gap: spacing.lg,
       ...(!isDesktop ? shadows.none : shadows.soft),
@@ -834,7 +834,7 @@ export const createHeaderStyles = (colors: ThemeColors, width: number) => {
     title: {
       ...typography.h1,
       color: colors.ink,
-      fontWeight: "900",
+      fontWeight: "600",
     },
     subtitle: {
       ...typography.body,
@@ -863,7 +863,7 @@ export const createHeaderStyles = (colors: ThemeColors, width: number) => {
     dateText: {
       ...typography.small,
       color: colors.ink,
-      fontWeight: "800",
+      fontWeight: "600",
     },
     circleButton: {
       width: compact ? 48 : 58,
@@ -890,7 +890,7 @@ export const createHeaderStyles = (colors: ThemeColors, width: number) => {
       fontSize: 11,
       lineHeight: 15,
       color: colors.white,
-      fontWeight: "900",
+      fontWeight: "600",
     },
     pressed: {
       opacity: 0.8,
@@ -898,3 +898,5 @@ export const createHeaderStyles = (colors: ThemeColors, width: number) => {
     },
   });
 };
+
+

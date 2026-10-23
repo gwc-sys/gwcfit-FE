@@ -1,9 +1,11 @@
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useState } from "react";
 import { ScreenHeader } from "../../components/ScreenHeader";
 import { Pressable } from "../../components/NativePressable";
 import { controlMetrics } from "../../theme/theme";
 import { showAlert } from "../../../../utils/appAlert";
 import { Ionicons } from "@expo/vector-icons";
-import { ActivityIndicator, Modal, ScrollView, Switch, Text, TextInput, View } from "react-native";
+import { ActivityIndicator, KeyboardAvoidingView, Platform, Modal, ScrollView, Switch, Text, TextInput, View } from "react-native";
 import { PrimaryButton } from "../../components/PrimaryButton";
 import { NoticeBanner } from "../../components/NoticeBanner";
 import { PulseDashboardLayout } from "../../../../components/dashboard/PulseDashboardLayout";
@@ -16,6 +18,7 @@ import type * as React from "react";
 import type { useMembershipPlanScreenPresentation, usePlanCardPresentation, usePlatformPlanCrudModalPresentation, usePlanActionModalPresentation, usePlanEditModalPresentation } from "../../../../screens/saas/MembershipPlanScreen";
 
 export function MembershipPlanScreenView({ model }: { model: ReturnType<typeof useMembershipPlanScreenPresentation> }): React.ReactNode {
+  const [showTemplates, setShowTemplates] = useState(false);
   if (model == null) return null;
   if (typeof model !== "object" || !("kind" in model)) return model;
   switch (model.kind) {
@@ -35,14 +38,6 @@ export function MembershipPlanScreenView({ model }: { model: ReturnType<typeof u
         <View style={styles.headerCopy}>
           <ScreenHeader title={isSuperAdmin ? "Platform Membership Plans" : "Membership Plans"} subtitle={isSuperAdmin ? "Review every plan currently used by gym owners across the platform." : "Create and manage membership plans for your gym."} />
         </View>
-        {!isSuperAdmin && !query.data?.length ? (
-          <PrimaryButton
-            title="Add All Starter Plans"
-            icon="add"
-            disabled={installStarters.isPending}
-            onPress={() => installStarters.mutate()}
-          />
-        ) : null}
         {isSuperAdmin ? <PrimaryButton title="Create plan" icon="add" onPress={() => setPlatformPlanDraft("new")} /> : null}
       </View>
       <NoticeBanner
@@ -63,17 +58,20 @@ export function MembershipPlanScreenView({ model }: { model: ReturnType<typeof u
       {(isSuperAdmin ? platformQuery.isLoading : query.isLoading) ? <ActivityIndicator color={colors.primary} /> : null}
       {(isSuperAdmin ? platformQuery.error : query.error) ? (
         <Text style={styles.error}>
-          Could not load saved plans. Showing plan templates below.
+          Could not load saved plans. Pull to refresh and try again.
         </Text>
       ) : null}
-      {!isSuperAdmin && !query.isLoading && !query.data?.length ? (
-        <Text style={styles.templateNotice}>
-          Starter plan templates — create or customize them using Plan
-          Management below.
-        </Text>
-      ) : null}
-      <View style={styles.grid}>
-        {plans.map((plan, index) => (
+      {!isSuperAdmin ? <ResourceCrudPanel config={membershipPlanConfig} /> : null}
+      <View style={styles.previewHeader}>
+        <Text accessibilityRole="header" style={styles.statLabel}>{!isSuperAdmin && !query.data?.length ? "Starter templates" : "Plan preview"}</Text>
+        <Text style={styles.subtitle}>{isSuperAdmin ? platformQuery.data?.length ?? 0 : query.data?.length ?? 0} saved</Text>
+      </View>
+      {!isSuperAdmin && plans.some(plan => plan.id.endsWith("-template")) ? <>
+        <Text style={styles.subtitle}>Use a starter template or create your own plan above.</Text>
+        <Pressable accessibilityRole="button" accessibilityState={{ expanded: showTemplates }} onPress={() => setShowTemplates(value => !value)} style={styles.templateToggle}><Text style={styles.detailsText}>{showTemplates ? "Hide templates" : `Browse ${plans.filter(plan => plan.id.endsWith("-template")).length} starter templates`}</Text><Ionicons name={showTemplates ? "chevron-up" : "chevron-down"} size={18} color={colors.primary} /></Pressable>
+      </> : null}
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} decelerationRate="fast" snapToAlignment="start" contentContainerStyle={styles.planScroller}>
+        {plans.filter(plan => isSuperAdmin || !plan.id.endsWith("-template") || showTemplates).map((plan, index) => (
           <PlanCard
             key={plan.id}
             plan={plan}
@@ -85,14 +83,7 @@ export function MembershipPlanScreenView({ model }: { model: ReturnType<typeof u
             onView={setDetailsPlan}
           />
         ))}
-      </View>
-      <View style={styles.stats}>
-        <Text style={styles.statValue}>{plans.length}</Text>
-        <View>
-          <Text style={styles.statLabel}>Total Plans</Text>
-          <Text style={styles.subtitle}>Membership packages displayed</Text>
-        </View>
-      </View>
+      </ScrollView>
       {isSuperAdmin ? (
         <View style={styles.platformNote}>
           <Ionicons name="information-circle-outline" size={20} color={colors.info} />
@@ -100,7 +91,7 @@ export function MembershipPlanScreenView({ model }: { model: ReturnType<typeof u
             These plans are shared from each Gym Owner site. The gym name on each card identifies the plan owner.
           </Text>
         </View>
-      ) : <ResourceCrudPanel config={membershipPlanConfig} />}
+       ) : null}
       <PlanActionModal
         plan={detailsPlan}
         onClose={() => setDetailsPlan(null)}
@@ -126,62 +117,30 @@ export function PlanCardView({ model }: { model: ReturnType<typeof usePlanCardPr
     case "view1": {
       const { styles, index, accent, icon, plan, onEdit, onView } = model.props;
       return ((
-    <View
-      style={[
-        styles.card,
-        index === 1 && { borderColor: accent, borderWidth: 2 },
-      ]}
-    >
-      {index === 1 ? (
-        <View style={[styles.popular, { backgroundColor: accent }]}>
-          <Text style={styles.popularText}>POPULAR</Text>
+    <View style={styles.card}>
+      <View style={styles.previewHeader}>
+        <View style={styles.planHeading}>
+          <View style={[styles.icon, { backgroundColor: `${accent}18` }]}><Ionicons name={icon} size={23} color={accent} /></View>
+          <View style={{ flex: 1, minWidth: 0 }}>
+            {plan.gym_name ? <Text style={styles.gymTag}>{plan.gym_name}</Text> : null}
+            <Text style={styles.planName}>{plan.name}</Text>
+          </View>
         </View>
-      ) : null}
-      <View style={[styles.icon, { backgroundColor: `${accent}18` }]}>
-        <Ionicons name={icon} size={34} color={accent} />
+        {plan.is_popular ? <View style={styles.pill}><Text style={styles.detailsText}>Popular</Text></View> : null}
       </View>
-      {plan.gym_name ? <Text style={styles.gymTag}>{plan.gym_name}</Text> : null}
-      <Text style={styles.planName}>{plan.name}</Text>
-      <Text style={styles.description}>
-        {plan.description || "Flexible access for your gym members"}
-      </Text>
-      <Text style={[styles.price, { color: accent }]}>
-        {formatCurrency(plan.price_cents, plan.currency)}
-      </Text>
-      <Text style={styles.subtitle}>/ plan</Text>
-      <View style={[styles.pill, { backgroundColor: `${accent}15` }]}>
-        <Text style={{ color: accent, fontWeight: "800" }}>
-          {Math.max(1, Math.round(plan.duration_days / 30))} Months
-        </Text>
+      {plan.description ? <Text style={styles.description}>{plan.description}</Text> : null}
+      <View style={styles.priceRow}>
+        <Text style={styles.price}>{formatCurrency(plan.price_cents, plan.currency)}</Text>
+        <Text style={styles.subtitle}>for {plan.duration_days} {plan.duration_days === 1 ? "day" : "days"}</Text>
       </View>
       <View style={styles.divider} />
       <View style={styles.features}>
-        {(plan.features.length ? plan.features : ["Gym access"]).map(
-          (feature) => (
-            <View key={feature} style={styles.feature}>
-              <Ionicons name="checkmark" size={18} color={accent} />
-              <Text style={styles.featureText}>{feature}</Text>
-            </View>
-          ),
-        )}
+        {plan.features.slice(0, 3).map((feature, i) => <View key={i} style={styles.feature}><Ionicons name="checkmark" size={17} color={accent} /><Text style={styles.featureText}>{feature}</Text></View>)}
+        {plan.features.length > 3 ? <Text style={styles.subtitle}>+{plan.features.length - 3} more in details</Text> : null}
       </View>
       <View style={styles.cardActions}>
-        {onEdit ? <Pressable
-          accessibilityRole="button"
-          onPress={() => onEdit(plan)}
-          style={({ pressed }) => [
-            styles.editButton,
-            { borderColor: accent },
-            pressed && { opacity: 0.7 },
-          ]}
-        >
-          <Text style={[styles.editText, { color: accent }]}>Edit Plan</Text>
-        </Pressable> : null}
-        <Pressable accessibilityRole="button" onPress={() => onView(plan)}>
-          <Text style={[styles.detailsText, { color: accent }]}>
-            View Details →
-          </Text>
-        </Pressable>
+        {onEdit ? <Pressable accessibilityRole="button" accessibilityLabel={`${plan.id.endsWith("-template") ? "Customize" : "Edit"} ${plan.name}`} onPress={() => onEdit(plan)} style={({ pressed }) => [styles.editButton, pressed && { opacity: 0.7 }]}><Text style={styles.editText}>{plan.id.endsWith("-template") ? "Customize" : "Edit plan"}</Text></Pressable> : null}
+        <Pressable accessibilityRole="button" accessibilityLabel={`View details for ${plan.name}`} onPress={() => onView(plan)} style={styles.detailsButton}><Text style={styles.detailsText}>Details</Text><Ionicons name="chevron-forward" size={16} color={accent} /></Pressable>
       </View>
     </View>
   ));
@@ -256,62 +215,46 @@ export function PlanEditModalView({ model }: { model: ReturnType<typeof usePlanE
     case "view1": {
       const { onClose, styles, plan, fields, mutation } = model.props;
       return ((
-    <Modal transparent visible animationType="fade" onRequestClose={onClose}>
-      <View style={styles.modalBackdrop}>
-        <ScrollView contentContainerStyle={styles.modalScroll}>
-          <View style={styles.modalCard}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Edit {plan.name}</Text>
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel="Close editor"
-                onPress={onClose}
-               style={{ minWidth: controlMetrics.minimumTouchSize, minHeight: controlMetrics.minimumTouchSize, alignItems: "center", justifyContent: "center" }}>
-                <Ionicons name="close" size={28} color="#94A3B8" />
-              </Pressable>
-            </View>
-            {fields.map(([label, value, setter]) => {
-              const multiline =
-                label.startsWith("Features") || label === "Description";
-              return (
-                <View key={label} style={styles.field}>
-                  <Text style={styles.fieldLabel}>{label}</Text>
-                  <TextInput
-                    value={value}
-                    onChangeText={setter}
-                    multiline={multiline}
-                    textAlignVertical={multiline ? "top" : "center"}
-                    style={[styles.input, multiline && styles.inputMultiline]}
-                    placeholderTextColor="#64748B"
-                  />
-                </View>
-              );
-            })}
-            {mutation.error ? (
-              <Text style={styles.error}>
-                {mutation.error instanceof Error
-                  ? mutation.error.message
-                  : "Could not save the plan."}
-              </Text>
-            ) : null}
-            <View style={styles.modalActions}>
-              <PrimaryButton
-                title="Cancel"
-                variant="secondary"
-                onPress={onClose}
-                style={styles.modalButton}
-              />
-              <PrimaryButton
-                title="Save Changes"
-                loading={mutation.isPending}
-                disabled={mutation.isPending}
-                onPress={() => mutation.mutate()}
-                style={styles.modalButton}
-              />
-            </View>
+    <Modal visible animationType="slide" presentationStyle="pageSheet" onRequestClose={() => { if (!mutation.isPending) onClose(); }}>
+      <SafeAreaView style={styles.editorScreen} edges={["top", "bottom"]}>
+        <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
+          <View style={styles.editorHeader}>
+            <Pressable accessibilityRole="button" disabled={mutation.isPending} accessibilityState={{ disabled: mutation.isPending }} onPress={onClose} style={styles.editorCancel}><Text style={[styles.detailsText, mutation.isPending && { opacity: 0.4 }]}>Cancel</Text></Pressable>
+            <Text accessibilityRole="header" style={styles.editorTitle}>{plan.id.endsWith("-template") ? "Customize plan" : "Edit plan"}</Text>
+            <View style={{ width: 64 }} />
           </View>
-        </ScrollView>
-      </View>
+          <ScrollView keyboardShouldPersistTaps="handled" keyboardDismissMode={Platform.OS === "ios" ? "interactive" : "on-drag"} automaticallyAdjustKeyboardInsets={false} contentContainerStyle={styles.editorContent}>
+            <View style={{ gap: 5 }}>
+              <Text style={styles.editorPlanName}>{plan.name}</Text>
+              <Text style={styles.description}>{plan.id.endsWith("-template") ? "Make this template your own. Saving creates a plan for your gym." : "Update the details members see for this plan."}</Text>
+            </View>
+            {[
+              { title: "Plan details", items: fields.slice(0, 2) },
+              { title: "Price & duration", items: fields.slice(2, 4) },
+              { title: "Included benefits", items: fields.slice(4) },
+            ].map(group => <View key={group.title} style={{ gap: 8 }}>
+              <Text accessibilityRole="header" style={styles.editorSectionTitle}>{group.title}</Text>
+              <View style={styles.editorGroup}>
+                {group.items.map(([label, value, setter], index) => {
+                  const isFeatures = label.startsWith("Features");
+                  const numeric = label === "Price" || label.startsWith("Duration");
+                  const multiline = isFeatures || label === "Description";
+                  const displayLabel = label === "Price" ? `Price (${plan.currency})` : isFeatures ? "Benefits" : label;
+                  return <View key={label} style={[styles.editorField, index > 0 && styles.editorFieldDivider]}>
+                    <Text style={styles.editorLabel}>{displayLabel}</Text>
+                    <TextInput accessibilityLabel={displayLabel} editable={!mutation.isPending} value={value} onChangeText={setter} keyboardType={numeric ? label === "Price" ? "decimal-pad" : "number-pad" : "default"} multiline={multiline} textAlignVertical={multiline ? "top" : "center"} placeholder={isFeatures ? "Gym access, Group classes, Personal training" : label === "Description" ? "A short description of your plan" : label === "Price" ? "0.00" : "Enter " + label.toLowerCase()} placeholderTextColor={styles.editorHint.color} selectionColor={styles.detailsText.color} style={[styles.editorInput, multiline && styles.editorMultiline]} />
+                  </View>;
+                })}
+              </View>
+              {group.title === "Included benefits" ? <Text style={styles.editorHint}>Separate benefits with commas.</Text> : group.title === "Price & duration" ? <Text style={styles.editorHint}>This price covers the full duration, entered in days.</Text> : null}
+            </View>)}
+            {mutation.error ? <Text accessibilityRole="alert" accessibilityLiveRegion="polite" style={styles.error}>{getApiErrorMessage(mutation.error)}</Text> : null}
+          </ScrollView>
+          <View style={styles.editorFooter}>
+            <PrimaryButton title={plan.id.endsWith("-template") ? "Create plan" : "Save changes"} loading={mutation.isPending} disabled={mutation.isPending} onPress={() => mutation.mutate()} />
+          </View>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
     </Modal>
   ));
     }

@@ -40,6 +40,7 @@ import {
   memberStatusTone,
 } from "../../utils/formatters";
 import { AccessDeniedScreen } from "./AccessDeniedScreen";
+import { ManageGymsScreen } from "./ManageGymsScreen";
 
 type SortDirection = "az" | "za";
 type MemberFilter = "all" | "active" | "inactive" | "expired" | "frozen";
@@ -102,12 +103,12 @@ export function useMemberListScreenPresentation() {
     return joined.getMonth() === now.getMonth() && joined.getFullYear() === now.getFullYear();
   }).length;
 
-  if (!canViewMembers) {
+  if (!canViewMembers && !isSuperAdmin) {
     return { kind: "view1" as const, props: {  } };
   }
 
   if (isSuperAdmin) {
-    return { kind: "view2" as const, props: { PlatformUserDirectory } };
+    return { kind: "view2" as const, props: { ConnectedGyms: ManageGymsScreen } };
   }
 
   const confirmDelete = (member: Member) => {

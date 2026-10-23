@@ -331,7 +331,7 @@ export function GymOwnerDashboardContentView({ model }: { model: ReturnType<type
     <PulseDashboardLayout activeLabel="Dashboard" roleLabel="Gym Owner">
       <View style={[styles.header, styles.sharedHeaderReplacement]}>
         <View style={styles.headerCopy}>
-          <Text style={styles.welcome}>Welcome back, {displayName}! 👋</Text>
+          <Text style={styles.welcome}>Welcome back, {displayName}!</Text>
           <Text style={styles.headerSubtitle}>
             Here&apos;s what&apos;s happening at your gym today.
           </Text>

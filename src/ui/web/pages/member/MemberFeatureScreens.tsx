@@ -1,3 +1,6 @@
+import { Pressable } from "react-native";
+import { MemberPaymentReceipt } from "../../../../features/operations/MemberPaymentReceipt";
+import { MemberPlanCheckout } from "../../../../features/operations/MembershipCheckout";
 import { getMemberPaymentTotals, getCompletedWorkoutCount, getRewardPoints, getRewardBadgeCount } from "../../../../utils/memberFeatureMetrics";
 import { FlatList, RefreshControl, Switch, Text, View } from "react-native";
 import type { ReactNode } from "react";
@@ -112,21 +115,26 @@ export function MemberMembershipScreenView({ model }: { model: ReturnType<typeof
       >
         {(membership) => (
           <>
+            <SectionTitle title="Current membership" />
             <View style={styles.panel}>
               <View style={styles.panelHeader}>
                 <View>
                   <Text style={styles.kicker}>{membership.gym_name ?? "Gym"}</Text>
-                  <Text style={styles.largeTitle}>{membership.membership_plan_name ?? "Membership plan"}</Text>
+                  <Text style={styles.largeTitle}>{membership.membership_plan_name ?? "No plan assigned"}</Text>
                 </View>
                 <StatusBadge label={membership.status} tone={memberStatusTone(membership.status)} />
               </View>
               <DetailGrid>
                 <MemberStatCard title="Price" value={formatCurrency(membership.plan_price_cents, membership.plan_currency)} icon="cash-outline" tone="success" />
                 <MemberStatCard title="Days left" value={`${membership.days_remaining}`} subtitle={membership.renewal_reminder} icon="calendar-number-outline" tone={membership.days_remaining <= 7 ? "warning" : "info"} />
+                <MemberStatCard title="Days completed" value={membership.start_date && Number.isFinite(Date.parse(membership.start_date)) ? String(Math.max(0, Math.floor((Math.min(Date.now(), membership.expiry_date && Number.isFinite(Date.parse(membership.expiry_date)) ? Date.parse(membership.expiry_date) : Date.now()) - Date.parse(membership.start_date)) / 86400000))) : "--"} icon="checkmark-circle-outline" tone="success" />
                 <MemberStatCard title="Duration" value={membership.plan_duration_days ? `${membership.plan_duration_days}d` : "--"} icon="timer-outline" tone="neutral" />
+                <MemberStatCard title="Start date" value={formatDate(membership.start_date)} icon="calendar-outline" tone="info" />
                 <MemberStatCard title="Expiry" value={formatDate(membership.expiry_date)} icon="calendar-outline" tone="info" />
               </DetailGrid>
             </View>
+
+            <MemberPlanCheckout plans={membership.available_plans ?? []} />
 
             <SectionTitle title="Benefits" />
             {membership.benefits.length ? (
@@ -191,14 +199,15 @@ export function MemberPaymentsScreenView({ model }: { model: ReturnType<typeof u
                 data={payments}
                 keyExtractor={(item) => item.payment_uuid}
                 renderItem={(payment: MemberPayment) => (
+                  <MemberPaymentReceipt paymentId={payment.payment_uuid}>{(open, busy) => <Pressable accessibilityRole={payment.status === "paid" ? "button" : undefined} accessibilityLabel={`${payment.membership_plan_name ?? "Payment"}. ${payment.status === "paid" ? "View payment receipt" : "Receipt available after confirmation"}`} disabled={payment.status !== "paid" || busy} onPress={open}>
                   <PaymentHistoryCard
                     title={payment.membership_plan_name ?? "Payment"}
                     subtitle={`${formatCurrency(payment.amount_cents, payment.currency)} - ${payment.payment_method}`}
-                    description={`Invoice: ${payment.invoice_number ?? "Not issued"} - ${formatDateTime(payment.payment_date)}`}
+                    description={`${formatDateTime(payment.payment_date)}${payment.status === "paid" ? " - Tap to view receipt" : " - Receipt available after confirmation"}`}
                     status={payment.status}
                     statusTone={toneForStatus(payment.status)}
-                    actionLabel={payment.receipt_url ? "Receipt" : undefined}
                   />
+                  </Pressable>}</MemberPaymentReceipt>
                 )}
               />
             </>

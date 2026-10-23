@@ -36,7 +36,7 @@ export type RootStackParamList = {
   MembershipPlans: undefined;
   Trainers: undefined;
   WorkoutPlans: undefined;
-  DietPlans: undefined;
+  DietPlans: { view?: "foods" | "plans" } | undefined;
   Reports: undefined;
   Notifications: undefined;
   Settings: undefined;

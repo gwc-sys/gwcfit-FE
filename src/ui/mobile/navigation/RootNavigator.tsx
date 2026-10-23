@@ -68,6 +68,8 @@ export function MainTabsView({ model }: { model: ReturnType<typeof useMainTabsPr
         <Tabs.Screen name="Directory" component={AdminMemberProfileScreen} options={{ title: "Card" }} />
       ) : canManageMembers ? (
         <Tabs.Screen name="Directory" component={OwnerMembersScreen} options={{ title: "Members" }} />
+      ) : user?.role === "trainer" ? (
+        <Tabs.Screen name="Directory" component={OwnerMembersScreen} options={{ title: "Clients" }} />
       ) : (
         <Tabs.Screen name="Directory" component={OperationsHubScreen} options={{ title: "Operations" }} />
       )}

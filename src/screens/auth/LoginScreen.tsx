@@ -1,3 +1,5 @@
+import { showAlert } from "../../utils/appAlert";
+import { getApiErrorMessage, getApiStatus } from "../../services/api/client";
 import type * as React from "react";
 import { LoginScreenView } from "./LoginScreen.presentation";
 import { createStyles } from "./LoginScreen.styles";
@@ -18,7 +20,6 @@ import { Screen } from "../../components/Screen";
 import { images } from "../../data/media";
 import type { RootStackParamList } from "../../navigation/types";
 import { authApi } from "../../services/api/auth";
-import { getApiErrorMessage } from "../../services/api/client";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useAppTheme } from "../../theme/AppThemeProvider";
 import { radius, shadows, spacing, typography } from "../../theme/theme";
@@ -53,6 +54,9 @@ export function useLoginScreenPresentation({ navigation }: Props) {
 
   const loginMutation = useMutation({
     mutationFn: authApi.login,
+    onError: (error) => {
+      if (getApiStatus(error) === 403) showAlert("Gym access unavailable", getApiErrorMessage(error));
+    },
     onSuccess: (session) => {
       setSession(session);
     }

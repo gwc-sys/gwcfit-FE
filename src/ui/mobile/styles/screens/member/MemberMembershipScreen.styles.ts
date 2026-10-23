@@ -1,0 +1,32 @@
+import { StyleSheet } from "react-native";
+import type { ThemeColors } from "../../../theme/theme";
+
+export const createMembershipStyles = (colors: ThemeColors) => StyleSheet.create({
+  content: { gap: 24 },
+  planRail: { gap: 12, paddingVertical: 4, paddingRight: 16, alignItems: "flex-start" },
+  planCard: { padding: 18, gap: 12, borderWidth: 1, borderColor: colors.border, borderRadius: 18, backgroundColor: colors.surface },
+  planName: { fontSize: 18, lineHeight: 24, fontWeight: "600", color: colors.ink, letterSpacing: -0.3 },
+  planPrice: { fontSize: 27, lineHeight: 34, fontWeight: "600", color: colors.ink, fontVariant: ["tabular-nums"] },
+  planBenefits: { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.border, paddingTop: 12, gap: 10 },
+  panel: { backgroundColor: colors.surface, borderRadius: 20, padding: 18, gap: 18 },
+  header: { flexDirection: "row", flexWrap: "wrap", alignItems: "flex-start", gap: 12 },
+  copy: { flex: 1, minWidth: 120, gap: 5 },
+  gym: { color: colors.muted, fontSize: 13, lineHeight: 19 },
+  title: { color: colors.ink, fontSize: 23, lineHeight: 29, fontWeight: "600", letterSpacing: -0.5 },
+  summary: { flexDirection: "row", flexWrap: "wrap", gap: 16 },
+  metric: { flex: 1, minWidth: 110, gap: 5 },
+  value: { color: colors.ink, fontSize: 28, lineHeight: 35, fontWeight: "600", fontVariant: ["tabular-nums"] },
+  label: { color: colors.muted, fontSize: 13, lineHeight: 19 },
+  dates: { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.border, paddingTop: 14, gap: 12 },
+  dateRow: { flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between", columnGap: 16, rowGap: 4 },
+  dateValue: { color: colors.ink, fontSize: 14, lineHeight: 21, fontWeight: "500" },
+  section: { gap: 10 },
+  sectionTitle: { color: colors.ink, fontSize: 19, lineHeight: 25, fontWeight: "600", letterSpacing: -0.3 },
+  list: { backgroundColor: colors.surface, borderRadius: 16, paddingHorizontal: 16 },
+  row: { minHeight: 48, paddingVertical: 14, gap: 8 },
+  divider: { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.border },
+  benefit: { flexDirection: "row", alignItems: "flex-start", gap: 10 },
+  body: { color: colors.ink, fontSize: 14, lineHeight: 21, flex: 1 },
+  historyTitle: { color: colors.ink, fontSize: 15, lineHeight: 21, fontWeight: "500" },
+  empty: { color: colors.muted, fontSize: 14, lineHeight: 21 },
+});

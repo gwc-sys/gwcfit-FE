@@ -20,8 +20,6 @@ export function WorkoutPlansScreenView({ model }: { model: ReturnType<typeof use
       const { styles, setCreateRequest, Stat, createRequest } = model.props;
       return (<Screen scroll contentContainerStyle={styles.screen}>
     <View style={styles.header}><View><Text style={styles.title}>Workout Plans</Text><Text style={styles.subtitle}>Member programming and sessions</Text></View><PrimaryButton title="Create New Plan" icon="add" onPress={() => setCreateRequest((value) => value + 1)} style={styles.createButton} /></View>
-    <View style={styles.stats}><Stat icon="barbell-outline" label="Total Plans" value="0" detail="No plans created yet" tone="#0A84FF" styles={styles} /><Stat icon="clipboard-outline" label="Active Plans" value="0" detail="Currently running" tone="#22C55E" styles={styles} /><Stat icon="calendar-outline" label="Programs" value="0" detail="Total programs" tone="#3B82F6" styles={styles} /><Stat icon="people-outline" label="Members Assigned" value="0" detail="Across all plans" tone="#F59E0B" styles={styles} /></View>
-    <View style={styles.manageHeader}><View><Text style={styles.kicker}>Manage workouts</Text><Text style={styles.manageTitle}>Workout Plans</Text></View></View>
     <ResourceCrudPanel config={workoutPlanConfig} createRequest={createRequest} />
   </Screen>);
     }

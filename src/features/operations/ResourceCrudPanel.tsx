@@ -296,6 +296,7 @@ export function useResourceCrudPanelPresentation<
     (field) =>
       !field.hidden &&
       !(autoAssignCurrentTrainer && field.relation === "trainer") &&
+      !(autoAssignCurrentTrainer && field.name === "calories_per_day") &&
       (!editingRecord || !field.createOnly),
   );
   const isMutating =
@@ -357,7 +358,11 @@ export function useResourceCrudPanelPresentation<
   const submit = handleSubmit((values) => {
     setNotice(null);
     const schema = editingRecord ? config.updateSchema : config.createSchema;
-    const parsed = schema.safeParse(values);
+    // The trainer editor omits nutrition targets; retain the existing API default.
+    const payloadValues = autoAssignCurrentTrainer
+      ? { ...values, calories_per_day: values.calories_per_day || "2000" }
+      : values;
+    const parsed = schema.safeParse(payloadValues);
 
     if (!parsed.success) {
       for (const issue of parsed.error.issues) {

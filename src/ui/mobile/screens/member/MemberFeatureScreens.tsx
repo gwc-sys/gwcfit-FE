@@ -1,9 +1,15 @@
+import { MemberPaymentReceipt } from "../../../../features/operations/MemberPaymentReceipt";
+import { MemberPlanCheckout } from "../../../../features/operations/MembershipCheckout";
+import { WeekCalendar } from "../../components/WeekCalendar";
+import { createMembershipStyles } from "../../styles/screens/member/MemberMembershipScreen.styles";
+import { Ionicons } from "@expo/vector-icons";
+import { Pressable } from "../../components/NativePressable";
 import { useState } from "react";
 import { positiveNumberError, progressFormError, supportFormError } from "../../components/member/formValidation";
 import { changePasswordSchema } from "../../../../validation/auth";
 import { MemberProgressOverview, useMemberReferenceColors } from "../../components/member/MemberReference";
 import { getMemberPaymentTotals, getCompletedWorkoutCount, getRewardPoints, getRewardBadgeCount } from "../../../../utils/memberFeatureMetrics";
-import { FlatList, RefreshControl, Switch, Text, View } from "react-native";
+import { FlatList, RefreshControl, ScrollView, Switch, Text, useWindowDimensions, View } from "react-native";
 import type { ReactNode } from "react";
 import { FormTextField } from "../../components/FormTextField";
 import { NoticeBanner } from "../../components/NoticeBanner";
@@ -96,12 +102,15 @@ export function SectionTitleView({ model }: { model: ReturnType<typeof useSectio
 }
 
 export function MemberMembershipScreenView({ model }: { model: ReturnType<typeof useMemberMembershipScreenPresentation> }): React.ReactNode {
+  const [selectedDate, setSelectedDate] = useState(() => new Date());
   const { colors } = useAppTheme();
+  const { width } = useWindowDimensions();
+  const membershipStyles = createMembershipStyles(colors);
   if (model == null) return null;
   if (typeof model !== "object" || !("kind" in model)) return model;
   switch (model.kind) {
     case "view1": {
-      const { styles, queryRefresh, query, QueryState, DetailGrid, SectionTitle, ListSection, toneForStatus } = model.props;
+      const { styles, queryRefresh, query, QueryState, toneForStatus } = model.props;
       return ((
     <Screen scroll contentContainerStyle={styles.screen} refreshControl={queryRefresh(query.isRefetching, () => query.refetch())}>
       <ScreenHeader title="Membership" subtitle="Plan and renewal" icon="ribbon-outline" />
@@ -115,46 +124,82 @@ export function MemberMembershipScreenView({ model }: { model: ReturnType<typeof
         onRetry={() => query.refetch()}
       >
         {(membership) => (
-          <>
-            <View style={styles.panel}>
-              <View style={styles.panelHeader}>
-                <View>
-                  <Text style={styles.kicker}>{membership.gym_name ?? "Gym"}</Text>
-                  <Text style={styles.largeTitle}>{membership.membership_plan_name ?? "Membership plan"}</Text>
-                </View>
-                <StatusBadge label={membership.status} tone={memberStatusTone(membership.status)} />
-              </View>
-              <DetailGrid>
-                <MemberStatCard title="Price" value={formatCurrency(membership.plan_price_cents, membership.plan_currency)} icon="cash-outline" tone="success" />
-                <MemberStatCard title="Days left" value={`${membership.days_remaining}`} subtitle={membership.renewal_reminder} icon="calendar-number-outline" tone={membership.days_remaining <= 7 ? "warning" : "info"} />
-                <MemberStatCard title="Duration" value={membership.plan_duration_days ? `${membership.plan_duration_days}d` : "--"} icon="timer-outline" tone="neutral" />
-                <MemberStatCard title="Expiry" value={formatDate(membership.expiry_date)} icon="calendar-outline" tone="info" />
-              </DetailGrid>
+          <View style={membershipStyles.content}>
+            <View style={membershipStyles.section}>
+              <WeekCalendar selectedDate={selectedDate} onSelect={setSelectedDate} />
+              <Text accessibilityLiveRegion="polite" style={membershipStyles.label}>{(() => {
+                const day = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, "0")}-${String(selectedDate.getDate()).padStart(2, "0")}`;
+                const label = selectedDate.toLocaleDateString(undefined, { day: "numeric", month: "short" });
+                if (!membership.membership_plan_uuid) return `${label}: No plan assigned`;
+                if (!membership.start_date || !membership.expiry_date) return `${label}: Membership dates not set`;
+                return `${label}: ${day < membership.start_date ? "Before your plan starts" : day > membership.expiry_date ? "After your plan ends" : "Within your membership period"}`;
+              })()}</Text>
             </View>
+            <View style={membershipStyles.panel}>
+              <View style={membershipStyles.header}>
+                <View style={membershipStyles.copy}>
+                  <Text style={membershipStyles.gym}>{membership.gym_name ?? "Your gym"}</Text>
+                  <Text accessibilityRole="header" style={membershipStyles.title}>{membership.membership_plan_name ?? "No plan assigned"}</Text>
+                </View>
+                {membership.membership_plan_uuid ? <StatusBadge label={membership.status} tone={memberStatusTone(membership.status)} /> : null}
+              </View>
+              {membership.membership_plan_uuid ? <>
+              <View style={membershipStyles.summary}>
+                <View style={membershipStyles.metric}>
+                  <Text style={membershipStyles.value}>{formatCurrency(membership.plan_price_cents, membership.plan_currency)}</Text>
+                  <Text style={membershipStyles.label}>Plan price</Text>
+                </View>
+                <View style={membershipStyles.metric}>
+                  <Text style={[membershipStyles.value, { color: membership.days_remaining > 0 && membership.days_remaining <= 7 ? colors.warning : colors.ink }]}>{Math.max(0, membership.days_remaining)}</Text>
+                  <Text style={membershipStyles.label}>Days remaining</Text>
+                </View>
+              </View>
+              <View style={membershipStyles.dates}>
+                {[
+                  ["Start date", membership.start_date ? formatDate(membership.start_date) : "Not set"],
+                  ["Expiry date", membership.expiry_date ? formatDate(membership.expiry_date) : "Not set"],
+                  ["Plan duration", membership.plan_duration_days ? `${membership.plan_duration_days} days` : "Not set"],
+                ].map(([label, value]) => <View key={label} style={membershipStyles.dateRow}><Text style={membershipStyles.label}>{label}</Text><Text style={membershipStyles.dateValue}>{value}</Text></View>)}
+              </View>
+              </> : <Text style={membershipStyles.empty}>Choose a plan below to get started.</Text>}
+              {membership.membership_plan_uuid && membership.renewal_reminder && !/^no reminder$/i.test(membership.renewal_reminder.trim()) ? <Text style={membershipStyles.label}>{membership.renewal_reminder}</Text> : null}
+            </View>
+            <View style={membershipStyles.section}>
+              <Text accessibilityRole="header" style={membershipStyles.sectionTitle}>Plans at your gym</Text>
+              <Text style={membershipStyles.label}>Swipe to compare plans. Choose a plan to join or renew.</Text>
+              <MemberPlanCheckout plans={membership.available_plans ?? []} renderPlans={(choose, enabled) => (membership.available_plans ?? []).length ? <ScrollView horizontal showsHorizontalScrollIndicator={false} decelerationRate="fast" contentContainerStyle={membershipStyles.planRail}>
+                {[...(membership.available_plans ?? [])].sort((a, b) => Number(b.plan_uuid === membership.membership_plan_uuid) - Number(a.plan_uuid === membership.membership_plan_uuid)).map(plan => <View key={plan.plan_uuid} style={[membershipStyles.planCard, { width: Math.min(340, Math.max(240, width - 72)) }, plan.plan_uuid === membership.membership_plan_uuid && { borderColor: colors.primary }]}>
+                  <View style={membershipStyles.header}>
+                    <View style={membershipStyles.copy}><Text style={membershipStyles.planName}>{plan.name}</Text><Text style={membershipStyles.label}>{plan.duration_days} days</Text></View>
+                    {plan.plan_uuid === membership.membership_plan_uuid ? <StatusBadge label="Your plan" tone="info" /> : null}
+                  </View>
+                  <Text style={membershipStyles.planPrice}>{formatCurrency(plan.price_cents, plan.currency)}</Text>
+                  {plan.description ? <Text style={membershipStyles.empty}>{plan.description}</Text> : null}
+                  <View style={membershipStyles.planBenefits}>
+                    {plan.benefits.map((benefit, i) => <View key={i} style={membershipStyles.benefit}><Ionicons name="checkmark-circle-outline" size={18} color={colors.primary} /><Text style={membershipStyles.body}>{benefit}</Text></View>)}
+                  </View>
+                  <PrimaryButton title={plan.plan_uuid === membership.membership_plan_uuid ? "Renew plan" : "Choose plan"} disabled={!enabled || plan.price_cents <= 0} onPress={() => choose(plan)} />
+                </View>)}
+              </ScrollView> : <Text style={membershipStyles.empty}>Your gym has not published any plans yet.</Text>} />
 
-            <SectionTitle title="Benefits" />
-            {membership.benefits.length ? (
-              membership.benefits.map((benefit) => <ScrollListCard key={benefit} title={benefit} icon="checkmark-circle-outline" />)
-            ) : (
-              <EmptyState title="No benefits listed" message="Plan benefits will appear when your gym adds them." icon="sparkles-outline" />
-            )}
-
-            <SectionTitle title="Membership History" />
-            <ListSection
-              data={membership.history}
-              keyExtractor={(item) => item.membership_uuid}
-              renderItem={(item) => (
-                <ScrollListCard
-                  title={item.membership_plan_name ?? "Membership"}
-                  subtitle={`${formatDate(item.start_date)} - ${formatDate(item.expiry_date)}`}
-                  description={item.amount_cents ? formatCurrency(item.amount_cents, item.currency ?? membership.plan_currency) : undefined}
-                  status={item.status}
-                  statusTone={toneForStatus(item.status)}
-                  icon="receipt-outline"
-                />
-              )}
-            />
-          </>
+            </View>
+            {membership.membership_plan_uuid ? <View style={membershipStyles.section}>
+              <Text accessibilityRole="header" style={membershipStyles.sectionTitle}>Your plan benefits</Text>
+              {membership.benefits.length ? <View style={membershipStyles.list}>
+                {membership.benefits.map((benefit, index) => <View key={`${index}-${benefit}`} style={[membershipStyles.row, membershipStyles.benefit, index > 0 && membershipStyles.divider]}><Ionicons name="checkmark-circle-outline" size={19} color={colors.primary} /><Text style={membershipStyles.body}>{benefit}</Text></View>)}
+              </View> : <Text style={membershipStyles.empty}>No benefits listed for your current plan.</Text>}
+            </View> : null}
+            <View style={membershipStyles.section}>
+              <Text accessibilityRole="header" style={membershipStyles.sectionTitle}>Membership history</Text>
+              {membership.history.length ? <View style={membershipStyles.list}>
+                {membership.history.map((item, index) => <View key={item.membership_uuid} style={[membershipStyles.row, index > 0 && membershipStyles.divider]}>
+                  <View style={membershipStyles.header}><View style={membershipStyles.copy}><Text style={membershipStyles.historyTitle}>{item.membership_plan_name ?? "Membership"}</Text><Text style={membershipStyles.label}>{item.start_date ? formatDate(item.start_date) : "Not set"} to {item.expiry_date ? formatDate(item.expiry_date) : "Not set"}</Text></View><StatusBadge label={item.status} tone={toneForStatus(item.status)} /></View>
+                  {item.amount_cents != null ? <Text style={membershipStyles.dateValue}>{formatCurrency(item.amount_cents, item.currency ?? membership.plan_currency)}</Text> : null}
+                  {item.status === "paid" ? <MemberPaymentReceipt paymentId={item.membership_uuid} /> : null}
+                </View>)}
+              </View> : <Text style={membershipStyles.empty}>Your membership records will appear here.</Text>}
+            </View>
+          </View>
         )}
       </QueryState>
     </Screen>
@@ -195,14 +240,15 @@ export function MemberPaymentsScreenView({ model }: { model: ReturnType<typeof u
                 data={payments}
                 keyExtractor={(item) => item.payment_uuid}
                 renderItem={(payment: MemberPayment) => (
+                  <MemberPaymentReceipt paymentId={payment.payment_uuid}>{(open, busy) => <Pressable accessibilityRole={payment.status === "paid" ? "button" : undefined} accessibilityLabel={`${payment.membership_plan_name ?? "Payment"}. ${payment.status === "paid" ? "View payment receipt" : "Receipt available after confirmation"}`} disabled={payment.status !== "paid" || busy} onPress={open}>
                   <PaymentHistoryCard
                     title={payment.membership_plan_name ?? "Payment"}
                     subtitle={`${formatCurrency(payment.amount_cents, payment.currency)} - ${payment.payment_method}`}
-                    description={`Invoice: ${payment.invoice_number ?? "Not issued"} - ${formatDateTime(payment.payment_date)}`}
+                    description={`${formatDateTime(payment.payment_date)}${payment.status === "paid" ? " - Tap to view receipt" : " - Receipt available after confirmation"}`}
                     status={payment.status}
                     statusTone={toneForStatus(payment.status)}
-                    actionLabel={payment.receipt_url ? "Receipt" : undefined}
                   />
+                  </Pressable>}</MemberPaymentReceipt>
                 )}
               />
             </>
@@ -374,6 +420,7 @@ export function MemberMealPlanScreenView({ model }: { model: ReturnType<typeof u
 }
 
 export function MemberProgressScreenView({ model }: { model: ReturnType<typeof useMemberProgressScreenPresentation> }): React.ReactNode {
+  const [showMore, setShowMore] = useState(false);
   const [validationError, setValidationError] = useState<string>();
   const memberColors = useMemberReferenceColors();
   const { colors } = useAppTheme();
@@ -386,23 +433,32 @@ export function MemberProgressScreenView({ model }: { model: ReturnType<typeof u
     <Screen scroll keyboard reference={false} style={{ backgroundColor: memberColors.background }} contentContainerStyle={styles.screen} refreshControl={queryRefresh(query.isRefetching, () => query.refetch())}>
       <ScreenHeader title="Your progress" subtitle="Small steps. Stronger you." />
       <MemberProgressOverview logs={query.data ?? []} loading={query.isLoading} failed={Boolean(query.error)} />
-      <View style={styles.panel}>
-        <SectionTitle title="Log Progress" />
-        <FormTextField label="Active calories burned (kcal)" value={activeCalories} keyboardType="numeric" onChangeText={setActiveCalories} leftIcon="flame-outline" />
-        <NoticeBanner message={progressValidation} tone="error" />
-        <View style={styles.inputRow}>
-          <FormTextField label="Weight (kg)" helper="Enter your measured weight in kilograms." value={weight} keyboardType="numeric" onChangeText={setWeight} leftIcon="scale-outline" />
-          <FormTextField label="Body fat %" value={bodyFat} keyboardType="numeric" onChangeText={setBodyFat} leftIcon="pulse-outline" />
+      <View style={[styles.panel, { padding: 16, gap: 16, borderWidth: 0, borderRadius: 18 }]}>
+        <View style={{ gap: 4 }}>
+          <Text accessibilityRole="header" style={{ color: colors.ink, fontSize: 20, fontWeight: "600", letterSpacing: -0.4 }}>Log progress</Text>
+          <Text style={{ color: colors.muted, fontSize: 13, lineHeight: 19 }}>Add weight or active calories. Other details are optional.</Text>
         </View>
-        <FormTextField label="Notes" value={notes} onChangeText={setNotes} leftIcon="create-outline" multiline />
+        <FormTextField label="Weight (kg)" placeholder="e.g. 72.5" value={weight} keyboardType="decimal-pad" onChangeText={setWeight} />
+        <FormTextField label="Active calories (kcal)" placeholder="e.g. 300" value={activeCalories} keyboardType="numeric" onChangeText={setActiveCalories} />
+        <NoticeBanner message={progressValidation} tone="error" />
+        <Pressable accessibilityRole="button" accessibilityState={{ expanded: showMore }} onPress={() => setShowMore(value => !value)} style={{ minHeight: 44, flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
+          <Text style={{ color: colors.primary, fontSize: 14, fontWeight: "500" }}>More details{!showMore && (bodyFat || notes) ? " ? Added" : ""}</Text>
+          <Ionicons name={showMore ? "chevron-up" : "chevron-down"} size={17} color={colors.primary} />
+        </Pressable>
+        {showMore ? <View style={{ gap: 16 }}>
+          <FormTextField label="Body fat (%)" placeholder="Optional" value={bodyFat} keyboardType="decimal-pad" onChangeText={setBodyFat} />
+          <FormTextField label="Notes" placeholder="How did you feel?" value={notes} onChangeText={setNotes} multiline />
+        </View> : null}
         <NoticeBanner message={validationError ?? null} tone="error" />
-        <PrimaryButton title="Save Log" icon="save-outline" loading={createLog.isPending} onPress={() => {
+        <PrimaryButton title="Save log" loading={createLog.isPending} onPress={() => {
           const error = progressFormError(weight, bodyFat, notes, activeCalories); setValidationError(error);
+          if (error && (bodyFat || notes)) setShowMore(true);
           if (!error && !createLog.isPending) submit();
         }} />
         <NoticeBanner message={createLog.error ? getApiErrorMessage(createLog.error) : createLog.data ? "Progress logged." : null} tone={createLog.error ? "error" : "success"} />
       </View>
-      <QueryState
+      <Text accessibilityRole="header" style={{ color: colors.ink, fontSize: 20, fontWeight: "600" }}>History</Text>
+      {!query.isLoading && !query.error && !query.data?.length ? <Text style={{ color: colors.muted, fontSize: 14, lineHeight: 21, paddingBottom: 16 }}>Your saved entries will appear here.</Text> : <QueryState
         loading={query.isLoading}
         error={query.error}
         empty={!query.data?.length}
@@ -413,11 +469,7 @@ export function MemberProgressScreenView({ model }: { model: ReturnType<typeof u
       >
         {(logs) => (
           <>
-            <DetailGrid>
-              <MemberStatCard title="Latest weight" value={logs[0]?.weight ? `${logs[0].weight} kg` : "--"} icon="scale-outline" tone="info" />
-              <MemberStatCard title="BMI" value={logs[0]?.bmi ? `${logs[0].bmi}` : "--"} icon="pulse-outline" tone="success" />
-              <MemberStatCard title="Goal" value={`${Math.round(logs[0]?.goal_progress_percentage ?? 0)}%`} icon="flag-outline" tone="warning" />
-            </DetailGrid>
+
             <ListSection
               data={logs}
               keyExtractor={(item) => item.progress_uuid}
@@ -434,7 +486,7 @@ export function MemberProgressScreenView({ model }: { model: ReturnType<typeof u
             />
           </>
         )}
-      </QueryState>
+      </QueryState>}
     </Screen>
   ));
     }
@@ -720,64 +772,4 @@ export function MemberSupportScreenView({ model }: { model: ReturnType<typeof us
   }
 }
 
-export function MemberSettingsScreenView({ model }: { model: ReturnType<typeof useMemberSettingsScreenPresentation> }): React.ReactNode {
-  const [validationError, setValidationError] = useState<string>();
-  const { colors } = useAppTheme();
-  if (model == null) return null;
-  if (typeof model !== "object" || !("kind" in model)) return model;
-  switch (model.kind) {
-    case "view1": {
-      const { styles, themeColors, oldPassword, setOldPassword, newPassword, setNewPassword, changePassword, submitPassword, notifications, setNotifications, privacy, setPrivacy, isDark, setColorScheme, navigation, logout } = model.props;
-      return ((
-    <Screen scroll keyboard contentContainerStyle={styles.screen}>
-      <ScreenHeader title="Settings" subtitle="Member preferences" icon="settings-outline" />
-      <View style={[styles.panel, { backgroundColor: themeColors.surface, borderColor: themeColors.border }]}>
-        <Text style={[styles.sectionTitle, { color: themeColors.ink }]}>Security</Text>
-        <FormTextField autoCapitalize="none" autoComplete="current-password" label="Old password" value={oldPassword} onChangeText={setOldPassword} secureTextEntry leftIcon="lock-open-outline" />
-        <FormTextField autoCapitalize="none" autoComplete="new-password" label="New password" value={newPassword} onChangeText={setNewPassword} secureTextEntry leftIcon="lock-closed-outline" />
-        <NoticeBanner message={validationError ?? null} tone="error" />
-        <PrimaryButton title="Change Password" icon="key-outline" loading={changePassword.isPending} onPress={() => {
-          const parsed = changePasswordSchema.safeParse({ old_password: oldPassword, new_password: newPassword });
-          const error = !oldPassword ? "Enter your current password." : !parsed.success ? parsed.error.issues[0]?.message : oldPassword === newPassword ? "Choose a different new password." : undefined;
-          setValidationError(error); if (!error && !changePassword.isPending) submitPassword();
-        }} />
-        <NoticeBanner message={changePassword.error ? getApiErrorMessage(changePassword.error) : changePassword.data?.message ?? null} tone={changePassword.error ? "error" : "success"} />
-      </View>
-
-      <View style={[styles.panel, { backgroundColor: themeColors.surface, borderColor: themeColors.border }]}>
-        <Text style={[styles.sectionTitle, { color: themeColors.ink }]}>Preferences</Text>
-        <ScrollListCard title="Notifications" subtitle="View gym updates and manage unread messages" icon="notifications-outline" actionLabel="Open" onAction={() => navigation.navigate("MemberNotifications")} />
-        <Text style={[styles.rowText, { color: themeColors.muted }]}>Notification delivery and shared-profile privacy preferences are not configurable in this version. Changing appearance below only changes this app's theme.</Text>
-        <View style={[styles.settingRow, { backgroundColor: themeColors.surfaceMuted }]}>
-          <View style={styles.flex}>
-            <Text style={[styles.rowTitle, { color: themeColors.ink }]}>Dark mode</Text>
-            <Text style={[styles.rowText, { color: themeColors.muted }]}>{isDark ? "Dark mode is on" : "Light mode is on"}</Text>
-          </View>
-          <Switch
-            accessibilityLabel="Dark mode"
-            value={isDark}
-            onValueChange={(enabled) => setColorScheme(enabled ? "dark" : "light")}
-            trackColor={{ true: themeColors.primary, false: themeColors.surfaceStrong }}
-            thumbColor={themeColors.white}
-            ios_backgroundColor={themeColors.surfaceStrong}
-          />
-        </View>
-        <ScrollListCard title="Language" subtitle="English" icon="language-outline" />
-        <ScrollListCard title="Connected devices" subtitle="Device connections are not available in this version" icon="watch-outline" />
-      </View>
-
-      <View style={styles.buttonRow}>
-        <PrimaryButton
-          title="Dashboard"
-          icon="speedometer-outline"
-          variant="secondary"
-          onPress={() => navigation.navigate("AppTabs", { screen: "MemberHome" })}
-          style={styles.buttonFlex}
-        />
-        <PrimaryButton title="Logout" icon="log-out-outline" variant="danger" loading={logout.isPending} onPress={() => requestLogoutConfirmation(() => logout.mutate())} style={styles.buttonFlex} />
-      </View>
-    </Screen>
-  ));
-    }
-  }
-}
+export { MemberSettingsView as MemberSettingsScreenView } from "./MemberSettingsView";

@@ -328,21 +328,23 @@ export const membershipPlanCreateSchema: z.ZodType<MembershipPlanCreatePayload> 
   z.object({
     name: z.string().trim().min(2).max(160),
     description: optionalText(800, "Description"),
+    daily_visit_limit: z.coerce.number().int().min(1).max(24).default(4),
     duration_days: z.coerce.number().int().gt(0),
-    price_cents: z.coerce.number().int().gte(0),
+    price_rupees: z.coerce.number().finite().gte(0).refine(value => Math.abs(value * 100 - Math.round(value * 100)) < 0.000001, "Enter a rupee amount with at most two decimal places").transform(value => Math.round(value * 100)),
     currency: currencyCode(),
     features: stringList(),
-  });
+  }).transform(({ price_rupees, ...plan }) => ({ ...plan, price_cents: price_rupees }));
 
 export const membershipPlanUpdateSchema: z.ZodType<MembershipPlanUpdatePayload> =
   z.object({
     name: z.string().trim().min(2).max(160).optional(),
     description: nullableText(800, "Description"),
+    daily_visit_limit: z.coerce.number().int().min(1).max(24).optional(),
     duration_days: z.coerce.number().int().gt(0).nullable().optional(),
-    price_cents: z.coerce.number().int().gte(0).nullable().optional(),
+    price_rupees: z.coerce.number().finite().gte(0).refine(value => Math.abs(value * 100 - Math.round(value * 100)) < 0.000001, "Enter a rupee amount with at most two decimal places").transform(value => Math.round(value * 100)).nullable().optional(),
     currency: optionalCurrencyCode(),
     features: optionalStringList().nullable(),
-  });
+  }).transform(({ price_rupees, ...plan }) => ({ ...plan, price_cents: price_rupees }));
 
 export const workoutPlanCreateSchema: z.ZodType<WorkoutPlanCreatePayload> =
   z.object({

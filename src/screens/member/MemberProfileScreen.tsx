@@ -11,7 +11,7 @@ import { PrimaryButton } from "../../components/PrimaryButton";
 import { EmptyState, ErrorState, LoadingSkeleton, ScrollListCard, StatusBadge } from "../../components/member";
 import { Screen } from "../../components/Screen";
 import { ScreenHeader } from "../../components/ScreenHeader";
-import { useMemberProfile, useUpdateMemberProfile } from "../../hooks/useMember";
+import { useMemberMembership, useMemberProfile, useUpdateMemberProfile } from "../../hooks/useMember";
 import { getApiErrorMessage } from "../../services/api/client";
 import { useAppTheme } from "../../theme/AppThemeProvider";
 import { radius, spacing, typography } from "../../theme/theme";
@@ -60,6 +60,7 @@ export function useMemberProfileScreenPresentation() {
   const { colors } = useAppTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const profileQuery = useMemberProfile();
+  const membershipQuery = useMemberMembership();
   const updateProfile = useUpdateMemberProfile();
   const profile = profileQuery.data;
   const [form, setForm] = useState<ProfileForm>(blankForm);
@@ -82,7 +83,7 @@ export function useMemberProfileScreenPresentation() {
   }, [profile]);
 
   const submit = () => {
-    updateProfile.mutate({
+    return new Promise<boolean>((resolve) => updateProfile.mutate({
       phone: form.phone,
       address: form.address,
       height: numericOrNull(form.height),
@@ -93,10 +94,11 @@ export function useMemberProfileScreenPresentation() {
         name: form.emergencyName.trim(),
         phone: form.emergencyPhone.trim()
       }
-    });
+    }, { onSuccess: () => resolve(true), onError: () => resolve(false) }));
   };
 
-  return { kind: "view1" as const, props: { styles, profileQuery, colors, profile, form, setForm, updateProfile, submit, navigation } };
+  const refreshProfile = () => Promise.all([profileQuery.refetch(), membershipQuery.refetch()]);
+  return { kind: "view1" as const, props: { styles, profileQuery, membershipQuery, refreshProfile, colors, profile, form, setForm, updateProfile, submit, navigation } };
 }
 
 export function MemberProfileScreen(...args: Parameters<typeof useMemberProfileScreenPresentation>): React.JSX.Element {

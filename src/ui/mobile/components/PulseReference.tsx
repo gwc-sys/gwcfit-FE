@@ -38,7 +38,7 @@ export function PulseChips<T extends string>({ options, value, onChange, segment
   const { colors } = useAppTheme();
   const s = pulseStyles(colors);
   return <View style={[s.chips, { alignItems: "center", position: "relative" }, segmented && { gap: 0 }]}>
-    {segmented && <View pointerEvents="none" style={{ position: "absolute", left: 0, right: 0, top: 6, bottom: 6, borderRadius: 14, backgroundColor: colors.surfaceMuted }} />}
+    {segmented && <View style={{ pointerEvents: "none", position: "absolute", left: 0, right: 0, top: 6, bottom: 6, borderRadius: 14, backgroundColor: colors.surfaceMuted }} />}
     {options.map(option => {
       const selected = value === option;
       return <Pressable key={option} accessibilityRole="button" accessibilityState={{ selected }} onPress={() => onChange(option)} style={({ pressed }) => [{ minHeight: controlMetrics.minimumTouchSize, justifyContent: "center", flex: segmented ? 1 : undefined, flexGrow: segmented ? 1 : 0, opacity: pressed ? 0.7 : 1 }]}>

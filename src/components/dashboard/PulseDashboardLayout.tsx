@@ -32,6 +32,7 @@ import { useLogout } from "../../hooks/useAuthActions";
 import { requestLogoutConfirmation } from "../../utils/logoutConfirmation";
 import { notificationsApi } from "../../services/api/notifications";
 import { Screen } from "../Screen";
+import { useMyGym } from "../../hooks/useOperations";
 
 export type PulseNavItem = {
   label: string;
@@ -174,6 +175,13 @@ export function usePulseDashboardLayoutPresentation({
   // Labels can change per locale or product wording without changing access.
   const isPlatformAdmin = user?.role === "super_admin";
   const isGymOwner = user?.role === "gym_owner";
+  const myGymQuery = useMyGym(Boolean(user?.gym_id));
+  useEffect(() => {
+    if (myGymQuery.data?.name && user?.gym_id === myGymQuery.data.id && user.gym_name !== myGymQuery.data.name) {
+      useAuthStore.setState({ user: { ...user, gym_name: myGymQuery.data.name } });
+    }
+  }, [myGymQuery.data, user]);
+  const savedGymName = myGymQuery.data?.name?.trim() || user?.gym_name?.trim() || "your gym";
   const isTrainer = user?.role === "trainer";
   const userName = user?.full_name ?? "John Trainer";
   const notificationQuery = useQuery({
@@ -217,7 +225,7 @@ export function usePulseDashboardLayoutPresentation({
     if (accountMenuRequest > 0) setAccountMenuOpen(true);
   }, [accountMenuRequest]);
 
-  return { kind: "view1" as const, props: { styles, contentStyle, refreshControl, isDesktop, isTrainer, isGymOwner, GymOwnerSidebar, activeLabel, navigation, isPlatformAdmin, colors, resolvedRoleLabel, sidebarItems, setAccountMenuOpen, userName, MobileBrandButton, firstName, ownerDate, unreadNotificationCount, resolvedTrainerSearch, setResolvedTrainerSearch, trainerDate, children, accountMenuOpen, user, OwnerAccountItem, isDark, toggleColorScheme, logout } };
+  return { kind: "view1" as const, props: { savedGymName, styles, contentStyle, refreshControl, isDesktop, isTrainer, isGymOwner, GymOwnerSidebar, activeLabel, navigation, isPlatformAdmin, colors, resolvedRoleLabel, sidebarItems, setAccountMenuOpen, userName, MobileBrandButton, firstName, ownerDate, unreadNotificationCount, resolvedTrainerSearch, setResolvedTrainerSearch, trainerDate, children, accountMenuOpen, user, OwnerAccountItem, isDark, toggleColorScheme, logout } };
 }
 
 export function PulseDashboardLayout(...args: Parameters<typeof usePulseDashboardLayoutPresentation>): React.JSX.Element {

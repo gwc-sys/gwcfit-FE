@@ -8,7 +8,7 @@ const navigationStyles = (colors: ThemeColors, bottomInset: number) => adaptPage
     height: 56 + Math.max(bottomInset, 8),
     paddingTop: 8,
     paddingBottom: Math.max(bottomInset, 8),
-    backgroundColor: colors.background === "#0B1119" ? colors.background : colors.surface,
+    backgroundColor: colors.surface,
     borderTopWidth: StyleSheet.hairlineWidth,
     borderColor: colors.border,
     elevation: 0,
@@ -27,5 +27,5 @@ export const createStyles = (colors: ThemeColors, _width: number, bottomInset: n
 
 export const createMemberTabStyles = (colors: ThemeColors, _width: number, bottomInset: number) => {
   const base = navigationStyles(colors, bottomInset);
-  return { ...base, tabBar: { ...base.tabBar, backgroundColor: colors.background === "#0B1119" ? "#0D1723" : colors.surface, borderColor: colors.background === "#0B1119" ? "#24374B" : colors.border }, memberTabLabel: { ...base.memberTabLabel, fontWeight: "500" as const }, centerTabLabel: { ...base.centerTabLabel, fontWeight: "500" as const } };
+  return { ...base, tabBar: { ...base.tabBar, backgroundColor: colors.surface, borderColor: colors.border }, memberTabLabel: { ...base.memberTabLabel, fontWeight: "500" as const }, centerTabLabel: { ...base.centerTabLabel, fontWeight: "500" as const } };
 };

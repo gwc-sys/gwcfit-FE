@@ -41,7 +41,7 @@ type DashboardPalette = {
 const MOBILE_STAT_CARD_WIDTH = 176;
 
 export const LIGHT_UI: DashboardPalette = {
-  background: "#F2F5FA",
+  background: "#F2F2F7",
   surface: "#FFFFFF",
   panel: "#FFFFFF",
   border: "#E5E5EA",
@@ -77,23 +77,23 @@ export const LIGHT_UI: DashboardPalette = {
 };
 
 export const DARK_UI: DashboardPalette = {
-  background: "#090F18",
-  surface: "#111D2B",
-  panel: "#111D2B",
-  border: "#24374B",
-  borderStrong: "rgba(0,122,255,0.30)",
+  background: "#000000",
+  surface: "#1C1C1E",
+  panel: "#1C1C1E",
+  border: "#38383A",
+  borderStrong: "#48484A",
   text: "#FFFFFF",
-  muted: "#A8BED8",
+  muted: "#A1A1A8",
   subtle: "#8E8E93",
   navLabel: "#D1D1D6",
   primary: "#0A84FF",
   primaryDark: "#64D2FF",
   onPrimary: "#FFFFFF",
-  success: "#22C55E",
-  danger: "#F87171",
-  warning: "#FB923C",
+  success: "#30D158",
+  danger: "#FF453A",
+  warning: "#FF9F0A",
   cyan: "#2DD4BF",
-  blue: "#60A5FA",
+  blue: "#0A84FF",
   pink: "#F472B6",
   softPurple: "rgba(0,122,255,0.18)",
   softGreen: "rgba(34,197,94,0.16)",
@@ -106,8 +106,8 @@ export const DARK_UI: DashboardPalette = {
   scheduleTime: "#CBD5E1",
   upcomingPill: "rgba(37,99,235,0.20)",
   upcomingPillText: "#93C5FD",
-  ringTrack: "rgba(0,122,255,0.22)",
-  progressTrack: "rgba(0,122,255,0.18)",
+  ringTrack: "#38383A",
+  progressTrack: "#38383A",
   calorieTrack: "rgba(148,163,184,0.18)",
   shadowColor: "#000000"
 };

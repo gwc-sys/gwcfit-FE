@@ -1,3 +1,4 @@
+import { formatCurrency } from "../../../../utils/formatters";
 import { showAlert } from "../../../../utils/appAlert";
 import { Ionicons } from "@expo/vector-icons";
 import { Controller } from "react-hook-form";
@@ -273,11 +274,12 @@ export function GymManagementPanelView({ model }: { model: ReturnType<typeof use
               <View style={styles.rowActions}>
                 <Pressable
                   accessibilityRole="button"
+                  accessibilityLabel={item.status === "active" && item.is_active ? "Suspend gym" : "Reactivate gym"}
                   onPress={() => confirmSuspend(item)}
                   style={styles.iconButton}
                 >
                   <Ionicons
-                    name="pause-circle-outline"
+                    name={item.status === "active" && item.is_active ? "pause-circle-outline" : "play-circle-outline"}
                     size={19}
                     color={colors.ink}
                   />
@@ -355,7 +357,7 @@ export function GymDetailsPanelView({ model }: { model: ReturnType<typeof useGym
   if (typeof model !== "object" || !("kind" in model)) return model;
   switch (model.kind) {
     case "view1": {
-      const { styles, colors, gym, DetailMetric, usersQuery, activeMembers, plansQuery, expiringSoon, trial, trialProgress, trialCompletedDays, trialRemainingDays, trialEndsAt, monthStart, leadingDays, monthDays, expiryByDay, trialDayState, daysRemaining, dateLabel, paymentsQuery } = model.props;
+      const { activationPlan, setActivationPlan, activationType, setActivationType, activationPlansQuery, isSuperAdmin, statusMutation, changeStatus, styles, colors, gym, DetailMetric, usersQuery, activeMembers, plansQuery, expiringSoon, trial, trialProgress, trialCompletedDays, trialRemainingDays, trialEndsAt, monthStart, leadingDays, monthDays, expiryByDay, trialDayState, daysRemaining, dateLabel, paymentsQuery } = model.props;
       return ((
     <View style={styles.wrap}>
       <View style={styles.hero}>
@@ -373,6 +375,51 @@ export function GymDetailsPanelView({ model }: { model: ReturnType<typeof useGym
           tone={gym.status === "active" ? "success" : "warning"}
         />
       </View>
+
+      {isSuperAdmin ? <View style={{ gap: 24, padding: 24, borderWidth: 1, borderColor: colors.border, borderRadius: 20, backgroundColor: colors.surface }}>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 14 }}>
+          <View style={{ padding: 12, borderRadius: 14, backgroundColor: colors.primarySoft }}><Ionicons name="shield-checkmark-outline" size={24} color={colors.primary} /></View>
+          <View style={{ flex: 1 }}><Text accessibilityRole="header" style={{ color: colors.ink, fontSize: 22, fontWeight: "600" }}>Platform membership</Text><Text style={{ color: colors.muted, fontSize: 14, marginTop: 5 }}>Choose a plan and how access is granted.</Text></View>
+        </View>
+        <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 24, padding: 20, backgroundColor: colors.primarySoft, borderRadius: 14 }}>
+          <View style={{ flex: 1, minWidth: 160, gap: 6 }}><Text style={{ color: colors.muted, fontSize: 12 }}>CURRENT PLAN</Text><Text style={{ color: colors.ink, fontSize: 20, fontWeight: "600" }}>{trial?.plan_name ?? "No plan assigned"}</Text></View>
+          <View style={{ flex: 1, minWidth: 160, gap: 6 }}><Text style={{ color: colors.muted, fontSize: 12 }}>ACCESS TYPE</Text><Text style={{ color: colors.ink, fontSize: 15 }}>{gym.settings?.platform_activation_type === "free" ? "Free ? Admin granted" : gym.settings?.platform_activation_type === "paid" ? "Paid ? Admin confirmed" : "Existing subscription"}</Text></View>
+          <View style={{ flex: 1, minWidth: 160, gap: 6 }}><Text style={{ color: colors.muted, fontSize: 12 }}>VALID UNTIL</Text><Text style={{ color: colors.ink, fontSize: 15 }}>{trial?.current_period_ends_at ? new Date(trial.current_period_ends_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : "Not set"}</Text></View>
+        </View>
+        <View style={{ gap: 12 }}>
+          <Text style={{ color: colors.ink, fontSize: 16, fontWeight: "600" }}>1. Choose a platform plan</Text>
+          {activationPlansQuery.isLoading ? <Text style={{ color: colors.muted }}>Loading plans...</Text> : null}
+          {activationPlansQuery.error ? <Text accessibilityRole="alert" style={{ color: colors.danger }}>{getApiErrorMessage(activationPlansQuery.error)}</Text> : null}
+          <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 12 }}>
+          {(activationPlansQuery.data ?? []).filter(plan => plan.is_active).map(plan => {
+            const selected = activationPlan === plan.id;
+            const available = plan.billing_period === "month" || plan.billing_period === "year";
+            return <Pressable key={plan.id} accessibilityRole="radio" accessibilityState={{ checked: selected, disabled: !available || statusMutation.isPending }} disabled={!available || statusMutation.isPending} onPress={() => setActivationPlan(plan.id)} style={({ pressed }) => ({ flexGrow: 1, flexBasis: 220, minWidth: 0, padding: 20, gap: 12, borderRadius: 16, borderWidth: 1, borderColor: selected ? colors.primary : colors.border, backgroundColor: selected ? colors.primarySoft : colors.background, opacity: !available ? 0.5 : pressed ? 0.8 : 1 })}>
+              <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", gap: 12 }}><Text style={{ color: colors.ink, fontSize: 18, fontWeight: "600", flex: 1 }}>{plan.name}</Text><Ionicons name={selected ? "checkmark-circle" : "ellipse-outline"} size={23} color={selected ? colors.primary : colors.muted} /></View>
+              <Text style={{ color: colors.ink, fontSize: 24, fontWeight: "600" }}>{plan.price_cents == null ? "Custom pricing" : formatCurrency(plan.price_cents, plan.currency)}<Text style={{ color: colors.muted, fontSize: 13, fontWeight: "400" }}>{available ? ` / ${plan.billing_period}` : ""}</Text></Text>
+              <Text style={{ color: colors.muted, fontSize: 13, lineHeight: 19 }}>{available ? plan.description : "Set a billing period before activation."}</Text>
+            </Pressable>;
+          })}
+          </View>
+        </View>
+        <View style={{ gap: 12 }}>
+          <Text style={{ color: colors.ink, fontSize: 16, fontWeight: "600" }}>2. Choose access type</Text>
+          <View style={{ flexDirection: "row", padding: 4, borderRadius: 13, backgroundColor: colors.surfaceElevated, gap: 4 }}>
+            {(["free", "paid"] as const).map(type => <Pressable key={type} accessibilityRole="radio" accessibilityState={{ checked: activationType === type }} disabled={statusMutation.isPending} onPress={() => setActivationType(type)} style={{ flex: 1, minHeight: 46, alignItems: "center", justifyContent: "center", borderRadius: 10, backgroundColor: activationType === type ? colors.primary : "transparent" }}><Text style={{ color: activationType === type ? colors.white : colors.muted, fontWeight: "600", fontSize: 15 }}>{type === "free" ? "Free access" : "Paid plan"}</Text></Pressable>)}
+          </View>
+          <Text style={{ color: colors.muted, fontSize: 14, lineHeight: 21 }}>{activationType === "free" ? "No payment required. Access is granted by super admin for the selected plan period." : "Confirm payment has been received before activating this plan."}</Text>
+        </View>
+        <View style={{ gap: 12, paddingTop: 20, borderTopWidth: 1, borderTopColor: colors.border }}>
+          <PrimaryButton title={activationPlan ? `Activate ${(activationPlansQuery.data ?? []).find(plan => plan.id === activationPlan)?.name ?? "plan"} ? ${activationType === "free" ? "Free access" : "Paid plan"}` : "Select a plan to continue"} disabled={!activationPlan || statusMutation.isPending} loading={statusMutation.isPending} onPress={() => changeStatus("reactivate")} />
+          {statusMutation.error ? <Text accessibilityRole="alert" style={{ color: colors.danger }}>{getApiErrorMessage(statusMutation.error)}</Text> : null}
+          {statusMutation.isSuccess ? <Text accessibilityLiveRegion="polite" style={{ color: colors.success }}>Gym status updated.</Text> : null}
+        </View>
+        <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 12 }}>
+          {gym.status === "active" && gym.is_active ? <PrimaryButton title="Suspend gym" variant="secondary" disabled={statusMutation.isPending} onPress={() => changeStatus("suspend")} /> : null}
+        {gym.is_active ? <PrimaryButton title="Suspend for unpaid platform plan" icon="card-outline" variant="secondary" disabled={statusMutation.isPending} onPress={() => changeStatus("unpaid")} /> : null}
+          {gym.is_active ? <PrimaryButton title="Delete gym" icon="trash-outline" variant="secondary" disabled={statusMutation.isPending} onPress={() => changeStatus("delete")} /> : null}
+        </View>
+      </View> : null}
 
       <View style={styles.metrics}>
         <DetailMetric
@@ -743,9 +790,11 @@ export function MyGymPanelView({ model }: { model: ReturnType<typeof useMyGymPan
         <View style={styles.fieldGrid}>
           <GymField autoCapitalize="none" control={control} error={errors.business_email?.message} keyboardType="email-address" label="Public business email" leftIcon="mail-outline" name="business_email" />
           <GymField control={control} error={errors.business_phone?.message} keyboardType="phone-pad" label="Public business phone" leftIcon="call-outline" name="business_phone" />
+        </View>
+        <View style={styles.fieldGrid}>
           <GymField control={control} error={errors.city?.message} label="City" leftIcon="business-outline" name="city" />
           <GymField control={control} error={errors.state?.message} label="State" leftIcon="map-outline" name="state" />
-          <GymField control={control} error={errors.pincode?.message} label="Pincode" leftIcon="pin-outline" name="pincode" />
+          <GymField control={control} error={errors.pincode?.message} keyboardType="phone-pad" label="Pincode" leftIcon="pin-outline" name="pincode" />
         </View>
         <View style={styles.fieldGrid}>
           <GymField autoCapitalize="none" control={control} error={errors.latitude?.message} label="Latitude" leftIcon="locate-outline" name="latitude" />

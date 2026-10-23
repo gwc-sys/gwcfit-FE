@@ -8,6 +8,7 @@ import { radius, shadows, spacing, typography } from "../theme/theme";
 import type { ThemeColors } from "../theme/theme";
 
 type QuickActionProps = {
+  grouped?: boolean;
   tile?: boolean;
   icon: keyof typeof Ionicons.glyphMap;
   title: string;
@@ -27,7 +28,7 @@ function getTone(colors: ThemeColors, tone: NonNullable<QuickActionProps["tone"]
   return tones[tone];
 }
 
-export function QuickAction({ icon, title, subtitle, onPress, tile = false, tone = "primary" }: QuickActionProps) {
+export function QuickAction({ icon, title, subtitle, onPress, tile = false, grouped = false, tone = "primary" }: QuickActionProps) {
   const { colors } = useAppTheme();
   const { width } = useWindowDimensions();
   const styles = useMemo(() => createStyles(colors), [colors]);
@@ -46,10 +47,11 @@ export function QuickAction({ icon, title, subtitle, onPress, tile = false, tone
         tablet && styles.wrapTablet,
         desktop && styles.wrapDesktop,
         tile && styles.tile,
+        grouped && { flexGrow: 0, flexBasis: "auto", borderRadius: 0, minHeight: 60, paddingHorizontal: 16, paddingVertical: 10, borderBottomWidth: StyleSheet.hairlineWidth },
         pressed && styles.pressed
       ]}
     >
-      <View style={[styles.iconWrap, { backgroundColor: toneColor.background }]}>
+      <View style={[styles.iconWrap, { backgroundColor: toneColor.background }, grouped && { width: 32, height: 32, borderRadius: 8 }]}>
         <Ionicons name={icon} size={tile ? 34 : compact ? 20 : 23} color={toneColor.foreground} />
       </View>
       <View style={[styles.copy, tile && { flex: undefined, alignItems: "center" }]}>

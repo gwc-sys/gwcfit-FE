@@ -25,8 +25,8 @@ export function MemberListScreenView({ model }: { model: ReturnType<typeof useMe
       return (<AccessDeniedScreen />);
     }
     case "view2": {
-      const { PlatformUserDirectory } = model.props;
-      return (<PlatformUserDirectory />);
+      const { ConnectedGyms } = model.props;
+      return (<ConnectedGyms />);
     }
     case "view3": {
       const { styles, compact, membersQuery, isTrainer, colors, setSearch, setPage, search, setMemberFilter, memberFilter, canManageMembers, navigation, MemberStat, activeCount, newThisMonthCount, expiredCount, setSortDirection, sortDirection, notice, deleteMember, visibleMembers, MemberRow, confirmDelete, page } = model.props;

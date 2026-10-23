@@ -66,6 +66,15 @@ export type MemberMembership = {
   days_remaining: number;
   renewal_reminder: string;
   benefits: string[];
+  available_plans?: Array<{
+    plan_uuid: string;
+    name: string;
+    description?: string | null;
+    duration_days: number;
+    price_cents: number;
+    currency: string;
+    benefits: string[];
+  }>;
   history: MemberMembershipHistoryItem[];
 };
 

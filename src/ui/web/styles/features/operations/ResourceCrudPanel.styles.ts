@@ -33,8 +33,8 @@ export const createStyles = (colors: ThemeColors, width: number) => {
       borderWidth: 1,
       borderColor: colors.border,
       borderRadius: radius.md,
-      backgroundColor: colors.surfaceStrong,
-      padding: spacing.md,
+      backgroundColor: colors.surface,
+      padding: 16,
     },
     scheduleHeading: {
       flexDirection: compact ? "column" : "row",
@@ -47,7 +47,7 @@ export const createStyles = (colors: ThemeColors, width: number) => {
       alignItems: "center",
       gap: spacing.sm,
     },
-    scheduleTitle: { ...typography.h3, color: colors.ink },
+    scheduleTitle: { ...typography.h3, fontSize: 17, fontWeight: "600", color: colors.ink },
     scheduleHint: { ...typography.small, color: colors.muted, marginTop: 2 },
     modeSwitch: {
       flexDirection: "row",
@@ -82,8 +82,8 @@ export const createStyles = (colors: ThemeColors, width: number) => {
       gap: spacing.xs,
       borderWidth: 1,
       borderColor: colors.border,
-      borderRadius: 999,
-      paddingHorizontal: spacing.lg,
+      borderRadius: 10,
+      paddingHorizontal: 16,
       backgroundColor: colors.surfaceElevated,
     },
     choiceOptionActive: {

@@ -1,3 +1,4 @@
+import { OwnerMembershipPayments } from "../../../../features/operations/MembershipCheckout";
 import { Ionicons } from "@expo/vector-icons";
 import { Fragment } from "react";
 import { ActivityIndicator, Modal, Pressable, ScrollView, Text, TextInput, View } from "react-native";
@@ -54,6 +55,7 @@ export function PaymentScreenView({ model }: { model: ReturnType<typeof usePayme
           <PrimaryButton title="Record Payment" icon="add" />
         </View>
       </View>
+      <OwnerMembershipPayments />
       <View style={styles.metrics}>
         <Metric
           s={styles}

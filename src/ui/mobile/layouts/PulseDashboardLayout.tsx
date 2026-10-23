@@ -42,7 +42,7 @@ export function PulseDashboardLayoutView({ model }: { model: ReturnType<typeof u
           <Text style={chrome.accountInitials}>{initials(userName) || "U"}</Text>
         </Pressable>
       </View> : null}
-      {isTrainer ? <View style={chrome.searchBar}>
+      {isTrainer && activeLabel !== "Members" && activeLabel !== "Attendance" && activeLabel !== "Diets" && activeLabel !== "Profile" ? <View style={chrome.searchBar}>
         <Ionicons name="search-outline" size={20} color={colors.muted} />
         <TextInput accessibilityLabel="Search workspace" value={resolvedTrainerSearch} onChangeText={setResolvedTrainerSearch} placeholder="Search workspace" placeholderTextColor={colors.subtle} style={chrome.searchInput} />
         {resolvedTrainerSearch ? <Pressable accessibilityRole="button" accessibilityLabel="Clear search" onPress={() => setResolvedTrainerSearch("")} style={chrome.clearButton}><Ionicons name="close-circle" size={20} color={colors.muted} /></Pressable> : null}
@@ -57,7 +57,7 @@ export function PulseDashboardLayoutView({ model }: { model: ReturnType<typeof u
       </View> : null}
       {isDashboard && isTrainer ? <Pressable accessibilityRole="button" accessibilityLabel="Open attendance calendar" onPress={() => navigation.navigate("Attendance")} style={chrome.trainerDate}><Ionicons name="calendar-outline" size={18} color={colors.primary} /><Text style={chrome.dateText}>{trainerDate}</Text></Pressable> : null}
       <EmbeddedScreenContext.Provider value={!workspaceScrolls}>
-        <View style={workspaceScrolls ? chrome.dashboardBody : chrome.screenBody}>{children}</View>
+        <View style={[workspaceScrolls ? chrome.dashboardBody : chrome.screenBody, isTrainer && isDashboard && { gap: 16 }]}>{children}</View>
       </EmbeddedScreenContext.Provider>
       {accountMenuOpen ? (
         <Modal

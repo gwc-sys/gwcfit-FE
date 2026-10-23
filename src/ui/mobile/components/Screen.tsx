@@ -84,7 +84,7 @@ export function Screen({
 
   return (
     <SafeAreaView edges={embedded ? [] : insideTabs ? ["top", "right", "left"] : ["top", "right", "bottom", "left"]} style={[styles.safe, { backgroundColor }, style]}>
-      {reference && !embedded && !dark ? <LinearGradient pointerEvents="none" colors={isDark ? pulseScreenGradients.dark : pulseScreenGradients.light} style={StyleSheet.absoluteFill} /> : null}
+      {reference && !embedded && !dark ? <LinearGradient colors={isDark ? pulseScreenGradients.dark : pulseScreenGradients.light} style={[StyleSheet.absoluteFill, { pointerEvents: "none" }]} /> : null}
       {keyboard ? (
         <KeyboardAvoidingView
           behavior={Platform.OS === "ios" ? "padding" : "height"}

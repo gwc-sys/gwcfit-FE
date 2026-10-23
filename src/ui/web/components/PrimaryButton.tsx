@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import type { ReactNode } from "react";
 import { useMemo } from "react";
-import { ActivityIndicator, Pressable, StyleProp, StyleSheet, Text, useWindowDimensions, View, ViewStyle } from "react-native";
+import { ActivityIndicator, Pressable, StyleProp, StyleSheet, Text, TextStyle, useWindowDimensions, View, ViewStyle } from "react-native";
 import { useAppTheme } from "../../../theme/AppThemeProvider";
 import { radius, shadows, spacing, typography } from "../theme/theme";
 import type { ThemeColors } from "../theme/theme";
@@ -18,6 +18,7 @@ type PrimaryButtonProps = {
   icon?: ReactNode | IconName;
   style?: StyleProp<ViewStyle>;
   foregroundColor?: string;
+  labelStyle?: StyleProp<TextStyle>;
 };
 
 export function PrimaryButton({
@@ -29,7 +30,8 @@ export function PrimaryButton({
   variant = "primary",
   icon,
   style,
-  foregroundColor
+  foregroundColor,
+  labelStyle
 }: PrimaryButtonProps) {
   const { colors } = useAppTheme();
   const { width } = useWindowDimensions();
@@ -87,7 +89,8 @@ export function PrimaryButton({
               variant === "ghost" && styles.ghostLabel,
               variant === "dark" && styles.darkLabel,
               foregroundColor ? { color: foregroundColor } : null,
-              disabled && styles.disabledLabel
+              disabled && styles.disabledLabel,
+              labelStyle
             ]}
           >
             {text}

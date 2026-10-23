@@ -14,8 +14,8 @@ export const createFeatureStyles = (colors: ThemeColors) => adaptPageStyles(Styl
   },
   panel: {
     gap: spacing.md,
-    borderRadius: 20,
-    borderWidth: 1,
+    borderRadius: radius.md,
+    borderWidth: StyleSheet.hairlineWidth,
     borderColor: colors.border,
     backgroundColor: colors.card,
     padding: spacing.md
@@ -70,7 +70,7 @@ export const createFeatureStyles = (colors: ThemeColors) => adaptPageStyles(Styl
   rowTitle: {
     ...typography.body,
     color: colors.ink,
-    fontWeight: "800"
+    fontWeight: "600"
   },
   rowText: {
     ...typography.small,

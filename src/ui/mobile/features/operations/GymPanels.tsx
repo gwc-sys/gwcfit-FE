@@ -1,3 +1,4 @@
+import { formatCurrency } from "../../../../utils/formatters";
 import { Pressable } from "../../components/NativePressable";
 import { controlMetrics } from "../../theme/theme";
 import { showAlert } from "../../../../utils/appAlert";
@@ -275,11 +276,12 @@ export function GymManagementPanelView({ model }: { model: ReturnType<typeof use
               <View style={styles.rowActions}>
                 <Pressable
                   accessibilityRole="button"
+                  accessibilityLabel={item.status === "active" && item.is_active ? "Suspend gym" : "Reactivate gym"}
                   onPress={() => confirmSuspend(item)}
                   style={styles.iconButton}
-                 accessibilityLabel={"Suspend gym"}>
+                >
                   <Ionicons
-                    name="pause-circle-outline"
+                    name={item.status === "active" && item.is_active ? "pause-circle-outline" : "play-circle-outline"}
                     size={19}
                     color={colors.ink}
                   />
@@ -357,7 +359,7 @@ export function GymDetailsPanelView({ model }: { model: ReturnType<typeof useGym
   if (typeof model !== "object" || !("kind" in model)) return model;
   switch (model.kind) {
     case "view1": {
-      const { styles, colors, gym, DetailMetric, usersQuery, activeMembers, plansQuery, expiringSoon, trial, trialProgress, trialCompletedDays, trialRemainingDays, trialEndsAt, monthStart, leadingDays, monthDays, expiryByDay, trialDayState, daysRemaining, dateLabel, paymentsQuery } = model.props;
+      const { activationPlan, setActivationPlan, activationType, setActivationType, activationPlansQuery, isSuperAdmin, statusMutation, changeStatus, styles, colors, gym, DetailMetric, usersQuery, activeMembers, plansQuery, expiringSoon, trial, trialProgress, trialCompletedDays, trialRemainingDays, trialEndsAt, monthStart, leadingDays, monthDays, expiryByDay, trialDayState, daysRemaining, dateLabel, paymentsQuery } = model.props;
       return ((
     <View style={styles.wrap}>
       <View style={styles.hero}>
@@ -375,6 +377,24 @@ export function GymDetailsPanelView({ model }: { model: ReturnType<typeof useGym
           tone={gym.status === "active" ? "success" : "warning"}
         />
       </View>
+
+      {isSuperAdmin ? <View style={{ gap: 12 }}>
+        <Text accessibilityRole="header" style={{ color: colors.ink, fontSize: 18, fontWeight: "600" }}>Gym access controls</Text>
+        <Text style={{ color: colors.muted }}>Manage access for the gym owner and all associated users.</Text>
+        <Text style={{ color: colors.ink }}>Current platform plan: {trial?.plan_name ?? "No plan assigned"}</Text>
+        <Text style={{ color: colors.muted }}>Activation: {gym.settings?.platform_activation_type === "free" ? "Free - granted by super admin (no payment)" : gym.settings?.platform_activation_type === "paid" ? "Paid - confirmed by super admin" : "Existing subscription"}</Text>
+        {trial?.current_period_ends_at ? <Text style={{ color: colors.muted }}>Valid until: {new Date(trial.current_period_ends_at).toLocaleDateString()}</Text> : null}
+        <Text style={{ color: colors.ink, fontWeight: "600" }}>Select Platform Membership Plan</Text>
+        {activationPlansQuery.error ? <Text style={{ color: colors.danger }}>{getApiErrorMessage(activationPlansQuery.error)}</Text> : null}
+        {(activationPlansQuery.data ?? []).filter(plan => plan.is_active).map(plan => <Pressable key={plan.id} accessibilityRole="radio" accessibilityState={{ checked: activationPlan === plan.id }} disabled={statusMutation.isPending} onPress={() => setActivationPlan(plan.id)} style={{ padding: 14, borderRadius: 12, borderWidth: 1, borderColor: activationPlan === plan.id ? colors.primary : colors.border }}><Text style={{ color: colors.ink }}>{activationPlan === plan.id ? "Selected: " : ""}{plan.name}</Text><Text style={{ color: colors.muted }}>{plan.price_cents == null ? "Custom pricing" : formatCurrency(plan.price_cents, plan.currency)} / {plan.billing_period}</Text></Pressable>)}
+        {(["free", "paid"] as const).map(type => <Pressable key={type} accessibilityRole="radio" accessibilityState={{ checked: activationType === type }} disabled={statusMutation.isPending} onPress={() => setActivationType(type)} style={{ padding: 14, borderRadius: 12, borderWidth: 1, borderColor: activationType === type ? colors.primary : colors.border }}><Text style={{ color: colors.ink }}>{activationType === type ? "Selected: " : ""}{type === "free" ? "Free platform access - no payment, granted by super admin" : "Paid plan - payment verified by super admin"}</Text></Pressable>)}
+        <PrimaryButton title="Activate selected platform plan" disabled={!activationPlan || statusMutation.isPending} loading={statusMutation.isPending} onPress={() => changeStatus("reactivate")} />
+        {gym.status === "active" && gym.is_active ? <PrimaryButton title="Suspend gym" variant="secondary" disabled={statusMutation.isPending} onPress={() => changeStatus("suspend")} /> : null}
+        {gym.is_active ? <PrimaryButton title="Suspend for unpaid platform plan" icon="card-outline" variant="secondary" disabled={statusMutation.isPending} onPress={() => changeStatus("unpaid")} /> : null}
+        {gym.is_active ? <PrimaryButton title="Delete gym" icon="trash-outline" variant="secondary" disabled={statusMutation.isPending} onPress={() => changeStatus("delete")} /> : null}
+        {statusMutation.error ? <Text accessibilityRole="alert" style={{ color: colors.danger }}>{getApiErrorMessage(statusMutation.error)}</Text> : null}
+        {statusMutation.isSuccess ? <Text accessibilityLiveRegion="polite" style={{ color: colors.success }}>Gym status updated.</Text> : null}
+      </View> : null}
 
       <View style={styles.metrics}>
         <DetailMetric

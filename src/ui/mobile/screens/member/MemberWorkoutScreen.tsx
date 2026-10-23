@@ -3,8 +3,7 @@ import { createContext, useContext, useState } from "react";
 import { useMemberReferenceColors } from "../../components/member/MemberReference";
 import { Pressable } from "../../components/NativePressable";
 import { Ionicons } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
-import { ActivityIndicator, Image, RefreshControl, Text, View } from "react-native";
+import { ActivityIndicator, Image, ScrollView, RefreshControl, Text, View } from "react-native";
 import { Screen } from "../../components/Screen";
 import { getApiErrorMessage } from "../../../../services/api/client";
 import { formatDate } from "../../../../utils/formatters";
@@ -25,9 +24,9 @@ export function MemberWorkoutScreenView({ model }: { model: ReturnType<typeof us
       const { styles, query, colors, Metric, completed, consistency, calories, durationText, duration, setFilter, filter, navigation, ui, setRecent, recent, State, visible, WorkoutCard, compact, workouts, Button } = model.props;
       return (<Screen scroll reference={false} style={{ backgroundColor: c.background }} maxWidth="none" contentContainerStyle={styles.screen} refreshControl={<RefreshControl refreshing={query.isRefetching} onRefresh={() => query.refetch()} tintColor={colors.primary} />}>
     <ScreenHeader title="My workouts" subtitle="Your plan. Your pace." />
-    <View style={{ flexDirection: "row", flexWrap: "wrap", borderWidth: 1, borderColor: c.border, backgroundColor: c.card, borderRadius: 18, padding: 16, gap: 20 }}>
-      <View style={{ flex: 1, minWidth: 100, flexDirection: "row", alignItems: "center", gap: 12 }}><Ionicons name="barbell" size={26} color={c.blue} /><View><Text style={{ color: c.text, fontSize: 23, fontWeight: "700" }}>{query.isLoading || query.error ? "--" : workouts.length}</Text><Text style={{ color: c.blue, fontSize: 13 }}>Assigned plans</Text></View></View>
-      <View style={{ flex: 1, minWidth: 100, flexDirection: "row", alignItems: "center", gap: 12 }}><Ionicons name="checkmark-circle" size={26} color="#26CDB4" /><View><Text style={{ color: c.text, fontSize: 23, fontWeight: "700" }}>{query.isLoading || query.error ? "--" : completed}</Text><Text style={{ color: c.muted, fontSize: 13 }}>Completed workouts</Text></View></View>
+    <View style={{ flexDirection: "row", flexWrap: "wrap", borderWidth: 1, borderColor: c.border, backgroundColor: c.card, borderRadius: 18, padding: 16, gap: 16 }}>
+      <View style={{ flex: 1, minWidth: 0, flexDirection: "row", alignItems: "center", gap: 12 }}><Ionicons name="barbell" size={26} color={c.blue} /><View style={{ flex: 1, minWidth: 0 }}><Text style={{ color: c.text, fontSize: 23, fontWeight: "700" }}>{query.isLoading || query.error ? "--" : workouts.length}</Text><Text style={{ color: c.blue, fontSize: 13 }}>Assigned plans</Text></View></View>
+      <View style={{ flex: 1, minWidth: 0, flexDirection: "row", alignItems: "center", gap: 12 }}><Ionicons name="checkmark-circle" size={26} color="#26CDB4" /><View style={{ flex: 1, minWidth: 0 }}><Text style={{ color: c.text, fontSize: 23, fontWeight: "700" }}>{query.isLoading || query.error ? "--" : completed}</Text><Text style={{ color: c.muted, fontSize: 13 }}>Completed</Text></View></View>
     </View>
     <Pressable accessibilityRole="button" accessibilityState={{ expanded: showDetails }} onPress={() => setShowDetails(value => !value)} style={{ minHeight: 44, flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}><Text style={{ color: c.blue, fontSize: 14 }}>Training statistics</Text><Ionicons name={showDetails ? "chevron-up" : "chevron-down"} size={18} color={c.blue} /></Pressable>
     {showDetails ?     <View style={styles.metrics}>
@@ -35,11 +34,31 @@ export function MemberWorkoutScreenView({ model }: { model: ReturnType<typeof us
       <Metric icon="trending-up" label="Consistency" value={`${consistency}%`} sub="This Week" tone="#10B981" />
     </View> : null}
 
-    <View style={styles.toolbar}><View style={styles.filters}>{([ ["all", "All Workouts"], ["completed", "Completed"], ["pending", "Pending"], ["not-started", "Not Started"] ] as Array<[Filter, string]>).map(([key, label]) => <Pressable accessibilityRole="button" accessibilityState={{ selected: filter === key }} key={key} onPress={() => setFilter(key)} style={[styles.filter, filter === key && styles.filterActive]}><Text style={[styles.filterText, filter === key && styles.filterTextActive]}>{label}</Text></Pressable>)}<Pressable accessibilityRole="button" onPress={() => navigation.navigate("AIWorkoutGenerator")} style={({ pressed }) => [styles.newWorkout, pressed && ui.pressed]}><Ionicons name="add" size={18} color="#FFFFFF" /><Text style={styles.newWorkoutText}>New Workout</Text></Pressable></View><Pressable accessibilityRole="button" onPress={() => setRecent((value) => !value)} style={styles.sort}><Text style={styles.sortText}>{recent ? "Recent First" : "Oldest First"}</Text><Ionicons name="chevron-down" size={17} color={colors.ink} /></Pressable></View>
+    <View style={styles.toolbar}>
+      <View style={styles.libraryHeading}>
+        <Text accessibilityRole="header" style={styles.sectionTitle}>Your plans</Text>
+        <Pressable accessibilityRole="button" onPress={() => navigation.navigate("AIWorkoutGenerator")} style={({ pressed }) => [styles.newWorkout, pressed && ui.pressed]}>
+          <Ionicons name="add" size={18} color="#FFFFFF" /><Text style={styles.newWorkoutText}>New workout</Text>
+        </Pressable>
+      </View>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filters}>
+        {([["all", "All"], ["completed", "Completed"], ["pending", "Pending"], ["not-started", "Not started"]] as Array<[Filter, string]>).map(([key, label]) => (
+          <Pressable accessibilityRole="button" accessibilityLabel={`${label} workouts`} accessibilityState={{ selected: filter === key }} key={key} onPress={() => setFilter(key)} style={({ pressed }) => [styles.filter, filter === key && styles.filterActive, pressed && ui.pressed]}>
+            <Text style={[styles.filterText, filter === key && styles.filterTextActive]}>{label}</Text>
+          </Pressable>
+        ))}
+      </ScrollView>
+      {workouts.length > 1 ? <View style={styles.libraryHeading}>
+        <Text style={styles.resultCount}>{visible.length} {visible.length === 1 ? "plan" : "plans"}</Text>
+        <Pressable accessibilityRole="button" accessibilityLabel={`Sort order: ${recent ? "newest first" : "oldest first"}. Tap to reverse.`} onPress={() => setRecent(value => !value)} style={styles.sort}>
+          <Ionicons name="swap-vertical" size={16} color={colors.muted} /><Text style={styles.sortText}>{recent ? "Newest first" : "Oldest first"}</Text>
+        </Pressable>
+      </View> : null}
+    </View>
 
     {query.isLoading ? <State icon="barbell-outline" message="Loading your workouts..." loading /> : query.error ? <View style={{ gap: 12 }}><State icon="alert-circle-outline" title="Couldn't load workouts" message={getApiErrorMessage(query.error)} /><Button icon="refresh" label="Try again" onPress={() => query.refetch()} secondary /></View> : visible.length ? <View style={styles.list}>{visible.map((workout, index) => <FeaturedWorkoutContext.Provider key={workout.workout_plan_uuid} value={index === 0}><WorkoutCard workout={workout} compact={compact} onOpen={() => navigation.navigate("MemberWorkoutDetail", { workoutPlanUuid: workout.workout_plan_uuid })} /></FeaturedWorkoutContext.Provider>)}</View> : <State icon="barbell-outline" title={workouts.length ? "No workouts in this status" : "No workout assigned"} message={workouts.length ? "Choose another filter to see your plans." : "Your trainer-created workout plans will appear here."} />}
 
-    <LinearGradient colors={[colors.primarySoft, colors.surface]} style={styles.progress}><View style={styles.trophy}><Ionicons name="trophy" size={25} color="#fff" /></View><View style={styles.progressCopy}><Text style={styles.progressTitle}>Keep going, you&apos;re doing great! 💪</Text><Text style={styles.progressText}>Consistency is the key to achieving your fitness goals.</Text></View><Button icon="trending-up" label="View Progress" onPress={() => navigation.navigate("MemberProgress")} secondary /></LinearGradient>
+
   </Screen>);
     }
   }

@@ -216,7 +216,25 @@ function createQuickActions(ui: DashboardPalette): ActionConfig[] {
       route: "MemberSupport",
       color: ui.warning,
       softColor: ui.softOrange
-    }
+    },
+    ...(Platform.OS === "web" ? [
+      {
+        title: "Membership",
+        subtitle: "Plan, status and renewal dates",
+        icon: "ribbon-outline" as const,
+        route: "MemberMembership" as const,
+        color: ui.blue,
+        softColor: ui.softBlue
+      },
+      {
+        title: "Payments",
+        subtitle: "Recorded payments and balances",
+        icon: "card-outline" as const,
+        route: "MemberPayments" as const,
+        color: ui.blue,
+        softColor: ui.softBlue
+      }
+    ] : [])
   ];
 }
 

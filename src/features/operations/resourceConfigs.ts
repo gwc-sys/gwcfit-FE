@@ -334,16 +334,23 @@ export const membershipPlanConfig: ResourceCrudConfig<
       valueFromRecord: (record) => text(record.description),
     },
     {
+      name: "daily_visit_limit",
+      label: "Daily visit limit (1 to 24)",
+      keyboardType: "numeric",
+      defaultValue: "4",
+      valueFromRecord: (record) => String(record.daily_visit_limit ?? 4),
+    },
+    {
       name: "duration_days",
       label: "Duration days",
       keyboardType: "numeric",
       valueFromRecord: (record) => String(record.duration_days),
     },
     {
-      name: "price_cents",
-      label: "Price cents",
+      name: "price_rupees",
+      label: "Price (INR)",
       keyboardType: "numeric",
-      valueFromRecord: (record) => String(record.price_cents),
+      valueFromRecord: (record) => String(record.price_cents / 100),
     },
     {
       name: "currency",

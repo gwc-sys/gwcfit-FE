@@ -16,7 +16,13 @@
       "infoPlist": {
         "NSAppTransportSecurity": {
           "NSAllowsArbitraryLoads": true
-        }
+        },
+        "LSApplicationQueriesSchemes": [
+          "gpay",
+          "bhim",
+          "phonepe",
+          "upi"
+        ]
       }
     },
     "android": {
@@ -59,7 +65,16 @@
         {
           "motionPermission": "Allow PulseFit to count your steps and estimate walking distance."
         }
-      ]
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow PulseFit to select your gym payment QR from photos.",
+          "cameraPermission": false,
+          "microphonePermission": false
+        }
+      ],
+      "expo-sharing"
     ]
   }
 }

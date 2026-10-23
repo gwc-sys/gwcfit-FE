@@ -16,7 +16,9 @@ export const createStyles = (colors: ThemeColors) =>
       gap: spacing.md,
       borderRadius: radius.md,
       padding: spacing.lg,
-      backgroundColor: colors.ink,
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.border,
     },
     avatar: {
       width: 72,
@@ -24,7 +26,7 @@ export const createStyles = (colors: ThemeColors) =>
       alignItems: "center",
       justifyContent: "center",
       borderRadius: radius.pill,
-      backgroundColor: "rgba(255,255,255,0.16)",
+      backgroundColor: colors.primary,
     },
     avatarText: {
       ...typography.h2,
@@ -32,6 +34,7 @@ export const createStyles = (colors: ThemeColors) =>
     },
     heroBody: {
       flex: 1,
+      minWidth: 0,
       gap: spacing.xs,
     },
     name: {
@@ -40,7 +43,7 @@ export const createStyles = (colors: ThemeColors) =>
     },
     email: {
       ...typography.body,
-      color: "rgba(255,255,255,0.72)",
+      color: colors.textSecondary,
     },
     quickRow: {
       flexDirection: "row",

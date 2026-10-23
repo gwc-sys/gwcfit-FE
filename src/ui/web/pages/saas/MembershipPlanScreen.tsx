@@ -37,14 +37,6 @@ export function MembershipPlanScreenView({ model }: { model: ReturnType<typeof u
               : "Create and manage membership plans for your gym."}
           </Text>
         </View>
-        {!isSuperAdmin && !query.data?.length ? (
-          <PrimaryButton
-            title="Add All Starter Plans"
-            icon="add"
-            disabled={installStarters.isPending}
-            onPress={() => installStarters.mutate()}
-          />
-        ) : null}
         {isSuperAdmin ? <PrimaryButton title="Create plan" icon="add" onPress={() => setPlatformPlanDraft("new")} /> : null}
       </View>
       <NoticeBanner
@@ -89,10 +81,10 @@ export function MembershipPlanScreenView({ model }: { model: ReturnType<typeof u
         ))}
       </View>
       <View style={styles.stats}>
-        <Text style={styles.statValue}>{plans.length}</Text>
+        <Text style={styles.statValue}>{isSuperAdmin ? platformQuery.data?.length ?? 0 : query.data?.length ?? 0}</Text>
         <View>
           <Text style={styles.statLabel}>Total Plans</Text>
-          <Text style={styles.subtitle}>Membership packages displayed</Text>
+          <Text style={styles.subtitle}>Saved membership plans</Text>
         </View>
       </View>
       {isSuperAdmin ? (

@@ -16,7 +16,7 @@ type Props = {
 export function MemberTrainingHero({ workoutTitle, completed, target, loading, unavailable, onWorkout, onProgress }: Props) {
   return <LinearGradient colors={["#1468E8", "#1044A0", "#122D58"]}
     start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={s.hero}>
-    <View pointerEvents="none" style={s.orbit} />
+    <View style={[s.orbit, { pointerEvents: "none" }]} />
     <View style={s.top}>
       <View style={s.badge}><Ionicons name="flash" size={13} color="#DCEAFF" /><Text style={s.eyebrow}>YOUR NEXT MOVE</Text></View>
       <Ionicons name="barbell-outline" size={28} color="#DCEAFF" />

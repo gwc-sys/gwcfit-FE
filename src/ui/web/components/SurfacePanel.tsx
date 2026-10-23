@@ -9,6 +9,7 @@ import type { ThemeColors } from "../theme/theme";
 
 type SurfacePanelProps = {
   title: string;
+  hideHeader?: boolean;
   kicker?: string;
   icon?: keyof typeof Ionicons.glyphMap;
   actionLabel?: string;
@@ -19,6 +20,7 @@ type SurfacePanelProps = {
 
 export function SurfacePanel({
   title,
+  hideHeader = false,
   kicker,
   icon,
   actionLabel,
@@ -33,7 +35,7 @@ export function SurfacePanel({
 
   return (
     <Animated.View entering={reduceMotion ? undefined : FadeInUp.duration(240)} style={[styles.panel, style]}>
-      <View style={styles.header}>
+      {!hideHeader ? <View style={styles.header}>
         <View style={styles.titleWrap}>
           {kicker ? (
             <Text maxFontSizeMultiplier={1.15} numberOfLines={1} style={styles.kicker}>
@@ -55,7 +57,7 @@ export function SurfacePanel({
             <Ionicons name={icon} size={21} color={colors.primary} />
           </View>
         ) : null}
-      </View>
+      </View> : null}
       {children}
     </Animated.View>
   );

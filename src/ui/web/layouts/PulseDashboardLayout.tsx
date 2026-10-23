@@ -1,7 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
+import { useReducedMotion } from "react-native-reanimated";
 import type { ReactNode } from "react";
-import { Modal, Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { initials } from "../../../utils/formatters";
 import { requestLogoutConfirmation } from "../../../utils/logoutConfirmation";
 import { Screen } from "../components/Screen";
@@ -9,11 +10,12 @@ import type * as React from "react";
 import type { usePulseDashboardLayoutPresentation, useGymOwnerSidebarPresentation, useOwnerAccountItemPresentation, useMobileBrandButtonPresentation, usePulseDashboardHeaderPresentation, useHeaderCircleButtonPresentation } from "../../../components/dashboard/PulseDashboardLayout";
 
 export function PulseDashboardLayoutView({ model }: { model: ReturnType<typeof usePulseDashboardLayoutPresentation> }): React.ReactNode {
+  const reduceMotion = useReducedMotion();
   if (model == null) return null;
   if (typeof model !== "object" || !("kind" in model)) return model;
   switch (model.kind) {
     case "view1": {
-      const { styles, contentStyle, refreshControl, isDesktop, isTrainer, isGymOwner, GymOwnerSidebar, activeLabel, navigation, isPlatformAdmin, colors, resolvedRoleLabel, sidebarItems, setAccountMenuOpen, userName, MobileBrandButton, firstName, ownerDate, unreadNotificationCount, resolvedTrainerSearch, setResolvedTrainerSearch, trainerDate, children, accountMenuOpen, user, OwnerAccountItem, isDark, toggleColorScheme, logout } = model.props;
+      const { savedGymName, styles, contentStyle, refreshControl, isDesktop, isTrainer, isGymOwner, GymOwnerSidebar, activeLabel, navigation, isPlatformAdmin, colors, resolvedRoleLabel, sidebarItems, setAccountMenuOpen, userName, MobileBrandButton, firstName, ownerDate, unreadNotificationCount, resolvedTrainerSearch, setResolvedTrainerSearch, trainerDate, children, accountMenuOpen, user, OwnerAccountItem, isDark, toggleColorScheme, logout } = model.props;
       return ((
     <Screen
       scroll
@@ -202,7 +204,7 @@ export function PulseDashboardLayoutView({ model }: { model: ReturnType<typeof u
                         </LinearGradient>
                         <View style={styles.profileCopy}>
                           <Text numberOfLines={1} style={styles.profileName}>
-                            {userName}
+                            {isGymOwner ? savedGymName : userName}
                           </Text>
                           <Text numberOfLines={1} style={styles.profileRole}>
                             {resolvedRoleLabel}
@@ -234,7 +236,7 @@ export function PulseDashboardLayoutView({ model }: { model: ReturnType<typeof u
               <Text style={styles.mobileBrandName}>PulseFit</Text>
               <View style={styles.mobileIdentityCopy}>
                 <Text numberOfLines={1} style={styles.mobileIdentityName}>
-                  {userName}
+                  {isGymOwner ? savedGymName : userName}
                 </Text>
                 <Text numberOfLines={1} style={styles.mobileIdentityRole}>
                   {resolvedRoleLabel}
@@ -261,10 +263,10 @@ export function PulseDashboardLayoutView({ model }: { model: ReturnType<typeof u
             <View style={styles.sharedOwnerHeader}>
               <View style={styles.sharedOwnerGreeting}>
                 <Text numberOfLines={1} style={styles.sharedOwnerTitle}>
-                  Welcome back, {firstName(userName)}! 👋
+                  Welcome to {savedGymName}
                 </Text>
                 <Text numberOfLines={1} style={styles.sharedOwnerSubtitle}>
-                  Here&apos;s what&apos;s happening at Gold Gym today.
+                  Here&apos;s what&apos;s happening at {savedGymName} today.
                 </Text>
               </View>
               <View style={styles.sharedOwnerActions}>
@@ -335,7 +337,7 @@ export function PulseDashboardLayoutView({ model }: { model: ReturnType<typeof u
                 >
                   <View style={styles.sharedOwnerAvatar}>
                     <Text style={styles.sharedOwnerAvatarText}>
-                      {initials(userName) || "GO"}
+                      {initials(isGymOwner ? savedGymName : userName) || "GO"}
                     </Text>
                   </View>
                   <View style={styles.sharedOwnerProfileCopy}>
@@ -343,7 +345,7 @@ export function PulseDashboardLayoutView({ model }: { model: ReturnType<typeof u
                       numberOfLines={1}
                       style={styles.sharedOwnerProfileName}
                     >
-                      {userName}
+                      {isGymOwner ? savedGymName : userName}
                     </Text>
                     <Text style={styles.sharedOwnerProfileRole}>Gym Owner</Text>
                   </View>
@@ -429,22 +431,26 @@ export function PulseDashboardLayoutView({ model }: { model: ReturnType<typeof u
         <Modal
           visible
           transparent
-          animationType="fade"
+          animationType={reduceMotion ? "none" : "fade"}
           onRequestClose={() => setAccountMenuOpen(false)}
         >
-          <Pressable accessibilityRole="button"
+          <View
             style={[
               styles.ownerAccountBackdrop,
               isTrainer && styles.trainerAccountBackdrop,
             ]}
-            onPress={() => setAccountMenuOpen(false)}
           >
-            <Pressable accessibilityRole="button"
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Close account menu"
+              style={StyleSheet.absoluteFill}
+              onPress={() => setAccountMenuOpen(false)}
+            />
+            <View
               style={[
                 styles.ownerAccountMenu,
                 isTrainer && styles.trainerAccountMenu,
               ]}
-              onPress={(event) => event.stopPropagation()}
             >
               <View
                 style={[
@@ -459,7 +465,7 @@ export function PulseDashboardLayoutView({ model }: { model: ReturnType<typeof u
                   ]}
                 >
                   <Text style={styles.ownerAccountAvatarText}>
-                    {initials(userName) || "U"}
+                    {initials(isGymOwner ? savedGymName : userName) || "U"}
                   </Text>
                 </View>
                 <View style={styles.ownerAccountCopy}>
@@ -470,7 +476,7 @@ export function PulseDashboardLayoutView({ model }: { model: ReturnType<typeof u
                       isTrainer && styles.trainerAccountName,
                     ]}
                   >
-                    {userName}
+                    {isGymOwner ? savedGymName : userName}
                   </Text>
                   <Text
                     numberOfLines={1}
@@ -574,8 +580,8 @@ export function PulseDashboardLayoutView({ model }: { model: ReturnType<typeof u
                 }}
                 styles={styles}
               />
-            </Pressable>
-          </Pressable>
+            </View>
+          </View>
         </Modal>
       ) : null}
     </Screen>

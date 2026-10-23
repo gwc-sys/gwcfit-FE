@@ -5,8 +5,10 @@ import { useAppTheme } from "../../../theme/AppThemeProvider";
 import { radius, spacing, typography } from "../theme/theme";
 import type { ThemeColors } from "../theme/theme";
 import { EmptyState } from "./EmptyState";
+import { Pressable } from "./NativePressable";
 
 type DataStateProps = {
+  compact?: boolean;
   loading?: boolean;
   error?: string | null;
   empty?: boolean;
@@ -17,6 +19,7 @@ type DataStateProps = {
 };
 
 export function DataState({
+  compact = false,
   loading,
   error,
   empty,
@@ -45,6 +48,11 @@ export function DataState({
   }
 
   if (empty) {
+    if (compact) return <View style={{ gap: 6, paddingVertical: 12 }}>
+      <Text style={{ color: colors.ink, fontSize: 17, fontWeight: "600" }}>{emptyTitle}</Text>
+      <Text style={{ color: colors.muted, fontSize: 14, lineHeight: 20 }}>{emptyMessage}</Text>
+      {emptyActionLabel && onEmptyAction ? <Pressable accessibilityRole="button" onPress={onEmptyAction} style={({ pressed }) => ({ minHeight: 44, alignSelf: "flex-start", justifyContent: "center", opacity: pressed ? 0.6 : 1 })}><Text style={{ color: colors.primary, fontSize: 15, fontWeight: "600" }}>{emptyActionLabel}</Text></Pressable> : null}
+    </View>;
     return (
       <EmptyState
         icon="file-tray-outline"

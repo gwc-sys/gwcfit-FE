@@ -6,6 +6,7 @@ import { radius, shadows, spacing, typography } from "../theme/theme";
 import type { ThemeColors } from "../theme/theme";
 
 type MetricCardProps = {
+  compact?: boolean;
   label: string;
   value: string;
   suffix?: string;
@@ -28,17 +29,17 @@ function getTone(colors: ThemeColors, tone: NonNullable<MetricCardProps["tone"]>
   return tones[tone];
 }
 
-export function MetricCard({ label, value, suffix, icon, footer, trend, tone = "primary" }: MetricCardProps) {
+export function MetricCard({ label, value, suffix, icon, footer, trend, compact = false, tone = "primary" }: MetricCardProps) {
   const { colors } = useAppTheme();
   const { width } = useWindowDimensions();
   const styles = useMemo(() => createStyles(colors, width), [colors, width]);
   const toneColor = getTone(colors, tone);
 
   return (
-    <View style={styles.card}>
+    <View style={[styles.card, compact && { minHeight: 118, padding: 14, gap: 4 }]}>
       <View style={styles.iconRow}>
-        <View style={[styles.iconWrap, { backgroundColor: colors.surfaceMuted }]}>
-          <Ionicons name={icon} size={22} color={toneColor.foreground} />
+        <View style={[styles.iconWrap, { backgroundColor: colors.surfaceMuted }, compact && { width: 28, height: 28, borderRadius: 8 }]}>
+          <Ionicons name={icon} size={compact ? 18 : 22} color={toneColor.foreground} />
         </View>
       </View>
       <View style={styles.valueRow}>

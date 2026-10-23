@@ -9,10 +9,8 @@ import { useAppTheme } from "../../../../theme/AppThemeProvider";
 import type { MemberProgressLog } from "../../../../types/member";
 
 export function useMemberReferenceColors() {
-  const { isDark } = useAppTheme();
-  return isDark
-    ? { background: "#090F18", card: "#111D2B", border: "#24374B", text: "#F7FAFF", muted: "#A8BED8", blue: "#389BFF", button: "#0066E5", track: "#233B56" }
-    : { background: "#F2F5FA", card: "#FFFFFF", border: "#D8E2EF", text: "#142238", muted: "#526681", blue: "#0066CC", button: "#0066CC", track: "#DCE7F4" };
+  const { colors } = useAppTheme();
+  return { background: colors.background, card: colors.card, border: colors.border, text: colors.ink, muted: colors.muted, blue: colors.primary, button: colors.primaryButton, track: colors.surfaceStrong };
 }
 
 export function MemberReferenceHeader({ gym, name, unread, onNotifications, onProfile }: {
@@ -66,7 +64,7 @@ export function MemberProgressOverview({ logs, loading, failed }: { logs: Member
   const progress = latestGoal == null || !Number.isFinite(latestGoal) ? null : Math.max(0, Math.min(100, latestGoal));
   const dateLabel = (timestamp: number) => new Date(timestamp).toLocaleDateString(undefined, { day: "numeric", month: "short" });
   return <View style={{ gap: 16 }}>
-    <View accessibilityRole="tablist" style={[s.segmented, { backgroundColor: c.card, borderColor: c.border }]}>{(["Week", "Month", "Year"] as const).map(item => <Pressable key={item} accessibilityRole="tab" accessibilityState={{ selected: range === item }} onPress={() => setRange(item)} style={[s.segment, range === item && { backgroundColor: c.button }]}><Text style={{ color: range === item ? "#FFFFFF" : c.muted, fontSize: 15, fontWeight: "500" }}>{item}</Text></Pressable>)}</View>
+    <View accessibilityRole="tablist" style={[s.segmented, { backgroundColor: c.card, borderColor: c.border }]}>{(["Week", "Month", "Year"] as const).map(item => <Pressable key={item} accessibilityRole="tab" accessibilityState={{ selected: range === item }} onPress={() => setRange(item)} style={[s.segment, range === item && { backgroundColor: c.button }]}><Text style={{ color: range === item ? "#FFFFFF" : c.muted, fontSize: 14, fontWeight: "600" }}>{item}</Text></Pressable>)}</View>
     <View style={[s.card, { backgroundColor: c.card, borderColor: c.border }]}>
       <View style={s.chartHeader}><Ionicons name="scale-outline" size={23} color={c.blue} /><Text style={[s.cardTitle, { color: c.text, flex: 1 }]}>Weight</Text><View style={{ alignItems: "flex-end", gap: 4 }}><Text style={[s.weight, { color: c.text }]}>{!loading && !failed && latest ? `${latest.weight} kg` : "—"}</Text><Text style={{ color: c.muted, fontSize: 12 }}>Last {days} days</Text></View></View>
       {loading || failed || !points.length ? <View style={s.chartEmpty}><Ionicons name="analytics-outline" size={32} color={c.blue} /><Text style={{ color: c.muted, textAlign: "center", lineHeight: 22 }}>{loading ? "Loading your progress…" : failed ? "Progress is unavailable. Use retry below." : "No weight recorded in this period.\nAdd your first log below."}</Text></View> : <View accessible accessibilityLabel={`Weight over the last ${days} days. ${points.map(log => `${dateLabel(Date.parse(log.logged_at))}: ${log.weight} kilograms`).join(". ")}`}>
@@ -79,11 +77,14 @@ export function MemberProgressOverview({ logs, loading, failed }: { logs: Member
         </Svg>
       </View>}
     </View>
-    {!loading && !failed ? <View style={[s.card, { backgroundColor: c.card, borderColor: c.border, flexDirection: "row", alignItems: "center", flexWrap: "wrap", gap: 18 }]}>
-      <View accessible accessibilityLabel={progress === null ? "Goal progress not set" : `Goal progress ${Math.round(progress)} percent`} style={s.ring}>
-        <Svg width={104} height={104}><Circle cx={52} cy={52} r={44} fill="none" stroke={c.track} strokeWidth={9} /><Circle cx={52} cy={52} r={44} fill="none" stroke={c.blue} strokeWidth={9} strokeLinecap="round" strokeDasharray={`${2 * Math.PI * 44}`} strokeDashoffset={2 * Math.PI * 44 * (1 - (progress ?? 0) / 100)} rotation={-90} origin="52,52" /></Svg>
-        <Text style={[s.ringText, { color: c.text }]}>{progress === null ? "—" : `${Math.round(progress)}%`}</Text>
-      </View><View style={{ flex: 1, minWidth: 130, gap: 8 }}><Text style={[s.cardTitle, { color: c.text }]}>Your goal progress</Text><Text style={{ color: c.muted, fontSize: 14, lineHeight: 22 }}>{progress === null ? "Your recorded goal progress will appear here." : "Your latest recorded milestone. Keep building your routine."}</Text></View>
+    {!loading && !failed ? <View style={{ flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 4, paddingVertical: 4 }}>
+      <Ionicons name="flag-outline" size={21} color={c.blue} />
+      <View style={{ flex: 1, minWidth: 0, gap: 4 }}>
+        <Text style={[s.cardTitle, { color: c.text }]}>Goal progress</Text>
+        <Text style={{ color: c.muted, fontSize: 13, lineHeight: 19 }}>{progress === null ? "Your goal progress will appear after logging." : "Your latest recorded milestone"}</Text>
+        {progress !== null ? <View accessibilityRole="progressbar" accessibilityValue={{ min: 0, max: 100, now: progress }} style={{ height: 5, borderRadius: 3, backgroundColor: c.track, marginTop: 4, overflow: "hidden" }}><View style={{ height: 5, borderRadius: 3, width: `${progress}%`, backgroundColor: c.blue }} /></View> : null}
+      </View>
+      {progress !== null ? <Text style={{ color: c.text, fontSize: 18, fontWeight: "600" }}>{Math.round(progress)}%</Text> : null}
     </View> : null}
   </View>;
 }
@@ -107,13 +108,13 @@ const s = StyleSheet.create({
   primary: { minHeight: 48, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 12, paddingHorizontal: 20, borderRadius: 12, backgroundColor: "#0066E5" },
   heroButton: { alignSelf: "flex-start", marginTop: 4 },
   primaryText: { color: "#FFFFFF", fontSize: 15, fontWeight: "600" },
-  segmented: { flexDirection: "row", padding: 4, borderWidth: 1, borderRadius: 16, gap: 4 },
-  segment: { flex: 1, minHeight: 44, justifyContent: "center", alignItems: "center", borderRadius: 12 },
+  segmented: { flexDirection: "row", padding: 3, borderWidth: StyleSheet.hairlineWidth, borderRadius: 13, gap: 3 },
+  segment: { flex: 1, minHeight: 44, justifyContent: "center", alignItems: "center", borderRadius: 10 },
   card: { borderWidth: 1, borderRadius: 18, padding: 16, gap: 16 },
   chartHeader: { flexDirection: "row", alignItems: "center", gap: 10 },
   cardTitle: { fontSize: 16, fontWeight: "600", lineHeight: 23 },
   weight: { fontSize: 23, fontWeight: "700", fontVariant: ["tabular-nums"] },
-  chartEmpty: { minHeight: 190, justifyContent: "center", alignItems: "center", gap: 12 },
+  chartEmpty: { minHeight: 112, justifyContent: "center", alignItems: "center", gap: 12 },
   ring: { width: 104, height: 104, alignItems: "center", justifyContent: "center" },
   ringText: { position: "absolute", fontSize: 24, fontWeight: "700" },
   pressed: { opacity: 0.72 },

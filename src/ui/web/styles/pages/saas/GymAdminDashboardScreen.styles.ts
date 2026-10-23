@@ -41,11 +41,11 @@ export const ownerProfileStyles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     borderRadius: 25,
-    backgroundColor: "#F6B38A",
+    backgroundColor: "#2C2C2E",
   },
-  avatarText: { fontSize: 16, color: "#FFFFFF", fontWeight: "900" },
+  avatarText: { fontSize: 16, color: "#FFFFFF", fontWeight: "600" },
   identityCopy: { flex: 1, minWidth: 0 },
-  name: { fontSize: 14, color: "#FFFFFF", fontWeight: "900" },
+  name: { fontSize: 14, color: "#FFFFFF", fontWeight: "600" },
   email: { fontSize: 11, color: "#A9C9E9", marginTop: 4 },
   divider: { height: 1, backgroundColor: "#26364B", marginVertical: 6 },
   item: {
@@ -55,7 +55,7 @@ export const ownerProfileStyles = StyleSheet.create({
     gap: 15,
     paddingHorizontal: 18,
   },
-  itemText: { fontSize: 14, color: "#FFFFFF", fontWeight: "900" },
+  itemText: { fontSize: 14, color: "#FFFFFF", fontWeight: "600" },
   danger: { color: "#EF4444" },
   disabled: { opacity: 0.5 },
   pressed: { backgroundColor: "#1B2A3E" },
@@ -75,7 +75,7 @@ export const ownerCalendarStyles = StyleSheet.create({
       : { shadowColor: "#000", shadowOpacity: 0.3, shadowRadius: 14, shadowOffset: { width: 0, height: 7 }, elevation: 8 }),
   },
   monthHeader: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 9 },
-  monthTitle: { fontSize: 20, color: "#FFFFFF", fontWeight: "900" },
+  monthTitle: { fontSize: 20, color: "#FFFFFF", fontWeight: "600" },
   arrowButton: { width: 30, height: 30, alignItems: "center", justifyContent: "center", borderRadius: 15, backgroundColor: "#334155" },
   weekRow: { flexDirection: "row", marginBottom: 4 },
   weekday: { width: "14.2857%", textAlign: "center", fontSize: 13, color: "#D7E3F0", fontWeight: "700" },
@@ -83,9 +83,9 @@ export const ownerCalendarStyles = StyleSheet.create({
   dayCell: { width: "14.2857%", height: 36, alignItems: "center", justifyContent: "center", borderRadius: 18 },
   dayText: { fontSize: 14, color: "#FFFFFF", fontWeight: "600" },
   selectedDay: { backgroundColor: "#7A8794" },
-  selectedDayText: { color: "#FFFFFF", fontWeight: "900" },
+  selectedDayText: { color: "#FFFFFF", fontWeight: "600" },
   todayButton: { alignItems: "center", paddingTop: 8 },
-  today: { fontSize: 11, color: "#0A84FF", fontWeight: "800" },
+  today: { fontSize: 11, color: "#0A84FF", fontWeight: "600" },
 });
 
 export const createOwnerDashboardStyles = (c: ThemeColors) =>
@@ -103,7 +103,7 @@ export const createOwnerDashboardStyles = (c: ThemeColors) =>
       fontSize: 27,
       lineHeight: 33,
       color: c.ink,
-      fontWeight: "900",
+      fontWeight: "600",
     },
     headerSubtitle: { fontSize: 13, color: c.textSecondary, marginTop: 5 },
     headerActions: { flexDirection: "row", alignItems: "center", gap: 10 },
@@ -118,7 +118,7 @@ export const createOwnerDashboardStyles = (c: ThemeColors) =>
       borderRadius: 9,
       backgroundColor: c.card,
     },
-    dateText: { fontSize: 11, color: c.ink, fontWeight: "800" },
+    dateText: { fontSize: 11, color: c.ink, fontWeight: "600" },
     headerIcon: {
       width: 44,
       height: 44,
@@ -140,7 +140,7 @@ export const createOwnerDashboardStyles = (c: ThemeColors) =>
       justifyContent: "center",
       backgroundColor: c.primary,
     },
-    headerBadgeText: { fontSize: 8, color: c.white, fontWeight: "900" },
+    headerBadgeText: { fontSize: 8, color: c.white, fontWeight: "600" },
     addButton: {
       height: 44,
       flexDirection: "row",
@@ -150,7 +150,7 @@ export const createOwnerDashboardStyles = (c: ThemeColors) =>
       borderRadius: 9,
       backgroundColor: c.primary,
     },
-    addButtonText: { fontSize: 12, color: c.white, fontWeight: "900" },
+    addButtonText: { fontSize: 12, color: c.white, fontWeight: "600" },
     metricGrid: {
       flexDirection: "row",
       flexWrap: "wrap",
@@ -181,13 +181,13 @@ export const createOwnerDashboardStyles = (c: ThemeColors) =>
     metricValue: {
       fontSize: 25,
       color: c.ink,
-      fontWeight: "900",
+      fontWeight: "600",
       marginTop: 9,
     },
     metricTrend: {
       fontSize: 11,
       color: "#18C77A",
-      fontWeight: "800",
+      fontWeight: "600",
       marginTop: 10,
     },
     dashboardGrid: {
@@ -232,9 +232,9 @@ export const createOwnerDashboardStyles = (c: ThemeColors) =>
       justifyContent: "space-between",
       gap: 8,
     },
-    panelTitle: { fontSize: 14, color: c.ink, fontWeight: "900" },
+    panelTitle: { fontSize: 14, color: c.ink, fontWeight: "600" },
     panelSubtitle: { fontSize: 10, color: c.textSecondary, marginTop: 7 },
-    viewAll: { fontSize: 10, color: "#0A84FF", fontWeight: "800" },
+    viewAll: { fontSize: 10, color: "#0A84FF", fontWeight: "600" },
     selectPill: {
       flexDirection: "row",
       alignItems: "center",
@@ -258,7 +258,7 @@ export const createOwnerDashboardStyles = (c: ThemeColors) =>
     chartRangeButton: { minWidth: 86, height: 36, flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 6, borderWidth: 1, borderColor: c.border, borderRadius: 7, paddingHorizontal: 9, backgroundColor: c.card },
     chartRangeMenu: { position: "absolute", top: 40, right: 0, width: 100, borderWidth: 1, borderColor: c.border, borderRadius: 7, paddingVertical: 4, backgroundColor: c.card },
     chartRangeOption: { paddingHorizontal: 10, paddingVertical: 8 },
-    chartRangeSelected: { color: c.primary, fontWeight: "900" },
+    chartRangeSelected: { color: c.primary, fontWeight: "600" },
     chartGrid: {
       position: "absolute",
       top: 0,
@@ -314,7 +314,7 @@ export const createOwnerDashboardStyles = (c: ThemeColors) =>
       borderRadius: 38,
       backgroundColor: c.card,
     },
-    donutValue: { fontSize: 20, color: c.ink, fontWeight: "900" },
+    donutValue: { fontSize: 20, color: c.ink, fontWeight: "600" },
     donutLabel: { fontSize: 8, color: c.textSecondary },
     distributionLegend: { gap: 11 },
     distributionRow: {
@@ -327,7 +327,7 @@ export const createOwnerDashboardStyles = (c: ThemeColors) =>
       marginLeft: "auto",
       fontSize: 10,
       color: c.ink,
-      fontWeight: "800",
+      fontWeight: "600",
     },
     activityRow: {
       minHeight: 38,
@@ -345,7 +345,7 @@ export const createOwnerDashboardStyles = (c: ThemeColors) =>
       borderRadius: 6,
     },
     activityLabel: { flex: 1, fontSize: 10, color: c.textSecondary },
-    activityValue: { fontSize: 10, color: c.ink, fontWeight: "800" },
+    activityValue: { fontSize: 10, color: c.ink, fontWeight: "600" },
     smallPanel: {
       flex: 1,
       minWidth: 240,
@@ -374,7 +374,7 @@ export const createOwnerDashboardStyles = (c: ThemeColors) =>
       borderRightColor: "#EF476F",
       borderTopColor: "#F59E0B",
     },
-    statusRingValue: { fontSize: 20, color: c.white, fontWeight: "900" },
+    statusRingValue: { fontSize: 20, color: c.white, fontWeight: "600" },
     statusRingLabel: { fontSize: 8, color: c.textSecondary },
     planRow: {
       flexDirection: "row",
@@ -394,7 +394,7 @@ export const createOwnerDashboardStyles = (c: ThemeColors) =>
     revenueValue: {
       fontSize: 23,
       color: c.ink,
-      fontWeight: "900",
+      fontWeight: "600",
       marginTop: 13,
     },
     revenueBars: {
@@ -429,10 +429,10 @@ export const createOwnerDashboardStyles = (c: ThemeColors) =>
       alignItems: "center",
       justifyContent: "center",
       borderRadius: 16,
-      backgroundColor: "#F6B38A",
+      backgroundColor: "#2C2C2E",
     },
-    recentAvatarText: { fontSize: 12, color: c.white, fontWeight: "800" },
-    recentName: { fontSize: 11, color: c.ink, fontWeight: "800" },
+    recentAvatarText: { fontSize: 12, color: c.white, fontWeight: "600" },
+    recentName: { fontSize: 11, color: c.ink, fontWeight: "600" },
     quickPanel: {
       gap: 14,
       borderWidth: 1,
@@ -461,7 +461,7 @@ export const createOwnerDashboardStyles = (c: ThemeColors) =>
       justifyContent: "center",
       borderRadius: 9,
     },
-    quickTitle: { fontSize: 11, color: c.ink, fontWeight: "800" },
+    quickTitle: { fontSize: 11, color: c.ink, fontWeight: "600" },
     quickSubtitle: { fontSize: 9, color: c.textSecondary, marginTop: 3 },
   });
 
@@ -575,3 +575,6 @@ export const createStyles = (colors: ThemeColors) =>
       color: colors.muted,
     },
   });
+
+
+

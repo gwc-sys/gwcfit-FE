@@ -4,6 +4,8 @@ import type { ReactNode } from "react";
 import { useColorScheme } from "react-native";
 
 import { useFitnessStore } from "../store/useFitnessStore";
+import { useAuthStore } from "../store/useAuthStore";
+import { useMyGym } from "../hooks/useOperations";
 import { getThemeColors } from "./theme";
 import type { AppColorScheme, AppThemeMode } from "./theme";
 
@@ -25,6 +27,13 @@ type AppThemeProviderProps = {
 };
 
 export function AppThemeProvider({ children }: AppThemeProviderProps) {
+  const user = useAuthStore(state => state.user);
+  const gym = useMyGym(Boolean(user?.gym_id));
+  useEffect(() => {
+    if (user && gym.data?.id === user.gym_id && gym.data.name !== user.gym_name) {
+      useAuthStore.setState({ user: { ...user, gym_name: gym.data.name } });
+    }
+  }, [gym.data, user]);
   const deviceColorScheme = useColorScheme();
   const themeMode = useFitnessStore((state) => state.themeMode);
   const setThemeMode = useFitnessStore((state) => state.setThemeMode);
@@ -75,4 +84,14 @@ export function useAppTheme() {
   }
 
   return value;
+}
+
+/** Override presentation colors for a subtree while retaining theme controls. */
+export function AppThemeColorScope({ children, colors }: {
+  children: ReactNode;
+  colors: AppThemeContextValue["colors"];
+}) {
+  const theme = useAppTheme();
+  const value = useMemo(() => ({ ...theme, colors }), [theme, colors]);
+  return <AppThemeContext.Provider value={value}>{children}</AppThemeContext.Provider>;
 }

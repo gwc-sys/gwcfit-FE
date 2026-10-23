@@ -1,3 +1,5 @@
+import { foodDisplayCatalog } from "../utils/foodDisplayCatalog";
+import { foodDisplayName } from "../utils/foodNames";
 import type * as React from "react";
 import { FoodNutritionMealPickerView, MacroView } from "./FoodNutritionMealPicker.presentation";
 import { stylesShared, createStyles } from "./FoodNutritionMealPicker.styles";
@@ -21,6 +23,8 @@ import {
 import { useAppTheme } from "../theme/AppThemeProvider";
 import type { ThemeColors } from "../theme/theme";
 import { showAlert } from "../utils/appAlert";
+
+const displayFoods = foodDisplayCatalog(foodNutritionCatalog);
 
 const mealTypes = ["Breakfast", "Lunch", "Dinner", "Snack"] as const;
 type MealType = (typeof mealTypes)[number];
@@ -47,6 +51,7 @@ type PlanMeal = {
 type Props = {
   value: string;
   targetCalories?: number;
+  simpleFoods?: boolean;
   onChange: (value: string) => void;
 };
 
@@ -140,6 +145,7 @@ function parseMeals(value: string): PlanMeal[] {
 export function useFoodNutritionMealPickerPresentation({
   value,
   targetCalories = 2000,
+  simpleFoods = false,
   onChange,
 }: Props) {
   const { colors } = useAppTheme();
@@ -153,7 +159,7 @@ export function useFoodNutritionMealPickerPresentation({
   const normalizedSearch = search.trim().toLowerCase();
   const visibleFoods = useMemo(
     () =>
-      foodNutritionCatalog
+      displayFoods
         .filter(
           (food) =>
             category === "All Foods" || food.categories.includes(category),
@@ -161,7 +167,7 @@ export function useFoodNutritionMealPickerPresentation({
         .filter(
           (food) =>
             !normalizedSearch ||
-            `${food.name} ${food.categories.join(" ")}`
+            `${foodDisplayName(food.name)} ${food.categories.join(" ")}`
               .toLowerCase()
               .includes(normalizedSearch),
         )
@@ -269,7 +275,7 @@ export function useFoodNutritionMealPickerPresentation({
     );
   };
 
-  return { kind: "view1" as const, props: { styles, buildDay, targetCalories, Macro, totals, round, colors, search, setSearch, category, setCategoryPanelOpen, categoryPanelOpen, setCategory, visibleFoods, addFood, selected, changeServings, save } };
+  return { kind: "view1" as const, props: { foodCount: displayFoods.length, simpleFoods, styles, buildDay, targetCalories, Macro, totals, round, colors, search, setSearch, category, setCategoryPanelOpen, categoryPanelOpen, setCategory, visibleFoods, addFood, selected, changeServings, save } };
 }
 
 export function FoodNutritionMealPicker(...args: Parameters<typeof useFoodNutritionMealPickerPresentation>): React.JSX.Element {

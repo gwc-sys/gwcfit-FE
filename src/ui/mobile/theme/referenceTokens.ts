@@ -1,16 +1,16 @@
 // Decorative colors match the reference. Text uses the accessible semantic
 // foregrounds in theme.ts rather than low-contrast decorative colors.
 export const pulseAccents = {
-  blue: "#1677FF",
-  green: "#14B86A",
-  purple: "#7847FF",
+  blue: "#0A84FF",
+  green: "#34C759",
+  purple: "#5856D6",
   orange: "#FF9500",
   pink: "#FF453A",
 } as const;
 
 export const pulseGradients = {
-  members: ["#0875FF", "#258BFF"] as const,
-  selection: ["#459AFF", "#1677FF"] as const,
+  members: ["#007AFF", "#0A84FF"] as const,
+  selection: ["#0A84FF", "#0A84FF"] as const,
 } as const;
 
 export const pulseEffects = {
@@ -19,16 +19,16 @@ export const pulseEffects = {
 } as const;
 
 export const pulseScreenGradients = {
-  light: ["#FFFFFF", "#F3F7FF"] as const,
-  dark: ["#0B1119", "#09121A"] as const,
+  light: ["#F2F2F7", "#F2F2F7"] as const,
+  dark: ["#000000", "#000000"] as const,
 } as const;
 
 export const pulseDarkAccents = {
   ...pulseAccents,
-  green: "#24D783",
-  purple: "#9164FF",
+  green: "#30D158",
+  purple: "#5E5CE6",
   orange: "#FF9F0A",
-  pink: "#FF5A66",
+  pink: "#FF453A",
 } as const;
 
 export const pulseLayout = {

@@ -106,7 +106,7 @@ const createStyles = (colors: ThemeColors) =>
   base: {
     minHeight: 54,
     minWidth: controlMetrics.minimumTouchSize,
-    borderRadius: radius.lg,
+    borderRadius: radius.md,
     borderWidth: 1,
     borderColor: "transparent",
     alignItems: "center",
@@ -143,7 +143,7 @@ const createStyles = (colors: ThemeColors) =>
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    gap: spacing.md
+    gap: spacing.sm
   },
   label: {
     flexShrink: 1,

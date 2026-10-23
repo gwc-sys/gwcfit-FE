@@ -36,6 +36,9 @@ const items: Array<{
     tab: true,
   },
   { label: "Meal Plan", icon: "restaurant-outline", route: "MemberMealPlan" },
+  { label: "Membership", icon: "ribbon-outline", route: "MemberMembership" },
+  { label: "Payments", icon: "card-outline", route: "MemberPayments" },
+  { label: "My trainer", icon: "person-outline", route: "MemberTrainer" },
   {
     label: "Progress",
     icon: "stats-chart-outline",
@@ -69,6 +72,7 @@ const items: Array<{
     tab: true,
   },
   { label: "Settings", icon: "settings-outline", route: "MemberSettings" },
+  { label: "Support", icon: "chatbubbles-outline", route: "MemberSupport" },
 ];
 
 const coachItems: Array<{

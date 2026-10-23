@@ -2,9 +2,9 @@ import type * as React from "react";
 import { AttendanceScreenView, ReceptionStatCardView, ActivityItemView } from "./AttendanceScreen.presentation";
 import { createDashboardStyles, createStyles } from "./AttendanceScreen.styles";
 import { Ionicons } from "@expo/vector-icons";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
-import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useMemo, useState } from "react";
+import { Platform, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 
 import { FormTextField } from "../../components/FormTextField";
 import { NoticeBanner } from "../../components/NoticeBanner";
@@ -30,6 +30,21 @@ export function useAttendanceScreenPresentation() {
   const { colors } = useAppTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const hasPermission = useAuthStore((state) => state.hasPermission);
+  const currentUser = useAuthStore((state) => state.user);
+  const isTrainer = currentUser?.role === "trainer";
+  const ptMembersQuery = useInfiniteQuery({
+    queryKey: ["members", "trainer-qr", currentUser?.id],
+    initialPageParam: 0,
+    queryFn: ({ pageParam }) => membersApi.list({ skip: pageParam, limit: 50 }),
+    getNextPageParam: (lastPage, pages) => lastPage.length === 50 ? pages.length * 50 : undefined,
+    enabled: Platform.OS !== "web" && isTrainer && hasPermission("manage_attendance"),
+    retry: false,
+  });
+  useEffect(() => {
+    if (Platform.OS !== "web" && isTrainer && ptMembersQuery.hasNextPage && !ptMembersQuery.isFetching && !ptMembersQuery.isError) {
+      void ptMembersQuery.fetchNextPage();
+    }
+  }, [isTrainer, ptMembersQuery.hasNextPage, ptMembersQuery.isFetching, ptMembersQuery.isError, ptMembersQuery.fetchNextPage]);
   const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null);
   const [notes, setNotes] = useState("");
   const [notice, setNotice] = useState<string | null>(null);
@@ -78,7 +93,7 @@ export function useAttendanceScreenPresentation() {
     return { kind: "view1" as const, props: {  } };
   }
 
-  return { kind: "view2" as const, props: { styles, ReceptionStatCard, statsQuery, queryClient, ActivityItem, colors, memberSearch, setMemberSearch, memberOptions, selectedMemberId, setSelectedMemberId, checkInMutation, membersQuery, setNotes, notes, notice } };
+  return { kind: "view2" as const, props: { styles, ReceptionStatCard, statsQuery, queryClient, ActivityItem, colors, memberSearch, setMemberSearch, memberOptions, selectedMemberId, setSelectedMemberId, checkInMutation, membersQuery, setNotes, notes, notice, isTrainer, ptMembersQuery } };
 }
 
 export function AttendanceScreen(...args: Parameters<typeof useAttendanceScreenPresentation>): React.JSX.Element {

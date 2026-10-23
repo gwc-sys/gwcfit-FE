@@ -34,8 +34,8 @@ export function MemberListScreenView({ model }: { model: ReturnType<typeof useMe
       return (<AccessDeniedScreen />);
     }
     case "view2": {
-      const { PlatformUserDirectory } = model.props;
-      return (<PlatformUserDirectory />);
+      const { ConnectedGyms } = model.props;
+      return (<ConnectedGyms />);
     }
     case "view3": {
       const { styles, compact, membersQuery, isTrainer, colors, setSearch, setPage, search, setMemberFilter, memberFilter, canManageMembers, navigation, MemberStat, activeCount, newThisMonthCount, expiredCount, setSortDirection, sortDirection, notice, deleteMember, visibleMembers, MemberRow, confirmDelete, page } = model.props;
@@ -43,7 +43,7 @@ export function MemberListScreenView({ model }: { model: ReturnType<typeof useMe
       const displayedMembers = expiringOnly ? visibleMembers.filter(isExpiringMember) : visibleMembers;
       const selectedChip = expiringOnly ? "Expiring" : memberFilter === "active" ? "Active" : memberFilter === "inactive" ? "Inactive" : "All";
       return ((
-    <Screen reference
+    <Screen reference={false}
       scroll
       contentContainerStyle={[styles.screen, compact && styles.screenCompact]}
       refreshControl={
@@ -53,15 +53,17 @@ export function MemberListScreenView({ model }: { model: ReturnType<typeof useMe
         />
       }
     >
-      <ScreenHeader title="Members" actionIcon={canManageMembers ? "person-add-outline" : undefined} actionLabel="Add member" onAction={canManageMembers ? () => navigation.navigate("AddMember") : undefined} />
+      <ScreenHeader title={isTrainer ? "Clients" : "Members"} subtitle={isTrainer ? "Your coaching directory" : "Your gym community"} actionIcon={canManageMembers ? "person-add-outline" : undefined} actionLabel="Add member" onAction={canManageMembers ? () => navigation.navigate("AddMember") : undefined} />
       <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
         <View style={[styles.toolbarSearch, { flex: 1, width: undefined, minHeight: 44 }]}>
           <Ionicons name="search-outline" size={18} color={colors.muted} />
-          <TextInput autoCapitalize="none" maxLength={120} onChangeText={value => { setSearch(value); setPage(0); }} placeholder="Search members..." placeholderTextColor={colors.subtle} style={[styles.searchInput, { fontSize: 14, minHeight: 44 }]} accessibilityLabel="Search members" value={search} />
+          <TextInput autoCapitalize="none" maxLength={120} onChangeText={value => { setSearch(value); setPage(0); }} placeholder="Search by name or phone" placeholderTextColor={colors.subtle} style={[styles.searchInput, { fontSize: 17, minHeight: 44 }]} accessibilityLabel="Search members" value={search} />
         </View>
         <Pressable accessibilityRole="button" accessibilityLabel="Member filters and sorting" onPress={() => setFiltersOpen(true)} style={ps.iconButton}><Ionicons name="filter" size={20} color={colors.ink} /></Pressable>
       </View>
-      <PulseChips options={["All", "Active", "Inactive", "Expiring"]} value={selectedChip} onChange={value => { setExpiringOnly(value === "Expiring"); setMemberFilter(value === "Active" ? "active" : value === "Inactive" ? "inactive" : "all"); setPage(0); }} />
+      <View accessibilityRole="tablist" style={{ flexDirection: "row", padding: 4, borderRadius: 12, backgroundColor: colors.surface, gap: 4 }}>
+        {(["All", "Active", "Inactive", "Expiring"] as const).map(value => <Pressable key={value} accessibilityRole="tab" accessibilityState={{ selected: selectedChip === value }} onPress={() => { setExpiringOnly(value === "Expiring"); setMemberFilter(value === "Active" ? "active" : value === "Inactive" ? "inactive" : "all"); setPage(0); }} style={{ flex: 1, minWidth: 0, minHeight: 44, paddingVertical: 10, paddingHorizontal: 2, alignItems: "center", justifyContent: "center", borderRadius: 9, backgroundColor: selectedChip === value ? colors.surfaceStrong : "transparent" }}><Text style={{ color: selectedChip === value ? colors.ink : colors.muted, fontSize: 13, fontWeight: selectedChip === value ? "600" : "400", textAlign: "center" }}>{value}</Text></Pressable>)}
+      </View>
       <Modal visible={filtersOpen} transparent animationType="none" onRequestClose={() => setFiltersOpen(false)}>
         <Pressable accessibilityRole="button" accessibilityLabel="Close member filters" onPress={() => setFiltersOpen(false)} style={{ flex: 1, backgroundColor: pulseEffects.scrim, justifyContent: "center", padding: 20 }}>
           <Pressable accessible={false} onPress={event => event.stopPropagation()} style={[ps.card, { gap: 16 }]}>
@@ -120,8 +122,10 @@ export function MemberListScreenView({ model }: { model: ReturnType<typeof useMe
         }
       />
 
+      {!membersQuery.isLoading && !membersQuery.error ? <Text accessibilityLiveRegion="polite" style={{ color: colors.muted, fontSize: 13, marginBottom: 10, marginLeft: 4 }}>{displayedMembers.length} {isTrainer ? "clients" : "members"} on this page</Text> : null}
       {displayedMembers.length > 0 ? (
         <FlatList
+          style={{ backgroundColor: colors.surface, borderRadius: 16, overflow: "hidden", paddingHorizontal: 16 }}
           data={displayedMembers}
           keyExtractor={(item) => item.id}
           ItemSeparatorComponent={() => <View style={styles.separator} />}
@@ -148,25 +152,11 @@ export function MemberListScreenView({ model }: { model: ReturnType<typeof useMe
         />
       ) : null}
 
-      <View style={[styles.pagination, compact && styles.paginationCompact]}>
-        <PrimaryButton
-          disabled={page === 0 || membersQuery.isFetching}
-          onPress={() => setPage((value) => Math.max(0, value - 1))}
-          title="Previous"
-          variant="secondary"
-          style={styles.pageButton}
-        />
-        <Text style={styles.pageLabel}>Page {page + 1}</Text>
-        <PrimaryButton
-          disabled={
-            (membersQuery.data?.length ?? 0) < 50 || membersQuery.isFetching
-          }
-          onPress={() => setPage((value) => value + 1)}
-          title="Next"
-          variant="secondary"
-          style={styles.pageButton}
-        />
-      </View>
+      {page > 0 || (membersQuery.data?.length ?? 0) >= 50 ? <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginTop: 12 }}>
+        <Pressable accessibilityRole="button" accessibilityLabel="Previous page" accessibilityState={{ disabled: page === 0 || membersQuery.isFetching }} disabled={page === 0 || membersQuery.isFetching} onPress={() => setPage(value => Math.max(0, value - 1))} style={{ minHeight: 44, paddingHorizontal: 8, justifyContent: "center" }}><Text style={{ color: page === 0 || membersQuery.isFetching ? colors.muted : colors.primary, fontSize: 15 }}>Previous</Text></Pressable>
+        <Text style={{ color: colors.muted, fontSize: 13 }}>Page {page + 1}</Text>
+        <Pressable accessibilityRole="button" accessibilityLabel="Next page" accessibilityState={{ disabled: (membersQuery.data?.length ?? 0) < 50 || membersQuery.isFetching }} disabled={(membersQuery.data?.length ?? 0) < 50 || membersQuery.isFetching} onPress={() => setPage(value => value + 1)} style={{ minHeight: 44, paddingHorizontal: 8, justifyContent: "center" }}><Text style={{ color: (membersQuery.data?.length ?? 0) < 50 || membersQuery.isFetching ? colors.muted : colors.primary, fontSize: 15 }}>Next</Text></Pressable>
+      </View> : null}
       </View>
     </Screen>
   ));
@@ -257,15 +247,14 @@ export function MemberRowView({ model }: { model: ReturnType<typeof useMemberRow
       const ps = pulseStyles(colors);
       return ((
     <View>
-      <View style={ps.row}>
+      <View style={[ps.row, { minHeight: 88, gap: 8 }]}>
         <Pressable accessibilityRole="button" accessibilityLabel={`View ${fullName}`} onPress={onView} onLongPress={() => setExpanded(value => !value)} style={({ pressed }) => [{ flexDirection: "row", alignItems: "center", flex: 1, minHeight: 68, gap: 12 }, pressed && { opacity: 0.65 }]}>
           <PulseAvatar name={fullName} uri={typeof member.extra_data?.profile_photo === "string" ? member.extra_data.profile_photo : undefined} />
-          <View style={ps.copy}><Text style={ps.name}>{fullName}</Text><Text style={ps.meta}>{relatedDisplayName(member.membership_plan_name, "No plan assigned")}</Text></View>
-          <StatusBadge label={member.status.charAt(0).toUpperCase() + member.status.slice(1)} tone={memberStatusTone(member.status)} />
+          <View style={ps.copy}><Text style={{ color: colors.ink, fontSize: 17, lineHeight: 23, fontWeight: "600" }}>{fullName}</Text><Text style={{ color: colors.muted, fontSize: 13, lineHeight: 18 }}>{relatedDisplayName(member.membership_plan_name, "No plan assigned")}</Text><Text style={{ color: member.status === "active" ? colors.success : colors.muted, fontSize: 12, lineHeight: 17, textTransform: "capitalize" }}>{member.status}</Text></View>
         </Pressable>
-        <Pressable accessibilityRole="button" accessibilityLabel={`Manage ${fullName}`} accessibilityState={{ expanded }} onPress={() => setExpanded(value => !value)} style={{ minHeight: 48, minWidth: 44, alignItems: "center", justifyContent: "center" }}><Ionicons name={expanded ? "chevron-down" : "chevron-forward"} size={16} color={colors.muted} /></Pressable>
+        <Pressable accessibilityRole="button" accessibilityLabel={`Manage ${fullName}`} accessibilityState={{ expanded }} onPress={() => setExpanded(value => !value)} style={{ minHeight: 48, minWidth: 44, alignItems: "center", justifyContent: "center" }}><Ionicons name={expanded ? "close" : "ellipsis-horizontal"} size={16} color={colors.muted} /></Pressable>
       </View>
-      {expanded && <View style={{ gap: 10 }}>
+      {expanded && <View style={{ gap: 10, paddingBottom: 16, paddingTop: 8 }}>
       <View style={{ gap: 6 }}>
         <Text style={styles.cellText}>{member.phone || "No phone"}</Text>
         <Text style={styles.memberMeta}>{member.email || "No email"}</Text>

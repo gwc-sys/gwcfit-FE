@@ -63,8 +63,8 @@ export function OwnerSettingsHubView({ model }: { model: ReturnType<typeof useOw
       </SurfacePanel>
       <MyGymPanel />
       <SurfacePanel title="Change password" kicker="Security" icon="lock-closed-outline">
-        <Controller control={control} name="old_password" render={({ field: { onBlur, onChange, value } }) => <FormTextField error={errors.old_password?.message} label="Current password" leftIcon="lock-open-outline" maxLength={72} onBlur={onBlur} onChangeText={onChange} placeholder="Enter current password" secureTextEntry value={value} />} />
-        <Controller control={control} name="new_password" render={({ field: { onBlur, onChange, value } }) => <FormTextField error={errors.new_password?.message} label="New password" leftIcon="lock-closed-outline" maxLength={72} onBlur={onBlur} onChangeText={onChange} placeholder="Use at least 8 characters" secureTextEntry value={value} />} />
+        <Controller control={control} name="old_password" render={({ field: { onBlur, onChange, value } }) => <FormTextField error={errors.old_password?.message} label="Old password" leftIcon="lock-open-outline" maxLength={72} onBlur={onBlur} onChangeText={onChange} placeholder="Enter your old password" autoComplete="new-password" autoCorrect={false} autoCapitalize="none" importantForAutofill="no" secureTextEntry value={value} />} />
+        <Controller control={control} name="new_password" render={({ field: { onBlur, onChange, value } }) => <FormTextField error={errors.new_password?.message} label="New password" leftIcon="lock-closed-outline" maxLength={72} onBlur={onBlur} onChangeText={onChange} placeholder="Use at least 8 characters" autoComplete="new-password" autoCorrect={false} autoCapitalize="none" importantForAutofill="no" secureTextEntry value={value} />} />
         <NoticeBanner message={changePassword.error ? getApiErrorMessage(changePassword.error) : null} tone="error" />
         <NoticeBanner message={changePassword.data?.message ?? null} />
         <PrimaryButton title="Update password" icon="key-outline" loading={changePassword.isPending} onPress={submitPasswordChange} />
@@ -113,10 +113,10 @@ export function SuperAdminSettingsHubView({ model }: { model: ReturnType<typeof 
 
       {user?.role !== "super_admin" ? <SurfacePanel title="Change password" kicker="Authentication" icon="lock-closed-outline">
         <Controller control={control} name="old_password" render={({ field: { onBlur, onChange, value } }) => (
-          <FormTextField error={errors.old_password?.message} label="Current password" leftIcon="lock-open-outline" maxLength={72} onBlur={onBlur} onChangeText={onChange} placeholder="Enter current password" secureTextEntry value={value} />
+          <FormTextField error={errors.old_password?.message} label="Old password" leftIcon="lock-open-outline" maxLength={72} onBlur={onBlur} onChangeText={onChange} placeholder="Enter your old password" autoComplete="new-password" autoCorrect={false} autoCapitalize="none" importantForAutofill="no" secureTextEntry value={value} />
         )} />
         <Controller control={control} name="new_password" render={({ field: { onBlur, onChange, value } }) => (
-          <FormTextField error={errors.new_password?.message} label="New password" leftIcon="lock-closed-outline" maxLength={72} onBlur={onBlur} onChangeText={onChange} placeholder="Use at least 8 characters" secureTextEntry value={value} />
+          <FormTextField error={errors.new_password?.message} label="New password" leftIcon="lock-closed-outline" maxLength={72} onBlur={onBlur} onChangeText={onChange} placeholder="Use at least 8 characters" autoComplete="new-password" autoCorrect={false} autoCapitalize="none" importantForAutofill="no" secureTextEntry value={value} />
         )} />
         <NoticeBanner message={changePassword.error ? getApiErrorMessage(changePassword.error) : null} tone="error" />
         <NoticeBanner message={changePassword.data?.message ?? null} />

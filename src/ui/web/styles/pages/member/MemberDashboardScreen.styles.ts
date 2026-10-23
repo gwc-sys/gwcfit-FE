@@ -75,24 +75,24 @@ export const LIGHT_UI: DashboardPalette = {
 };
 
 export const DARK_UI: DashboardPalette = {
-  background: "#0C111B",
-  surface: "#191B20",
-  panel: "#2C2C2E",
-  border: "rgba(0,122,255,0.18)",
-  borderStrong: "rgba(0,122,255,0.30)",
+  background: "#000000",
+  surface: "#000000",
+  panel: "#000000",
+  border: "rgba(84,84,88,0.65)",
+  borderStrong: "#3A3A3C",
   text: "#FFFFFF",
   muted: "#AEAEB2",
   subtle: "#8E8E93",
   navLabel: "#D1D1D6",
   primary: "#0A84FF",
-  primaryDark: "#64D2FF",
+  primaryDark: "#0A84FF",
   onPrimary: "#FFFFFF",
-  success: "#22C55E",
-  danger: "#F87171",
-  warning: "#FB923C",
-  cyan: "#2DD4BF",
-  blue: "#60A5FA",
-  pink: "#F472B6",
+  success: "#30D158",
+  danger: "#FF453A",
+  warning: "#FF9F0A",
+  cyan: "#64D2FF",
+  blue: "#0A84FF",
+  pink: "#FF375F",
   softPurple: "rgba(0,122,255,0.18)",
   softGreen: "rgba(34,197,94,0.16)",
   softBlue: "rgba(96,165,250,0.16)",
@@ -104,8 +104,8 @@ export const DARK_UI: DashboardPalette = {
   scheduleTime: "#CBD5E1",
   upcomingPill: "rgba(37,99,235,0.20)",
   upcomingPillText: "#93C5FD",
-  ringTrack: "rgba(0,122,255,0.22)",
-  progressTrack: "rgba(0,122,255,0.18)",
+  ringTrack: "#3A3A3C",
+  progressTrack: "#3A3A3C",
   calorieTrack: "rgba(148,163,184,0.18)",
   shadowColor: "#000000"
 };
@@ -769,3 +769,5 @@ export function createStyles(ui: DashboardPalette) {
     }
   });
 }
+
+
