@@ -30,6 +30,7 @@ import type { ThemeColors } from "../../theme/theme";
 import { formatRole, initials } from "../../utils/formatters";
 import { useLogout } from "../../hooks/useAuthActions";
 import { requestLogoutConfirmation } from "../../utils/logoutConfirmation";
+import { useNotificationDelivery } from "../../services/notificationDelivery";
 import { notificationsApi } from "../../services/api/notifications";
 import { Screen } from "../Screen";
 import { useMyGym } from "../../hooks/useOperations";
@@ -185,13 +186,15 @@ export function usePulseDashboardLayoutPresentation({
   const isTrainer = user?.role === "trainer";
   const userName = user?.full_name ?? "John Trainer";
   const notificationQuery = useQuery({
-    queryKey: ["notifications", "unread-count"],
-    queryFn: () => notificationsApi.list(true),
+    queryKey: ["notifications", "unread-count", user?.id],
+    queryFn: () => notificationsApi.unreadCount(),
     enabled: Boolean(user),
-    refetchInterval: 30000,
+    refetchInterval: 60000,
+    refetchIntervalInBackground: true,
     retry: false,
   });
-  const unreadNotificationCount = notificationQuery.data?.length ?? 0;
+  const unreadNotificationCount = notificationQuery.data ?? 0;
+  useNotificationDelivery(navigation, user?.id, unreadNotificationCount);
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
   const [localTrainerSearch, setLocalTrainerSearch] = useState("");
   const logout = useLogout();
@@ -225,7 +228,7 @@ export function usePulseDashboardLayoutPresentation({
     if (accountMenuRequest > 0) setAccountMenuOpen(true);
   }, [accountMenuRequest]);
 
-  return { kind: "view1" as const, props: { savedGymName, styles, contentStyle, refreshControl, isDesktop, isTrainer, isGymOwner, GymOwnerSidebar, activeLabel, navigation, isPlatformAdmin, colors, resolvedRoleLabel, sidebarItems, setAccountMenuOpen, userName, MobileBrandButton, firstName, ownerDate, unreadNotificationCount, resolvedTrainerSearch, setResolvedTrainerSearch, trainerDate, children, accountMenuOpen, user, OwnerAccountItem, isDark, toggleColorScheme, logout } };
+  return { kind: "view1" as const, props: { paymentGraceEndsAt: myGymQuery.data?.settings?.payment_grace_ends_at, savedGymName, styles, contentStyle, refreshControl, isDesktop, isTrainer, isGymOwner, GymOwnerSidebar, activeLabel, navigation, isPlatformAdmin, colors, resolvedRoleLabel, sidebarItems, setAccountMenuOpen, userName, MobileBrandButton, firstName, ownerDate, unreadNotificationCount, resolvedTrainerSearch, setResolvedTrainerSearch, trainerDate, children, accountMenuOpen, user, OwnerAccountItem, isDark, toggleColorScheme, logout } };
 }
 
 export function PulseDashboardLayout(...args: Parameters<typeof usePulseDashboardLayoutPresentation>): React.JSX.Element {
@@ -308,6 +311,9 @@ export function usePulseDashboardHeaderPresentation({
     () => createHeaderStyles(colors, width),
     [colors, width],
   );
+  const headerUser = useAuthStore((state) => state.user);
+  const unread = useQuery({ queryKey: ["notifications", "unread-count", headerUser?.id], queryFn: notificationsApi.unreadCount, enabled: Boolean(headerUser) && Boolean(onNotifications), refetchInterval: 60000, refetchIntervalInBackground: true });
+  const resolvedBadge = notificationBadge ?? (unread.data ? (unread.data >= 10 ? "10+" : String(unread.data)) : undefined);
   const resolvedDate =
     dateLabel ??
     new Intl.DateTimeFormat("en-US", {
@@ -316,7 +322,7 @@ export function usePulseDashboardHeaderPresentation({
       year: "numeric",
     }).format(new Date());
 
-  return { kind: "view1" as const, props: { styles, title, subtitle, colors, resolvedDate, onSearch, HeaderCircleButton, onNotifications, notificationBadge, onMessages } };
+  return { kind: "view1" as const, props: { styles, title, subtitle, colors, resolvedDate, onSearch, HeaderCircleButton, onNotifications, notificationBadge: resolvedBadge, onMessages } };
 }
 
 export function PulseDashboardHeader(...args: Parameters<typeof usePulseDashboardHeaderPresentation>): React.JSX.Element {

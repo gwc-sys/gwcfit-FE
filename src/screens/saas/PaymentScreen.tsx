@@ -237,7 +237,7 @@ export function usePlatformPaymentsDashboardPresentation({
 }) {
   const { colors } = useAppTheme();
   const styles = useMemo(() => makeStyles(colors, 1200), [colors]);
-  const [selectedMetric, setSelectedMetric] = useState<string | null>(null);
+  const [selectedMetric, setSelectedMetric] = useState<string | null>("subscribed");
   const paid = payments.filter((item) => item.status === "paid");
   const due = payments.filter((item) => item.status !== "paid" && item.status !== "refunded");
   const totalRevenue = paid.reduce((sum, item) => sum + item.amount_cents, 0);
@@ -250,7 +250,7 @@ export function usePlatformPaymentsDashboardPresentation({
   const subscribedGyms = developerGyms.filter(isCurrentSubscription);
   const trialGyms = developerGyms.filter((gym) => isCurrentSubscription(gym) && gym.subscription?.status === "trialing");
   const applicationRevenue = developerGyms
-    .filter((gym) => gym.subscription?.status === "active")
+    .filter((gym) => isCurrentSubscription(gym) && gym.subscription?.status === "active")
     .reduce((sum, gym) => sum + (gym.subscription?.amount_cents ?? 0), 0);
   const subscriptionRevenue = developerGyms
     .filter(isCurrentSubscription)
@@ -264,9 +264,9 @@ export function usePlatformPaymentsDashboardPresentation({
   const maxRevenue = Math.max(...gymRows.map((row) => row.revenue), 1);
   const expiryMembers = members.filter((member) => member.membership_ends_at).sort((left, right) => new Date(left.membership_ends_at!).getTime() - new Date(right.membership_ends_at!).getTime()).slice(0, 12);
   const relatedGymRows = selectedMetric === "application" || selectedMetric === "subscribed" || selectedMetric === "trial" || selectedMetric === "subscription-value"
-    ? developerGyms.filter((gym) => selectedMetric === "application" ? gym.subscription?.status === "active" : selectedMetric === "trial" ? isCurrentSubscription(gym) && gym.subscription?.status === "trialing" : isCurrentSubscription(gym))
+    ? developerGyms.filter((gym) => selectedMetric === "application" ? isCurrentSubscription(gym) && gym.subscription?.status === "active" : selectedMetric === "trial" ? isCurrentSubscription(gym) && gym.subscription?.status === "trialing" : isCurrentSubscription(gym))
     : gymRows.filter((row) => selectedMetric === "active" ? row.gym.status === "active" : selectedMetric === "revenue" || selectedMetric === "dues" || selectedMetric === "members");
-  const relatedMetricTitle = selectedMetric === "application" ? "Gyms contributing application earnings" : selectedMetric === "subscribed" ? "Currently subscribed gyms" : selectedMetric === "trial" ? "Gyms using the free trial" : selectedMetric === "subscription-value" ? "Gyms included in subscription value" : selectedMetric === "revenue" ? "Gym member revenue by gym" : selectedMetric === "dues" ? "Pending dues by gym" : selectedMetric === "active" ? "Active gyms" : selectedMetric === "members" ? "Member count by gym" : "Select a metric card to view related gyms";
+  const relatedMetricTitle = selectedMetric === "application" ? "Gyms with active paid application plans" : selectedMetric === "subscribed" ? "Currently subscribed gyms" : selectedMetric === "trial" ? "Gyms using the free trial" : selectedMetric === "subscription-value" ? "Gyms included in subscription value" : selectedMetric === "revenue" ? "Gym member revenue by gym" : selectedMetric === "dues" ? "Pending dues by gym" : selectedMetric === "active" ? "Active gyms" : selectedMetric === "members" ? "Member count by gym" : "Select a metric card to view related gyms";
   return { kind: "view1" as const, props: { styles, colors, loading, error, Metric, totalRevenue, setSelectedMetric, selectedMetric, totalDues, gyms, members, applicationRevenue, subscribedGyms, trialGyms, subscriptionRevenue, relatedMetricTitle, relatedGymRows, gymRows, maxRevenue, expiryMembers, developerGyms , activeGymCount: gyms.filter((gym) => gym.status === "active").length} };
 }
 

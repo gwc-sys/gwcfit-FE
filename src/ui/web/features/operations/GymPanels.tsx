@@ -1,3 +1,5 @@
+import { ScrollView } from "react-native";
+import { useState } from "react";
 import { formatCurrency } from "../../../../utils/formatters";
 import { showAlert } from "../../../../utils/appAlert";
 import { Ionicons } from "@expo/vector-icons";
@@ -353,11 +355,16 @@ export function GymMetricView({ model }: { model: ReturnType<typeof useGymMetric
 }
 
 export function GymDetailsPanelView({ model }: { model: ReturnType<typeof useGymDetailsPanelPresentation> }): React.ReactNode {
+  const [calendarWeekOffset, setCalendarWeekOffset] = useState(0);
+  const weekStart = new Date();
+  weekStart.setHours(0, 0, 0, 0);
+  weekStart.setDate(weekStart.getDate() - ((weekStart.getDay() + 6) % 7) + calendarWeekOffset * 7);
+  const weekDates = Array.from({ length: 7 }, (_, index) => { const date = new Date(weekStart); date.setDate(date.getDate() + index); return date; });
   if (model == null) return null;
   if (typeof model !== "object" || !("kind" in model)) return model;
   switch (model.kind) {
     case "view1": {
-      const { activationPlan, setActivationPlan, activationType, setActivationType, activationPlansQuery, isSuperAdmin, statusMutation, changeStatus, styles, colors, gym, DetailMetric, usersQuery, activeMembers, plansQuery, expiringSoon, trial, trialProgress, trialCompletedDays, trialRemainingDays, trialEndsAt, monthStart, leadingDays, monthDays, expiryByDay, trialDayState, daysRemaining, dateLabel, paymentsQuery } = model.props;
+      const { statusOptionsOpen, setStatusOptionsOpen, graceDays, setGraceDays, activationPlan, setActivationPlan, activationType, setActivationType, activationPlansQuery, isSuperAdmin, statusMutation, changeStatus, styles, colors, gym, DetailMetric, usersQuery, activeMembers, plansQuery, expiringSoon, trial, trialProgress, trialCompletedDays, trialRemainingDays, trialEndsAt, monthStart, leadingDays, monthDays, expiryByDay, trialDayState, daysRemaining, dateLabel, paymentsQuery } = model.props;
       return ((
     <View style={styles.wrap}>
       <View style={styles.hero}>
@@ -370,10 +377,19 @@ export function GymDetailsPanelView({ model }: { model: ReturnType<typeof useGym
             {gym.code} · {gym.address || "Platform tenant"}
           </Text>
         </View>
+        <View style={{ alignItems: "flex-end", gap: 10 }}>
+          <Pressable accessibilityRole="button" accessibilityLabel={`Gym status: ${gym.status}. Show access options`} accessibilityState={{ expanded: statusOptionsOpen, disabled: !isSuperAdmin }} disabled={!isSuperAdmin} onPress={() => setStatusOptionsOpen(value => !value)} style={{ minHeight: 44, justifyContent: "center" }}>
         <StatusBadge
           label={gym.status}
           tone={gym.status === "active" ? "success" : "warning"}
         />
+          </Pressable>
+          {isSuperAdmin && statusOptionsOpen ? <View style={{ gap: 10, padding: 14, borderRadius: 12, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surface, maxWidth: 300 }}>
+            <Text style={{ color: colors.ink, fontWeight: "600" }}>{gym.status === "active" ? "Gym is active" : "Unsuspend gym"}</Text>
+            {gym.status !== "active" ? <Text style={{ color: colors.muted, lineHeight: 20 }}>Use Platform membership below to activate a plan, or grant extra days to pay.</Text> : <Text style={{ color: colors.muted }}>Manage the gym's plan and access below.</Text>}
+            <PrimaryButton title={gym.status === "active" ? "Manage access" : "Unsuspend gym"} variant="secondary" onPress={() => { setStatusOptionsOpen(false); showAlert("Unsuspend gym", "Restore access by granting extra days to pay, or activate the platform plan selected below.", [{ text: "Cancel", style: "cancel" }, { text: `Grant ${graceDays} extra days`, onPress: () => changeStatus("grace") }, ...(activationPlan ? [{ text: "Activate selected plan", onPress: () => changeStatus("reactivate") }] : [])]); }} />
+          </View> : null}
+        </View>
       </View>
 
       {isSuperAdmin ? <View style={{ gap: 24, padding: 24, borderWidth: 1, borderColor: colors.border, borderRadius: 20, backgroundColor: colors.surface }}>
@@ -383,7 +399,7 @@ export function GymDetailsPanelView({ model }: { model: ReturnType<typeof useGym
         </View>
         <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 24, padding: 20, backgroundColor: colors.primarySoft, borderRadius: 14 }}>
           <View style={{ flex: 1, minWidth: 160, gap: 6 }}><Text style={{ color: colors.muted, fontSize: 12 }}>CURRENT PLAN</Text><Text style={{ color: colors.ink, fontSize: 20, fontWeight: "600" }}>{trial?.plan_name ?? "No plan assigned"}</Text></View>
-          <View style={{ flex: 1, minWidth: 160, gap: 6 }}><Text style={{ color: colors.muted, fontSize: 12 }}>ACCESS TYPE</Text><Text style={{ color: colors.ink, fontSize: 15 }}>{gym.settings?.platform_activation_type === "free" ? "Free ? Admin granted" : gym.settings?.platform_activation_type === "paid" ? "Paid ? Admin confirmed" : "Existing subscription"}</Text></View>
+          <View style={{ flex: 1, minWidth: 160, gap: 6 }}><Text style={{ color: colors.muted, fontSize: 12 }}>ACCESS TYPE</Text><Text style={{ color: colors.ink, fontSize: 15 }}>{gym.settings?.platform_activation_type === "free" ? "Free - Admin granted" : gym.settings?.platform_activation_type === "paid" ? "Paid - Admin confirmed" : "Existing subscription"}</Text></View>
           <View style={{ flex: 1, minWidth: 160, gap: 6 }}><Text style={{ color: colors.muted, fontSize: 12 }}>VALID UNTIL</Text><Text style={{ color: colors.ink, fontSize: 15 }}>{trial?.current_period_ends_at ? new Date(trial.current_period_ends_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : "Not set"}</Text></View>
         </View>
         <View style={{ gap: 12 }}>
@@ -410,12 +426,19 @@ export function GymDetailsPanelView({ model }: { model: ReturnType<typeof useGym
           <Text style={{ color: colors.muted, fontSize: 14, lineHeight: 21 }}>{activationType === "free" ? "No payment required. Access is granted by super admin for the selected plan period." : "Confirm payment has been received before activating this plan."}</Text>
         </View>
         <View style={{ gap: 12, paddingTop: 20, borderTopWidth: 1, borderTopColor: colors.border }}>
-          <PrimaryButton title={activationPlan ? `Activate ${(activationPlansQuery.data ?? []).find(plan => plan.id === activationPlan)?.name ?? "plan"} ? ${activationType === "free" ? "Free access" : "Paid plan"}` : "Select a plan to continue"} disabled={!activationPlan || statusMutation.isPending} loading={statusMutation.isPending} onPress={() => changeStatus("reactivate")} />
+          <PrimaryButton title={activationPlan ? `Activate ${(activationPlansQuery.data ?? []).find(plan => plan.id === activationPlan)?.name ?? "plan"} - ${activationType === "free" ? "Free access" : "Paid plan"}` : "Select a plan to continue"} disabled={!activationPlan || statusMutation.isPending} loading={statusMutation.isPending} onPress={() => changeStatus("reactivate")} />
           {statusMutation.error ? <Text accessibilityRole="alert" style={{ color: colors.danger }}>{getApiErrorMessage(statusMutation.error)}</Text> : null}
           {statusMutation.isSuccess ? <Text accessibilityLiveRegion="polite" style={{ color: colors.success }}>Gym status updated.</Text> : null}
         </View>
         <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 12 }}>
           {gym.status === "active" && gym.is_active ? <PrimaryButton title="Suspend gym" variant="secondary" disabled={statusMutation.isPending} onPress={() => changeStatus("suspend")} /> : null}
+        <View style={{ gap: 12, padding: 20, borderWidth: 1, borderColor: colors.border, borderRadius: 14 }}>
+          <Text style={{ color: colors.ink, fontSize: 17, fontWeight: "600" }}>Extra days after plan expiry</Text>
+          <Text style={{ color: colors.muted }}>After a platform plan expires, grant extra days to pay. Enter or edit the allowance below. Applying it restores access and sets a new deadline from today.</Text>
+          {gym.settings?.payment_grace_ends_at ? <Text style={{ color: colors.primary }}>Payment time: {String(gym.settings.payment_grace_days)} days granted - {Math.max(0, Math.ceil((Date.parse(String(gym.settings.payment_grace_ends_at)) - Date.now()) / 86400000))} days remaining - Due {new Date(String(gym.settings.payment_grace_ends_at)).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}</Text> : null}
+          <FormTextField label="Extra days to pay (1 to 30)" keyboardType="numeric" value={graceDays} onChangeText={setGraceDays} />
+          <PrimaryButton title={gym.settings?.payment_grace_ends_at ? "Update extra days and restore access" : "Grant extra days and restore access"} variant="secondary" disabled={statusMutation.isPending || !Number.isInteger(Number(graceDays)) || Number(graceDays) < 1 || Number(graceDays) > 30} onPress={() => changeStatus("grace")} />
+        </View>
         {gym.is_active ? <PrimaryButton title="Suspend for unpaid platform plan" icon="card-outline" variant="secondary" disabled={statusMutation.isPending} onPress={() => changeStatus("unpaid")} /> : null}
           {gym.is_active ? <PrimaryButton title="Delete gym" icon="trash-outline" variant="secondary" disabled={statusMutation.isPending} onPress={() => changeStatus("delete")} /> : null}
         </View>
@@ -572,15 +595,10 @@ export function GymDetailsPanelView({ model }: { model: ReturnType<typeof useGym
           <View>
             <Text style={styles.cardTitle}>Subscription calendar</Text>
             <Text style={styles.cardSubtitle}>
-              Days marked in yellow have a membership ending
+              Yellow: completed. Green: remaining. Red: plan expiry date.
             </Text>
           </View>
-          <Text style={styles.month}>
-            {monthStart.toLocaleDateString(undefined, {
-              month: "long",
-              year: "numeric",
-            })}
-          </Text>
+
         </View>
         <View style={styles.trialCalendarSummary}>
           <Text style={styles.trialCalendarText}>
@@ -597,52 +615,35 @@ export function GymDetailsPanelView({ model }: { model: ReturnType<typeof useGym
             <Text style={styles.legendText}>Completed</Text>
             <View style={[styles.legendDot, styles.remainingDot]} />
             <Text style={styles.legendText}>Remaining</Text>
+            <View style={[styles.legendDot, { backgroundColor: "#FF453A" }]} /><Text style={styles.legendText}>Expiry</Text>
           </View>
         </View>
-        <View style={styles.weekRow}>
-          {["S", "M", "T", "W", "T", "F", "S"].map((day, index) => (
-            <Text key={`${day}-${index}`} style={styles.weekDay}>
-              {day}
-            </Text>
-          ))}
+        <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 12, marginTop: 12 }}>
+          <Text style={{ color: colors.muted, fontSize: 24, fontWeight: "400" }}>{weekStart.toLocaleDateString("en-IN", { month: "long", year: "numeric" })}</Text>
+          <View style={{ flexDirection: "row", gap: 8 }}>
+            <Pressable accessibilityRole="button" accessibilityLabel="Previous week" onPress={() => setCalendarWeekOffset(value => value - 1)} style={{ padding: 12 }}><Ionicons name="chevron-back" size={22} color={colors.primary} /></Pressable>
+            <Pressable accessibilityRole="button" accessibilityLabel="Current week" onPress={() => setCalendarWeekOffset(0)} style={{ padding: 12 }}><Text style={{ color: colors.primary }}>Today</Text></Pressable>
+            <Pressable accessibilityRole="button" accessibilityLabel="Next week" onPress={() => setCalendarWeekOffset(value => value + 1)} style={{ padding: 12 }}><Ionicons name="chevron-forward" size={22} color={colors.primary} /></Pressable>
+          </View>
         </View>
-        <View style={styles.calendar}>
-          {Array.from({ length: leadingDays + monthDays }, (_, index) => {
-            const day = index - leadingDays + 1;
-            const key =
-              day > 0
-                ? `${monthStart.getFullYear()}-${String(monthStart.getMonth() + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`
-                : `blank-${index}`;
-            const marked = expiryByDay.has(key);
-            const state = trialDayState(day);
-            return (
-              <View
-                key={key}
-                style={[
-                  styles.day,
-                  day <= 0 ? styles.emptyDay : null,
-                  marked ? styles.markedDay : null,
-                  state === "completed" ? styles.completedDay : null,
-                  state === "remaining" ? styles.remainingDay : null,
-                ]}
-              >
-                <Text
-                  style={[
-                    styles.dayText,
-                    marked || state !== "none" ? styles.markedText : null,
-                  ]}
-                >
-                  {day > 0 ? day : ""}
-                </Text>
-                {state !== "none" ? (
-                  <Text style={styles.dayLabel}>
-                    {state === "completed" ? "done" : "left"}
-                  </Text>
-                ) : null}
-              </View>
-            );
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ width: "100%" }} contentContainerStyle={{ flexGrow: 1, justifyContent: "space-between", gap: 12, paddingVertical: 16 }}>
+          {weekDates.map(date => {
+            const today = new Date(); today.setHours(0, 0, 0, 0);
+            const expiry = trialEndsAt ? new Date(trialEndsAt) : null; expiry?.setHours(0, 0, 0, 0);
+            const start = expiry ? new Date(expiry) : null; start?.setDate(start.getDate() - trialCompletedDays - trialRemainingDays);
+            const isToday = date.getTime() === today.getTime();
+            const isExpiry = expiry != null && date.getTime() === expiry.getTime();
+            const inPlan = start != null && expiry != null && date >= start && date <= expiry;
+            const completed = inPlan && date < today;
+            const remaining = inPlan && !completed && !isExpiry;
+            const tone = isExpiry ? "#FF453A" : completed ? "#FFD60A" : remaining ? "#30D158" : null;
+            return <View key={date.toISOString()} accessibilityLabel={`${date.toLocaleDateString("en-IN")}, ${isExpiry ? "Plan expires" : completed ? "Completed" : remaining ? "Remaining" : "Outside plan"}${isToday ? ", Today" : ""}`} style={{ width: 88, height: 162, borderRadius: 48, backgroundColor: isToday ? "#0A84FF" : "#1C1C1E", alignItems: "center", justifyContent: "space-between", paddingTop: 22, paddingBottom: 10 }}>
+              <Text style={{ color: "#FFFFFF", fontSize: 20 }}>{date.toLocaleDateString("en-IN", { weekday: "short" })}</Text>
+              <View style={{ width: 70, height: 70, borderRadius: 35, backgroundColor: tone ?? (isToday ? "#FFFFFF" : "#2C2C2E"), alignItems: "center", justifyContent: "center" }}><Text style={{ color: tone ? isExpiry ? "#FFFFFF" : "#000000" : isToday ? "#0A84FF" : "#FFFFFF", fontSize: 27, fontWeight: "500" }}>{date.getDate()}</Text></View>
+              <Text style={{ color: "#FFFFFF", fontSize: 10 }}>{isExpiry ? "Expires" : isToday ? "Today" : completed ? "Completed" : remaining ? "Remaining" : ""}</Text>
+            </View>;
           })}
-        </View>
+        </ScrollView>
         <View style={styles.validityBlock}>
           <Text style={styles.validityTitle}>Membership validity</Text>
           {activeMembers

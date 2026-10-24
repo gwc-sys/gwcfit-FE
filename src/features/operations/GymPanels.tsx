@@ -4,7 +4,7 @@ import { GymManagementPanelView, GymMetricView, GymDetailsPanelView, DetailMetri
 import { createStyles, createDetailStyles } from "./GymPanels.styles";
 import { showAlert } from "../../utils/appAlert";
 import { Ionicons } from "@expo/vector-icons";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Controller,
@@ -242,20 +242,30 @@ export function useGymDetailsPanelPresentation({ gym: initialGym }: { gym: Gym }
   const isSuperAdmin = useAuthStore(state => state.user?.role === "super_admin");
   const gymQuery = useQuery({ queryKey: ["gym-profile", initialGym.id], queryFn: () => gymsApi.get(initialGym.id), enabled: isSuperAdmin });
   const gym = gymQuery.data ?? initialGym;
+  const [statusOptionsOpen, setStatusOptionsOpen] = useState(false);
+  const [graceDays, setGraceDays] = useState("7");
+  useEffect(() => {
+    setGraceDays(String(gym.settings?.payment_grace_days ?? 7));
+  }, [gym.id, gym.settings?.payment_grace_days]);
   const [activationPlan, setActivationPlan] = useState("");
   const [activationType, setActivationType] = useState<"paid" | "free">("free");
   const activationPlansQuery = useQuery({ queryKey: ["activation-platform-plans"], queryFn: platformPlansApi.list, enabled: isSuperAdmin });
   const statusMutation = useMutation({
-    mutationFn: async (action: "reactivate" | "suspend" | "unpaid" | "delete") => {
+    mutationFn: async (action: "reactivate" | "suspend" | "unpaid" | "grace" | "delete") => {
       if (action === "reactivate") await gymsApi.reactivate(gym.id, activationPlan, activationType);
+      else if (action === "grace") {
+        const days = Number(graceDays);
+        if (!Number.isInteger(days) || days < 1 || days > 30) throw new Error("Enter 1 to 30 days.");
+        await gymsApi.grantPaymentGrace(gym.id, days);
+      }
       else if (action === "unpaid") await gymsApi.suspend(gym.id, "platform_unpaid");
       else if (action === "suspend") await gymsApi.suspend(gym.id);
       else await gymsApi.remove(gym.id);
     },
     onSuccess: () => { client.invalidateQueries(); },
   });
-  const changeStatus = (action: "reactivate" | "suspend" | "unpaid" | "delete") => {
-    showAlert(action === "reactivate" ? "Activate gym" : action === "suspend" ? "Suspend gym" : action === "unpaid" ? "Suspend for unpaid platform plan" : "Delete gym", `${gym.name}: ${action === "reactivate" ? "Activate the selected Platform Membership Plan? Free activation records no payment; paid activation records payment confirmed by super admin." : "This blocks access for the owner and all gym users."}`, [
+  const changeStatus = (action: "reactivate" | "suspend" | "unpaid" | "grace" | "delete") => {
+    showAlert(action === "reactivate" ? "Activate gym" : action === "suspend" ? "Suspend gym" : action === "unpaid" ? "Suspend for unpaid platform plan" : action === "grace" ? "Unsuspend with payment time" : "Delete gym", `${gym.name}: ${action === "grace" ? `Set a new payment deadline ${graceDays} days from now and restore access? This replaces any previous extra-days deadline. Access suspends when it ends unless a plan is activated.` : action === "reactivate" ? "Activate the selected Platform Membership Plan? Free activation records no payment; paid activation records payment confirmed by super admin." : "This blocks access for the owner and all gym users."}`, [
       { text: "Cancel", style: "cancel" },
       { text: "Confirm", onPress: () => statusMutation.mutate(action) },
     ]);
@@ -290,31 +300,15 @@ export function useGymDetailsPanelPresentation({ gym: initialGym }: { gym: Gym }
     (item) => item.id === gym.id,
   );
   const trial = platformGym?.subscription;
-  const trialDays = 30;
-  const trialStartedAt = trial?.trial_started_at
-    ? new Date(trial.trial_started_at)
-    : null;
-  const trialEndsAt = trial?.current_period_ends_at
-    ? new Date(trial.current_period_ends_at)
-    : trialStartedAt
-      ? new Date(trialStartedAt.getTime() + trialDays * 86400000)
-      : null;
-  const trialCompletedDays = trialStartedAt
-    ? Math.min(
-        trialDays,
-        Math.max(
-          0,
-          Math.floor((Date.now() - trialStartedAt.getTime()) / 86400000),
-        ),
-      )
-    : 0;
-  const trialRemainingDays = trialEndsAt
-    ? Math.max(0, Math.ceil((trialEndsAt.getTime() - Date.now()) / 86400000))
-    : trialDays;
-  const trialProgress = Math.min(
-    100,
-    Math.round((trialCompletedDays / trialDays) * 100),
-  );
+  const periodEnd = trial?.current_period_ends_at ? new Date(trial.current_period_ends_at) : null;
+  const activationDate = gym.settings?.platform_activation_at;
+  const inferredDuration = (activationPlansQuery.data ?? []).find(plan => plan.id === trial?.platform_plan_id)?.billing_period === "year" ? 365 : 30;
+  const trialStartedAt = activationDate ? new Date(String(activationDate)) : trial?.trial_started_at ? new Date(trial.trial_started_at) : periodEnd ? new Date(periodEnd.getTime() - inferredDuration * 86400000) : null;
+  const trialEndsAt = periodEnd;
+  const trialDays = trialStartedAt && trialEndsAt ? Math.max(1, Math.ceil((trialEndsAt.getTime() - trialStartedAt.getTime()) / 86400000)) : 0;
+  const trialCompletedDays = trialStartedAt ? Math.min(trialDays, Math.max(0, Math.floor((Date.now() - trialStartedAt.getTime()) / 86400000))) : 0;
+  const trialRemainingDays = Math.max(0, trialDays - trialCompletedDays);
+  const trialProgress = trialDays ? Math.min(100, Math.round(trialCompletedDays / trialDays * 100)) : 0;
   const trialDayState = (day: number) => {
     if (!trialStartedAt || !trialEndsAt || day <= 0) return "none";
     const date = new Date(monthStart.getFullYear(), monthStart.getMonth(), day);
@@ -371,7 +365,7 @@ export function useGymDetailsPanelPresentation({ gym: initialGym }: { gym: Gym }
       ? Math.ceil((new Date(value).getTime() - Date.now()) / 86400000)
       : null;
 
-  return { kind: "view1" as const, props: { activationPlan, setActivationPlan, activationType, setActivationType, activationPlansQuery, isSuperAdmin, statusMutation, changeStatus, styles, colors, gym, DetailMetric, usersQuery, activeMembers, plansQuery, expiringSoon, trial, trialProgress, trialCompletedDays, trialRemainingDays, trialEndsAt, monthStart, leadingDays, monthDays, expiryByDay, trialDayState, daysRemaining, dateLabel, paymentsQuery } };
+  return { kind: "view1" as const, props: { statusOptionsOpen, setStatusOptionsOpen, graceDays, setGraceDays, activationPlan, setActivationPlan, activationType, setActivationType, activationPlansQuery, isSuperAdmin, statusMutation, changeStatus, styles, colors, gym, DetailMetric, usersQuery, activeMembers, plansQuery, expiringSoon, trial, trialProgress, trialCompletedDays, trialRemainingDays, trialEndsAt, monthStart, leadingDays, monthDays, expiryByDay, trialDayState, daysRemaining, dateLabel, paymentsQuery } };
 }
 
 export function GymDetailsPanel(...args: Parameters<typeof useGymDetailsPanelPresentation>): React.JSX.Element {

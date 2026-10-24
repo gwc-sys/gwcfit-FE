@@ -107,6 +107,9 @@ export const gymsApi = {
     const response = await apiClient.get<DeveloperGym[]>("/developer/gyms");
     return response.data;
   },
+  async grantPaymentGrace(gymId: string, days: number) {
+    return (await apiClient.post<Gym>(`/gyms/${gymId}/payment-grace`, { days })).data;
+  },
   async reactivate(gymId: string, platform_plan_id?: string, activation_type?: "paid" | "free") {
     return (await apiClient.post<Gym>(`/gyms/${gymId}/reactivate`, { platform_plan_id, activation_type })).data;
   },

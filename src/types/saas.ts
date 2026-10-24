@@ -57,6 +57,10 @@ export type AppNotification = {
   created_at: string;
   status: "read" | "unread";
   gym_name?: string | null;
+  category?: string;
+  important?: boolean;
+  route?: string | null;
+  resource_id?: string | null;
 };
 
 export type PlatformPlan = {

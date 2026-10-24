@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { authApi } from "../services/api/auth";
 import { useAuthStore } from "../store/useAuthStore";
+import { disableNotificationDelivery } from "../services/notificationDelivery";
 import type { ChangePasswordPayload, ForgotPasswordPayload, ResetPasswordPayload, VerifyEmailPayload } from "../types/saas";
 
 export function useForgotPassword() {
@@ -37,7 +38,10 @@ export function useLogout() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: authApi.logout,
+    mutationFn: async () => {
+      await disableNotificationDelivery().catch(() => {});
+      return authApi.logout();
+    },
     retry: false,
     onSettled: () => {
       queryClient.clear();

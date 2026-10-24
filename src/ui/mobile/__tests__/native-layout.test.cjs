@@ -817,6 +817,8 @@ test("reference notification rows open details and retain the unread mutation gu
             colors: h.colors,
             query: { data, isLoading: false },
             markRead: { mutate: (id) => marked.push(id), isPending: false },
+            enableDelivery: { mutate: () => {}, isPending: false },
+            openRelated: () => {},
           },
         },
       }),

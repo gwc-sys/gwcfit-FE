@@ -26,19 +26,20 @@ function category(notification: AppNotification) {
 }
 
 export function NotificationsScreenView({ model }: { model: ReturnType<typeof useNotificationsScreenPresentation> }): React.ReactNode {
-  const [filter, setFilter] = useState<"All" | "Unread">("All");
+  const [filter, setFilter] = useState<"All" | "Unread" | "Important">("All");
   const [selected, setSelected] = useState<AppNotification | null>(null);
   if (model == null) return null;
   if (typeof model !== "object" || !("kind" in model)) return model;
-  const { query, colors, markRead } = model.props;
+  const { query, colors, markRead, enableDelivery, openRelated } = model.props;
   const s = pulseStyles(colors);
-  const notifications = query.data?.filter(notification => filter === "All" || notification.status === "unread") ?? [];
+  const notifications = query.data?.filter(notification => filter === "All" || (filter === "Important" ? notification.important : notification.status === "unread")) ?? [];
   return <Screen reference scroll contentContainerStyle={s.screen} refreshControl={<RefreshControl refreshing={query.isFetching} onRefresh={() => query.refetch()} tintColor={colors.primary} />}>
     <ScreenHeader title="Notifications" />
     <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-      <PulseChips options={["All", "Unread"]} value={filter} onChange={setFilter} />
-      <Pressable accessibilityRole="button" accessibilityLabel="Important notifications information" onPress={() => showAlert("Important notifications", "These updates do not include importance labels. Use All or Unread to view your notifications.")} style={{ minHeight: 48, justifyContent: "center" }}><View style={{ minHeight: 32, paddingHorizontal: 14, borderRadius: 10, backgroundColor: colors.surfaceMuted, justifyContent: "center" }}><Text style={s.chipText}>Important</Text></View></Pressable>
+      <PulseChips options={["All", "Unread", "Important"]} value={filter} onChange={setFilter} />
     </View>
+    <PrimaryButton title="Enable system notifications" icon="notifications-outline" variant="secondary" loading={enableDelivery.isPending} onPress={() => enableDelivery.mutate()} />
+    <NoticeBanner message={enableDelivery.error ? (enableDelivery.error as Error).message : enableDelivery.data ?? null} tone={enableDelivery.error ? "error" : "info"} />
     <DataState loading={query.isLoading} error={query.error ? getApiErrorMessage(query.error) : null} empty={!query.isLoading && !query.error && !notifications.length} emptyTitle="All caught up" emptyMessage={filter === "Unread" ? "No unread notifications." : "Your updates will appear here."} />
     <NoticeBanner tone="error" message={markRead.error ? getApiErrorMessage(markRead.error) : null} />
     <View>{notifications.map(notification => {
@@ -51,7 +52,7 @@ export function NotificationsScreenView({ model }: { model: ReturnType<typeof us
     })}</View>
     <Modal visible={Boolean(selected)} transparent animationType="none" onRequestClose={() => setSelected(null)}>
       <Pressable accessibilityRole="button" accessibilityLabel="Close notification" onPress={() => setSelected(null)} style={{ flex: 1, justifyContent: "center", backgroundColor: pulseEffects.scrim, padding: 20 }}>
-        <Pressable accessible={false} onPress={event => event.stopPropagation()} style={s.card}><Text accessibilityRole="header" style={[s.name, { fontSize: 20 }]}>{selected?.title}</Text><Text style={[s.meta, { fontSize: 16, lineHeight: 24 }]}>{selected?.body}</Text><Text style={s.meta}>{selected ? relativeTime(selected.created_at) : ""}</Text><PrimaryButton title="Done" onPress={() => setSelected(null)} /></Pressable>
+        <Pressable accessible={false} onPress={event => event.stopPropagation()} style={s.card}><Text accessibilityRole="header" style={[s.name, { fontSize: 20 }]}>{selected?.title}</Text><Text style={[s.meta, { fontSize: 16, lineHeight: 24 }]}>{selected?.body}</Text><Text style={s.meta}>{selected ? relativeTime(selected.created_at) : ""}</Text>{selected?.route && selected.route !== "Notifications" ? <PrimaryButton title="Open related information" onPress={() => { if (selected) openRelated(selected); setSelected(null); }} /> : null}<PrimaryButton title="Done" onPress={() => setSelected(null)} /></Pressable>
       </Pressable>
     </Modal>
   </Screen>;

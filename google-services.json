@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "990369818871",
+    "project_id": "pulsefit-app-7270e",
+    "storage_bucket": "pulsefit-app-7270e.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:990369818871:android:396adb372aa89b12f0cbf2",
+        "android_client_info": {
+          "package_name": "com.pulsefit.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAi5GtMvU9v5C92cGt5aPVoTEVGhnQon2E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:990369818871:android:356fabefaeb795fef0cbf2",
+        "android_client_info": {
+          "package_name": "com.pulsefit.gymsaas"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAi5GtMvU9v5C92cGt5aPVoTEVGhnQon2E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

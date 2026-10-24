@@ -15,7 +15,7 @@ export function PulseDashboardLayoutView({ model }: { model: ReturnType<typeof u
   if (typeof model !== "object" || !("kind" in model)) return model;
   switch (model.kind) {
     case "view1": {
-      const { savedGymName, styles, contentStyle, refreshControl, isDesktop, isTrainer, isGymOwner, GymOwnerSidebar, activeLabel, navigation, isPlatformAdmin, colors, resolvedRoleLabel, sidebarItems, setAccountMenuOpen, userName, MobileBrandButton, firstName, ownerDate, unreadNotificationCount, resolvedTrainerSearch, setResolvedTrainerSearch, trainerDate, children, accountMenuOpen, user, OwnerAccountItem, isDark, toggleColorScheme, logout } = model.props;
+      const { paymentGraceEndsAt, savedGymName, styles, contentStyle, refreshControl, isDesktop, isTrainer, isGymOwner, GymOwnerSidebar, activeLabel, navigation, isPlatformAdmin, colors, resolvedRoleLabel, sidebarItems, setAccountMenuOpen, userName, MobileBrandButton, firstName, ownerDate, unreadNotificationCount, resolvedTrainerSearch, setResolvedTrainerSearch, trainerDate, children, accountMenuOpen, user, OwnerAccountItem, isDark, toggleColorScheme, logout } = model.props;
       return ((
     <Screen
       scroll
@@ -267,6 +267,7 @@ export function PulseDashboardLayoutView({ model }: { model: ReturnType<typeof u
                 </Text>
                 <Text numberOfLines={1} style={styles.sharedOwnerSubtitle}>
                   Here&apos;s what&apos;s happening at {savedGymName} today.
+                  {paymentGraceEndsAt ? ` Payment due in ${Math.max(0, Math.ceil((Date.parse(String(paymentGraceEndsAt)) - Date.now()) / 86400000))} days. Contact the developer to renew your platform plan.` : ""}
                 </Text>
               </View>
               <View style={styles.sharedOwnerActions}>
@@ -313,8 +314,8 @@ export function PulseDashboardLayoutView({ model }: { model: ReturnType<typeof u
                   {unreadNotificationCount > 0 ? (
                     <View style={styles.sharedOwnerBadge}>
                       <Text style={styles.sharedOwnerBadgeText}>
-                        {unreadNotificationCount > 99
-                          ? "99+"
+                        {unreadNotificationCount >= 10
+                          ? "10+"
                           : unreadNotificationCount}
                       </Text>
                     </View>
@@ -828,6 +829,7 @@ export function HeaderCircleButtonView({ model }: { model: ReturnType<typeof use
       return ((
     <Pressable
       accessibilityRole="button"
+      accessibilityLabel={icon === "notifications-outline" ? `Open notifications${badge ? `, ${badge} unread` : ""}` : icon === "chatbubble-ellipses-outline" ? "Open messages" : "Search"}
       onPress={onPress}
       style={({ pressed }) => [styles.circleButton, pressed && styles.pressed]}
     >

@@ -2,6 +2,7 @@
   "expo": {
     "name": "PulseFit Gym SaaS",
     "slug": "pulsefit-gym-saas",
+    "owner": "mahesh-raskar",
     "version": "1.0.0",
     "orientation": "default",
     "userInterfaceStyle": "automatic",
@@ -27,6 +28,7 @@
     },
     "android": {
       "package": "com.pulsefit.gymsaas",
+      "googleServicesFile": "./google-services.json",
       "userInterfaceStyle": "automatic",
       "adaptiveIcon": {
         "backgroundColor": "#007AFF"
@@ -74,7 +76,13 @@
           "microphonePermission": false
         }
       ],
-      "expo-sharing"
-    ]
+      "expo-sharing",
+      "expo-notifications"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "a5f624f8-3fed-4922-ad4e-f99aab998ecf"
+      }
+    }
   }
 }

@@ -36,7 +36,7 @@ export function PulseDashboardLayoutView({ model }: { model: ReturnType<typeof u
         </View>
         <Pressable accessibilityRole="button" accessibilityLabel={`Notifications${unreadNotificationCount ? `, ${unreadNotificationCount} unread` : ""}`} onPress={() => navigation.navigate("Notifications")} style={({ pressed }) => [chrome.iconButton, pressed && chrome.pressed]}>
           <Ionicons name="notifications-outline" size={22} color={colors.ink} />
-          {unreadNotificationCount > 0 ? <View style={chrome.notificationDot} /> : null}
+          {unreadNotificationCount > 0 ? <View style={[chrome.notificationDot, { minWidth: 18, height: 18, width: undefined, borderRadius: 9, top: 2, right: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: 3 }]}><Text style={{ color: "#fff", fontSize: 10, fontWeight: "700" }}>{unreadNotificationCount >= 10 ? "10+" : unreadNotificationCount}</Text></View> : null}
         </Pressable>
         <Pressable accessibilityRole="button" accessibilityLabel="Open account menu" onPress={() => setAccountMenuOpen(true)} style={({ pressed }) => [chrome.accountButton, pressed && chrome.pressed]}>
           <Text style={chrome.accountInitials}>{initials(userName) || "U"}</Text>

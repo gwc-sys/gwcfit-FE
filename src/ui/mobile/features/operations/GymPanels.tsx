@@ -359,7 +359,7 @@ export function GymDetailsPanelView({ model }: { model: ReturnType<typeof useGym
   if (typeof model !== "object" || !("kind" in model)) return model;
   switch (model.kind) {
     case "view1": {
-      const { activationPlan, setActivationPlan, activationType, setActivationType, activationPlansQuery, isSuperAdmin, statusMutation, changeStatus, styles, colors, gym, DetailMetric, usersQuery, activeMembers, plansQuery, expiringSoon, trial, trialProgress, trialCompletedDays, trialRemainingDays, trialEndsAt, monthStart, leadingDays, monthDays, expiryByDay, trialDayState, daysRemaining, dateLabel, paymentsQuery } = model.props;
+      const { statusOptionsOpen, setStatusOptionsOpen, graceDays, setGraceDays, activationPlan, setActivationPlan, activationType, setActivationType, activationPlansQuery, isSuperAdmin, statusMutation, changeStatus, styles, colors, gym, DetailMetric, usersQuery, activeMembers, plansQuery, expiringSoon, trial, trialProgress, trialCompletedDays, trialRemainingDays, trialEndsAt, monthStart, leadingDays, monthDays, expiryByDay, trialDayState, daysRemaining, dateLabel, paymentsQuery } = model.props;
       return ((
     <View style={styles.wrap}>
       <View style={styles.hero}>
@@ -372,10 +372,19 @@ export function GymDetailsPanelView({ model }: { model: ReturnType<typeof useGym
             {gym.code} · {gym.address || "Platform tenant"}
           </Text>
         </View>
+        <View style={{ alignItems: "flex-end", gap: 10 }}>
+          <Pressable accessibilityRole="button" accessibilityLabel={`Gym status: ${gym.status}. Show access options`} accessibilityState={{ expanded: statusOptionsOpen, disabled: !isSuperAdmin }} disabled={!isSuperAdmin} onPress={() => setStatusOptionsOpen(value => !value)} style={{ minHeight: 44, justifyContent: "center" }}>
         <StatusBadge
           label={gym.status}
           tone={gym.status === "active" ? "success" : "warning"}
         />
+          </Pressable>
+          {isSuperAdmin && statusOptionsOpen ? <View style={{ gap: 10, padding: 14, borderRadius: 12, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surface, maxWidth: 300 }}>
+            <Text style={{ color: colors.ink, fontWeight: "600" }}>{gym.status === "active" ? "Gym is active" : "Unsuspend gym"}</Text>
+            {gym.status !== "active" ? <Text style={{ color: colors.muted, lineHeight: 20 }}>Use Platform membership below to activate a plan, or grant extra days to pay.</Text> : <Text style={{ color: colors.muted }}>Manage the gym's plan and access below.</Text>}
+            <PrimaryButton title={gym.status === "active" ? "Manage access" : "Unsuspend gym"} variant="secondary" onPress={() => { setStatusOptionsOpen(false); showAlert("Unsuspend gym", "Restore access by granting extra days to pay, or activate the platform plan selected below.", [{ text: "Cancel", style: "cancel" }, { text: `Grant ${graceDays} extra days`, onPress: () => changeStatus("grace") }, ...(activationPlan ? [{ text: "Activate selected plan", onPress: () => changeStatus("reactivate") }] : [])]); }} />
+          </View> : null}
+        </View>
       </View>
 
       {isSuperAdmin ? <View style={{ gap: 12 }}>
@@ -390,6 +399,13 @@ export function GymDetailsPanelView({ model }: { model: ReturnType<typeof useGym
         {(["free", "paid"] as const).map(type => <Pressable key={type} accessibilityRole="radio" accessibilityState={{ checked: activationType === type }} disabled={statusMutation.isPending} onPress={() => setActivationType(type)} style={{ padding: 14, borderRadius: 12, borderWidth: 1, borderColor: activationType === type ? colors.primary : colors.border }}><Text style={{ color: colors.ink }}>{activationType === type ? "Selected: " : ""}{type === "free" ? "Free platform access - no payment, granted by super admin" : "Paid plan - payment verified by super admin"}</Text></Pressable>)}
         <PrimaryButton title="Activate selected platform plan" disabled={!activationPlan || statusMutation.isPending} loading={statusMutation.isPending} onPress={() => changeStatus("reactivate")} />
         {gym.status === "active" && gym.is_active ? <PrimaryButton title="Suspend gym" variant="secondary" disabled={statusMutation.isPending} onPress={() => changeStatus("suspend")} /> : null}
+        <View style={{ gap: 12, padding: 20, borderWidth: 1, borderColor: colors.border, borderRadius: 14 }}>
+          <Text style={{ color: colors.ink, fontSize: 17, fontWeight: "600" }}>Extra days after plan expiry</Text>
+          <Text style={{ color: colors.muted }}>After a platform plan expires, grant extra days to pay. Enter or edit the allowance below. Applying it restores access and sets a new deadline from today.</Text>
+          {gym.settings?.payment_grace_ends_at ? <Text style={{ color: colors.primary }}>Payment time: {String(gym.settings.payment_grace_days)} days granted - {Math.max(0, Math.ceil((Date.parse(String(gym.settings.payment_grace_ends_at)) - Date.now()) / 86400000))} days remaining - Due {new Date(String(gym.settings.payment_grace_ends_at)).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}</Text> : null}
+          <FormTextField label="Extra days to pay (1 to 30)" keyboardType="numeric" value={graceDays} onChangeText={setGraceDays} />
+          <PrimaryButton title={gym.settings?.payment_grace_ends_at ? "Update extra days and restore access" : "Grant extra days and restore access"} variant="secondary" disabled={statusMutation.isPending || !Number.isInteger(Number(graceDays)) || Number(graceDays) < 1 || Number(graceDays) > 30} onPress={() => changeStatus("grace")} />
+        </View>
         {gym.is_active ? <PrimaryButton title="Suspend for unpaid platform plan" icon="card-outline" variant="secondary" disabled={statusMutation.isPending} onPress={() => changeStatus("unpaid")} /> : null}
         {gym.is_active ? <PrimaryButton title="Delete gym" icon="trash-outline" variant="secondary" disabled={statusMutation.isPending} onPress={() => changeStatus("delete")} /> : null}
         {statusMutation.error ? <Text accessibilityRole="alert" style={{ color: colors.danger }}>{getApiErrorMessage(statusMutation.error)}</Text> : null}
@@ -547,7 +563,7 @@ export function GymDetailsPanelView({ model }: { model: ReturnType<typeof useGym
           <View>
             <Text style={styles.cardTitle}>Subscription calendar</Text>
             <Text style={styles.cardSubtitle}>
-              Days marked in yellow have a membership ending
+              Yellow: completed. Green: remaining. Red: plan expiry.
             </Text>
           </View>
           <Text style={styles.month}>
@@ -572,6 +588,7 @@ export function GymDetailsPanelView({ model }: { model: ReturnType<typeof useGym
             <Text style={styles.legendText}>Completed</Text>
             <View style={[styles.legendDot, styles.remainingDot]} />
             <Text style={styles.legendText}>Remaining</Text>
+            <View style={[styles.legendDot, { backgroundColor: "#FF453A" }]} /><Text style={styles.legendText}>Expiry</Text>
           </View>
         </View>
         <View style={styles.weekRow}>
@@ -588,7 +605,7 @@ export function GymDetailsPanelView({ model }: { model: ReturnType<typeof useGym
               day > 0
                 ? `${monthStart.getFullYear()}-${String(monthStart.getMonth() + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`
                 : `blank-${index}`;
-            const marked = expiryByDay.has(key);
+            const marked = day > 0 && trialEndsAt != null && trialEndsAt.getFullYear() === monthStart.getFullYear() && trialEndsAt.getMonth() === monthStart.getMonth() && trialEndsAt.getDate() === day;
             const state = trialDayState(day);
             return (
               <View
@@ -596,9 +613,10 @@ export function GymDetailsPanelView({ model }: { model: ReturnType<typeof useGym
                 style={[
                   styles.day,
                   day <= 0 ? styles.emptyDay : null,
-                  marked ? styles.markedDay : null,
+
                   state === "completed" ? styles.completedDay : null,
                   state === "remaining" ? styles.remainingDay : null,
+                  marked ? styles.markedDay : null,
                 ]}
               >
                 <Text

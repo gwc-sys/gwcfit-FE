@@ -158,7 +158,7 @@ export function useStaffScreenPresentation() {
     const scopedList = (usersQuery.data ?? []).filter((target) => isSuperAdmin ? (target.role as string) === "super_admin" || target.role === "gym_owner" : target.role === "trainer" || target.role === "receptionist" || target.role === "sub_admin");
     const list = roleFilter === "all" ? scopedList : scopedList.filter((target) => (target.role as string) === roleFilter);
     return [...list].sort((left, right) => left.name.localeCompare(right.name));
-  }, [usersQuery.data, isSuperAdmin]);
+  }, [usersQuery.data, isSuperAdmin, roleFilter]);
 
   const counts = useMemo(
     () => ({

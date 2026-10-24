@@ -24,7 +24,7 @@ export type RootStackParamList = {
   MemberSettings: undefined;
   ManageGyms: undefined;
   CreateGymAdmin: undefined;
-  Invitations: undefined;
+  Invitations: { enquiryId?: string } | undefined;
   Staff: undefined;
   MemberList: undefined;
   AddMember: undefined;
