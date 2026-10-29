@@ -113,6 +113,12 @@ export const createStyles = (colors: ThemeColors) =>
       borderColor: colors.primary,
       backgroundColor: colors.primarySoft,
     },
+    memberChipSelect: {
+      flex: 1,
+      minWidth: 0,
+      justifyContent: "center",
+      gap: spacing.xs,
+    },
     memberChipText: {
       ...typography.body,
       color: colors.ink,

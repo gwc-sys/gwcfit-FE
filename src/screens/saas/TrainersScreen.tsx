@@ -5,6 +5,7 @@ import { showAlert } from "../../utils/appAlert";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { FlatList, Modal, Pressable, RefreshControl, StyleSheet, Text, TextInput, View } from "react-native";
 
 import { DataState } from "../../components/DataState";
@@ -33,6 +34,8 @@ export function useTrainersScreenPresentation() {
   const [page, setPage] = useState(0);
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<Trainer | null>(null);
+  const [detailTrainer, setDetailTrainer] = useState<Trainer | null>(null);
+  const feedbackQuery = useQuery({ queryKey: ["trainer-feedback", detailTrainer?.id], queryFn: () => trainersApi.getFeedback(detailTrainer!.id), enabled: Boolean(detailTrainer) });
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -48,7 +51,8 @@ export function useTrainersScreenPresentation() {
   if (!canManage) return { kind: "view1" as const, props: {  } };
 
   const openCreate = () => { setEditing(null); setName(""); setEmail(""); setPhone(""); setSpecialties(""); setFormOpen(true); };
-  const openEdit = (trainer: Trainer) => { setEditing(trainer); setName(trainer.full_name); setEmail(trainer.email ?? ""); setPhone(trainer.phone ?? ""); setSpecialties(trainer.specialties.join(", ")); setFormOpen(true); };
+  const openTrainerForm = (trainer: Trainer) => { setEditing(trainer); setName(trainer.full_name); setEmail(trainer.email ?? ""); setPhone(trainer.phone ?? ""); setSpecialties(trainer.specialties.join(", ")); setFormOpen(true); };
+  const openEdit = (trainer: Trainer) => setDetailTrainer(trainer);
   const save = () => {
     if (!name.trim()) return showAlert("Trainer name required");
     const payload = { full_name: name.trim(), email: email.trim() || null, phone: phone.trim() || null, specialties: specialties.split(",").map((item) => item.trim()).filter(Boolean), hourly_rate_cents: editing?.hourly_rate_cents ?? 0, commission_rate: editing?.commission_rate ?? 0 };
@@ -57,7 +61,7 @@ export function useTrainersScreenPresentation() {
   };
   const remove = (trainer: Trainer) => showAlert("Deactivate trainer", trainer.full_name, [{ text: "Cancel", style: "cancel" }, { text: "Deactivate", style: "destructive", onPress: () => resource.deleteMutation.mutate(trainer.id) }]);
 
-  return { kind: "view2" as const, props: { styles, resource, colors, search, setSearch, setPage, setFilter, filter, openCreate, Stat, trainers, visible, TrainerRow, openEdit, remove, page, formOpen, setFormOpen, editing, name, setName, email, setEmail, phone, setPhone, specialties, setSpecialties, save , activeTrainerCount: trainers.filter((item) => item.is_active).length, inactiveTrainerCount: trainers.filter((item) => !item.is_active).length, newTrainerCount: trainers.filter((item) => { const date = new Date(item.created_at); const now = new Date(); return date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear(); }).length} };
+  return { kind: "view2" as const, props: { styles, resource, colors, search, setSearch, setPage, setFilter, filter, openCreate, Stat, trainers, visible, TrainerRow, openEdit, openTrainerForm, remove, page, formOpen, setFormOpen, editing, detailTrainer, setDetailTrainer, feedbackQuery, name, setName, email, setEmail, phone, setPhone, specialties, setSpecialties, save , activeTrainerCount: trainers.filter((item) => item.is_active).length, inactiveTrainerCount: trainers.filter((item) => !item.is_active).length, newTrainerCount: trainers.filter((item) => { const date = new Date(item.created_at); const now = new Date(); return date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear(); }).length} };
 }
 
 export function TrainersScreen(...args: Parameters<typeof useTrainersScreenPresentation>): React.JSX.Element {
@@ -69,7 +73,7 @@ export function useStatPresentation({ icon, label, value, tone, styles }: { icon
 function Stat(...args: Parameters<typeof useStatPresentation>): React.JSX.Element {
   return <StatView model={useStatPresentation(...args)} />;
 }
-export function useTrainerRowPresentation({ trainer, styles, colors, onEdit, onDelete }: { trainer: Trainer; styles: ReturnType<typeof createStyles>; colors: ThemeColors; onEdit: () => void; onDelete: () => void }) { return { kind: "view1" as const, props: { styles, trainer, onEdit, colors, onDelete } }; }
+export function useTrainerRowPresentation({ trainer, styles, colors, onEdit, onDelete, onProfile }: { trainer: Trainer; styles: ReturnType<typeof createStyles>; colors: ThemeColors; onEdit: () => void; onDelete: () => void; onProfile?: () => void }) { return { kind: "view1" as const, props: { styles, trainer, onEdit, colors, onDelete, onProfile } }; }
 
 function TrainerRow(...args: Parameters<typeof useTrainerRowPresentation>): React.JSX.Element {
   return <TrainerRowView model={useTrainerRowPresentation(...args)} />;

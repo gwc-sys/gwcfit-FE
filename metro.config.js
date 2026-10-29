@@ -9,6 +9,20 @@ const { withNativeWind } = require("nativewind/metro");
 const config = getDefaultConfig(__dirname);
 
 config.resolver.blockList = /[/\\]\.pytest_cache(?:[/\\].*)?$/;
+const resolveRequest = config.resolver.resolveRequest;
+config.resolver.resolveRequest = (context, moduleName, platform) => {
+  if (moduleName === "react-native-worklets") {
+    return context.resolveRequest(
+      context,
+      require.resolve("react-native-worklets"),
+      platform
+    );
+  }
+
+  return resolveRequest
+    ? resolveRequest(context, moduleName, platform)
+    : context.resolveRequest(context, moduleName, platform);
+};
 config.transformer.unstable_allowRequireContext = true;
 
 module.exports = withNativeWind(config, {

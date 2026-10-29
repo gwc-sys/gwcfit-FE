@@ -5,7 +5,7 @@ import { createFeatureStyles } from "./MemberFeatureScreens.styles";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { FlatList, RefreshControl, StyleSheet, Switch, Text, View } from "react-native";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { ReactElement, ReactNode } from "react";
 
 import { FormTextField } from "../../components/FormTextField";
@@ -49,6 +49,8 @@ import {
   useMemberProgress,
   useMemberRewards,
   useMemberTrainer,
+  useTrainerFeedback,
+  useSaveTrainerFeedback,
   useMemberWorkouts,
   useUpdateGoal
 } from "../../hooks/useMember";
@@ -291,9 +293,24 @@ export function useMemberTrainerScreenPresentation() {
   const styles = useMemo(() => createFeatureStyles(featureColors), [featureColors]);
 
   const query = useMemberTrainer();
+  const feedbackQuery = useTrainerFeedback();
+  const saveFeedback = useSaveTrainerFeedback();
+  const [rating, setRating] = useState(5);
+  const [feedbackOption, setFeedbackOption] = useState<string | null>(null);
+  const [customFeedback, setCustomFeedback] = useState("");
   const navigation = useNavigation<any>();
 
-  return { kind: "view1" as const, props: { styles, queryRefresh, query, SectionTitle, navigation } };
+  useEffect(() => {
+    if (feedbackQuery.data) {
+      setRating(feedbackQuery.data.rating);
+      setFeedbackOption(feedbackQuery.data.feedback_option ?? null);
+      setCustomFeedback(feedbackQuery.data.feedback_text ?? "");
+    }
+  }, [feedbackQuery.data]);
+
+  const submitFeedback = () => saveFeedback.mutate({ rating, feedback_option: feedbackOption, feedback_text: feedbackOption === "Other" ? customFeedback.trim() : null });
+
+  return { kind: "view1" as const, props: { styles, queryRefresh, query, feedbackQuery, saveFeedback, rating, setRating, feedbackOption, setFeedbackOption, customFeedback, setCustomFeedback, submitFeedback, SectionTitle, navigation } };
 }
 
 export function MemberTrainerScreen(...args: Parameters<typeof useMemberTrainerScreenPresentation>): React.JSX.Element {

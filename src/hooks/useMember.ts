@@ -7,6 +7,7 @@ import type {
   MemberGoalUpdate,
   MemberProfileUpdate,
   MemberProgressLogCreate,
+  TrainerFeedbackPayload,
   SupportTicketCreate,
 } from "../types/member";
 
@@ -21,6 +22,7 @@ export const memberQueryKeys = {
   meals: () => ["member", "meals"] as const,
   progress: () => ["member", "progress"] as const,
   trainer: () => ["member", "trainer"] as const,
+  trainerFeedback: () => ["member", "trainer-feedback"] as const,
   classes: () => ["member", "classes"] as const,
   notifications: (unreadOnly = false) =>
     ["member", "notifications", unreadOnly] as const,
@@ -204,6 +206,19 @@ export function useCreateProgressLog() {
 
 export function useMemberTrainer() {
   return useMemberQuery(memberQueryKeys.trainer(), memberApi.getMemberTrainer);
+}
+
+export function useTrainerFeedback() {
+  return useMemberQuery(memberQueryKeys.trainerFeedback(), memberApi.getTrainerFeedback);
+}
+
+export function useSaveTrainerFeedback() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: TrainerFeedbackPayload) => memberApi.saveTrainerFeedback(payload),
+    retry: false,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: memberQueryKeys.trainerFeedback() }),
+  });
 }
 
 export function useMemberClasses() {

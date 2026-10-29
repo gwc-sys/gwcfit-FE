@@ -98,14 +98,20 @@ export function AttendanceScreenView({ model }: { model: ReturnType<typeof useAt
           {memberOptions.map((member) => {
             const selected = selectedMemberId === member.id;
             return (
-              <Pressable accessibilityRole="button"
+              <View
                 key={member.id}
-                onPress={() => setSelectedMemberId(member.id)}
                 style={[
                   styles.memberChip,
                   selected && styles.memberChipSelected,
                 ]}
               >
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={`Select ${member.first_name} ${member.last_name}`}
+                  accessibilityState={{ selected }}
+                  onPress={() => setSelectedMemberId(member.id)}
+                  style={styles.memberChipSelect}
+                >
                 <Text
                   style={[
                     styles.memberChipText,
@@ -129,8 +135,9 @@ export function AttendanceScreenView({ model }: { model: ReturnType<typeof useAt
                   label={member.member_code}
                   tone={selected ? "success" : "neutral"}
                 />
-                <Pressable accessibilityRole="button" style={styles.checkinButton} onPress={() => { setSelectedMemberId(member.id); checkInMutation.mutate(member.id); }}><Ionicons name="person-add-outline" size={15} color="#fff" /><Text style={styles.checkinButtonText}>Check-in</Text></Pressable>
-              </Pressable>
+                </Pressable>
+                <Pressable accessibilityRole="button" accessibilityLabel={`Check in ${member.first_name} ${member.last_name}`} style={styles.checkinButton} onPress={() => { setSelectedMemberId(member.id); checkInMutation.mutate(member.id); }}><Ionicons name="person-add-outline" size={15} color="#fff" /><Text style={styles.checkinButtonText}>Check-in</Text></Pressable>
+              </View>
             );
           })}
         </View>

@@ -21,6 +21,7 @@ import type {
   PaymentCreatePayload,
   PaymentUpdatePayload,
   Trainer,
+  TrainerRatingSummary,
   TrainerCreatePayload,
   TrainerUpdatePayload,
   RoleName,
@@ -123,7 +124,12 @@ export const gymsApi = {
   }
 };
 
-export const trainersApi = createCrudApi<Trainer, TrainerCreatePayload, TrainerUpdatePayload>("/trainers");
+export const trainersApi = {
+  ...createCrudApi<Trainer, TrainerCreatePayload, TrainerUpdatePayload>("/trainers"),
+  async getFeedback(id: string) {
+    return (await apiClient.get<TrainerRatingSummary>(`/trainers/${id}/feedback`)).data;
+  },
+};
 export const staffApi = {
   async list(params?: StaffListParams) {
     const response = await apiClient.get<GymUser[]>("/staff", { params });

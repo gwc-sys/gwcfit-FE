@@ -19,6 +19,8 @@ import type {
   MemberProgressLogCreate,
   MemberReward,
   MemberTrainer,
+  TrainerFeedback,
+  TrainerFeedbackPayload,
   MemberWorkout,
   SupportTicket,
   SupportTicketCreate
@@ -121,6 +123,14 @@ export const memberApi = {
   async getMemberTrainer() {
     const response = await apiClient.get<MemberTrainer | null>("/member/trainer");
     return response.data;
+  },
+
+  async getTrainerFeedback() {
+    return (await apiClient.get<TrainerFeedback | null>("/member/trainer/feedback")).data;
+  },
+
+  async saveTrainerFeedback(payload: TrainerFeedbackPayload) {
+    return (await apiClient.put<TrainerFeedback>("/member/trainer/feedback", payload)).data;
   },
 
   async getMemberClasses() {

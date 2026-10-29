@@ -171,7 +171,7 @@ export function useGymAdminDashboardScreenPresentation() {
     return { kind: "view1" as const, props: { GymOwnerDashboardContent, navigation, statsQuery, recentMembers, recentStaff, userCounts, plansQuery, paymentsQuery, attendanceQuery, workoutsQuery } };
   }
 
-  return { kind: "view2" as const, props: { dashboardCopy, isRefreshing, statsQuery, membersQuery, paymentsQuery, plansQuery, staffQuery, userCountsQuery, user, navigation, canManageReports, styles, canManageStaff, userCounts, canManageMembers, canManageAttendance, canManagePayments, canManageTrainers, paymentStats, recentMembers, recentStaff, roleTone } };
+  return { kind: "view2" as const, props: { dashboardCopy, isRefreshing, statsQuery, membersQuery, paymentsQuery, plansQuery, staffQuery, userCountsQuery, attendanceQuery, user, navigation, canManageReports, styles, canManageStaff, userCounts, canManageMembers, canManageAttendance, canManagePayments, canManageMembershipPlans, canManageTrainers, paymentStats, recentMembers, recentStaff, roleTone } };
 }
 
 export function GymAdminDashboardScreen(...args: Parameters<typeof useGymAdminDashboardScreenPresentation>): React.JSX.Element {

@@ -2,10 +2,10 @@ import { InsightCarousel } from "../../components/InsightCarousel";
 import { WeekCalendar } from "../../components/WeekCalendar";
 import { Pressable } from "../../components/NativePressable";
 import { OwnerMobileDataContext, OwnerMobileOverview } from "../../components/OwnerMobileOverview";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { PulseStat, pulseStyles } from "../../components/PulseReference";
 import { Ionicons } from "@expo/vector-icons";
-import { Modal, RefreshControl, Text, View } from "react-native";
+import { Modal, RefreshControl, StyleSheet, Text, View } from "react-native";
 import { DataState } from "../../components/DataState";
 import { MetricCard } from "../../components/MetricCard";
 import { QuickAction } from "../../components/QuickAction";
@@ -18,6 +18,8 @@ import { relatedDisplayName } from "../../../../utils/displayNames";
 import { formatCurrency, formatDate, formatRole, initials, memberStatusTone } from "../../../../utils/formatters";
 import { requestLogoutConfirmation } from "../../../../utils/logoutConfirmation";
 import { repdbExerciseLibrary } from "../../../../data/repdbExerciseLibrary";
+import { useAppTheme } from "../../../../theme/AppThemeProvider";
+import { controlMetrics } from "../../theme/theme";
 import type * as React from "react";
 import type { useGymAdminDashboardScreenPresentation, useGymOwnerDashboardContentPresentation, useOwnerProfileMenuPresentation, useProfileMenuItemPresentation, useOwnerMetricPresentation, useDistributionRowPresentation, useSimpleChartPresentation, useStatusPanelPresentation, usePlansPanelPresentation, useRevenuePanelPresentation, useRecentMembersPanelPresentation } from "../../../../screens/saas/GymAdminDashboardScreen";
 
@@ -44,7 +46,26 @@ export function GymAdminDashboardScreenView({ model }: { model: ReturnType<typeo
     ));
     }
     case "view2": {
-      const { dashboardCopy, isRefreshing, statsQuery, membersQuery, paymentsQuery, plansQuery, staffQuery, userCountsQuery, user, navigation, canManageReports, styles, canManageStaff, userCounts, canManageMembers, canManageAttendance, canManagePayments, canManageTrainers, paymentStats, recentMembers, recentStaff, roleTone } = model.props;
+      const { dashboardCopy, isRefreshing, statsQuery, membersQuery, paymentsQuery, plansQuery, staffQuery, userCountsQuery, attendanceQuery, user, navigation, canManageReports, styles, canManageStaff, userCounts, canManageMembers, canManageAttendance, canManagePayments, canManageMembershipPlans, canManageTrainers, paymentStats, recentMembers, recentStaff, roleTone } = model.props;
+      if (dashboardCopy.headerTitle === "Reception Dashboard") {
+        return (
+          <ReceptionMobileDashboard
+            attendanceQuery={attendanceQuery}
+            canManageAttendance={canManageAttendance}
+            canManageMembers={canManageMembers}
+            canManageMembershipPlans={canManageMembershipPlans}
+            canManagePayments={canManagePayments}
+            canManageTrainers={canManageTrainers}
+            membersQuery={membersQuery}
+            navigation={navigation}
+            paymentStats={paymentStats}
+            paymentsQuery={paymentsQuery}
+            recentMembers={recentMembers}
+            statsQuery={statsQuery}
+            user={user}
+          />
+        );
+      }
       return ((
     <PulseDashboardLayout
       activeLabel="Dashboard"
@@ -328,6 +349,145 @@ export function GymAdminDashboardScreenView({ model }: { model: ReturnType<typeo
     }
   }
 }
+
+/** A focused, touch-first workspace for the receptionist role. It reuses the
+ * existing permission gates, queries, and navigation destinations above. */
+function ReceptionMobileDashboard({
+  attendanceQuery,
+  canManageAttendance,
+  canManageMembers,
+  canManageMembershipPlans,
+  canManagePayments,
+  canManageTrainers,
+  membersQuery,
+  navigation,
+  paymentStats,
+  paymentsQuery,
+  recentMembers,
+  statsQuery,
+  user,
+}: any) {
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => createReceptionDashboardStyles(colors), [colors]);
+  const firstName = user?.full_name?.trim().split(/\s+/)[0] || "there";
+  const todayKey = new Date().toISOString().slice(0, 10);
+  const attendance = attendanceQuery.data ?? [];
+  const arrivals = attendanceQuery.data
+    ? attendance.filter((record: any) => String(record.check_in_at ?? "").slice(0, 10) === todayKey).length
+    : statsQuery.data?.checkins_today;
+  const memberCount = statsQuery.data?.active_members ?? (membersQuery.data ? membersQuery.data.length : undefined);
+  const serviceDate = new Date().toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric" });
+  const actions = [
+    canManageMembers && { label: "Find a member", detail: "Search profiles", icon: "search-outline" as const, onPress: () => navigation.navigate("MemberList") },
+    canManageMembers && { label: "Add member", detail: "Create a profile", icon: "person-add-outline" as const, onPress: () => navigation.navigate("AddMember") },
+    canManageTrainers && { label: "Trainers", detail: "Manage coaching staff", icon: "barbell-outline" as const, onPress: () => navigation.navigate("Trainers") },
+    canManageMembershipPlans && { label: "Membership plans", detail: "Manage available plans", icon: "pricetag-outline" as const, onPress: () => navigation.navigate("MembershipPlans") },
+    canManagePayments && { label: "Record payment", detail: "Collect a membership due", icon: "card-outline" as const, onPress: () => navigation.navigate("Payments") },
+    canManageAttendance && { label: "Attendance history", detail: "Review today’s visits", icon: "time-outline" as const, onPress: () => navigation.navigate("Attendance") },
+  ].filter(Boolean) as Array<{ label: string; detail: string; icon: keyof typeof Ionicons.glyphMap; onPress: () => void }>;
+
+  return (
+    <PulseDashboardLayout activeLabel="Dashboard" roleLabel="Reception" refreshControl={<RefreshControl refreshing={Boolean(attendanceQuery.isFetching || membersQuery.isFetching || paymentsQuery.isFetching || statsQuery.isFetching)} onRefresh={() => { void attendanceQuery.refetch(); void membersQuery.refetch(); void paymentsQuery.refetch(); void statsQuery.refetch(); }} />}>
+      <View style={styles.screen}>
+        <View style={styles.intro}>
+          <Text style={styles.eyebrow}>{serviceDate}</Text>
+          <Text accessibilityRole="header" style={styles.title}>Hello, {firstName}</Text>
+          <Text style={styles.subtitle}>Everything needed to keep the front desk moving.</Text>
+        </View>
+
+        {canManageAttendance ? (
+          <Pressable accessibilityRole="button" accessibilityLabel="Open member check-in" onPress={() => navigation.navigate("Attendance")} style={({ pressed }) => [styles.checkInCard, pressed && styles.pressed]}>
+            <View style={styles.checkInIcon}><Ionicons name="qr-code-outline" size={27} color="#FFFFFF" /></View>
+            <View style={styles.checkInCopy}>
+              <Text style={styles.checkInKicker}>MEMBER ARRIVAL</Text>
+              <Text style={styles.checkInTitle}>Open check-in</Text>
+              <Text style={styles.checkInText}>Show the live QR code for a fast, secure visit.</Text>
+            </View>
+            <View style={styles.checkInArrow}><Ionicons name="arrow-forward" size={20} color={colors.primary} /></View>
+          </Pressable>
+        ) : null}
+
+        <View style={styles.sectionHeader}>
+          <Text accessibilityRole="header" style={styles.sectionTitle}>Today at the desk</Text>
+          {(attendanceQuery.isFetching || membersQuery.isFetching || paymentsQuery.isFetching) ? <Text style={styles.loadingLabel}>Updating</Text> : null}
+        </View>
+        <View style={styles.metricGrid}>
+          <ReceptionMetric icon="walk-outline" label="Arrivals" value={arrivals} tone={colors.primary} styles={styles} />
+          <ReceptionMetric icon="people-outline" label="Active members" value={memberCount} tone={colors.success} styles={styles} />
+          <ReceptionMetric icon="time-outline" label="Payment follow-ups" value={canManagePayments ? paymentStats.pending : undefined} tone={colors.warning} styles={styles} />
+        </View>
+
+        {statsQuery.error || attendanceQuery.error ? <View accessibilityRole="alert" style={styles.notice}><Ionicons name="cloud-offline-outline" size={18} color={colors.warning} /><Text style={styles.noticeText}>Some desk totals could not be refreshed. You can still use available actions.</Text></View> : null}
+
+        <View style={styles.sectionHeader}>
+          <Text accessibilityRole="header" style={styles.sectionTitle}>Desk actions</Text>
+        </View>
+        <View style={styles.group}>
+          {actions.map((action, index) => <Pressable key={action.label} accessibilityRole="button" onPress={action.onPress} style={({ pressed }) => [styles.actionRow, index < actions.length - 1 && styles.actionDivider, pressed && styles.rowPressed]}>
+            <View style={styles.actionIcon}><Ionicons name={action.icon} size={21} color={colors.primary} /></View>
+            <View style={styles.actionCopy}><Text style={styles.actionTitle}>{action.label}</Text><Text style={styles.actionDetail}>{action.detail}</Text></View>
+            <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
+          </Pressable>)}
+        </View>
+
+        {canManageMembers ? <View style={styles.sectionHeader}><Text accessibilityRole="header" style={styles.sectionTitle}>Recently added</Text><Pressable accessibilityRole="button" accessibilityLabel="View all members" onPress={() => navigation.navigate("MemberList")} style={styles.textButton}><Text style={styles.textButtonLabel}>See all</Text></Pressable></View> : null}
+        {canManageMembers ? <View style={styles.group}>
+          {recentMembers.slice(0, 3).map((member: any, index: number) => <Pressable key={member.id} accessibilityRole="button" accessibilityLabel={`Open ${member.first_name} ${member.last_name}`} onPress={() => navigation.navigate("MemberProfile", { memberId: member.id })} style={({ pressed }) => [styles.memberRow, index < Math.min(recentMembers.length, 3) - 1 && styles.actionDivider, pressed && styles.rowPressed]}>
+            <View style={styles.avatar}><Text style={styles.avatarLabel}>{member.first_name?.charAt(0)?.toUpperCase() || "M"}</Text></View>
+            <View style={styles.actionCopy}><Text style={styles.actionTitle}>{member.first_name} {member.last_name}</Text><Text numberOfLines={1} style={styles.actionDetail}>{member.membership_plan_name || "No membership plan"}</Text></View>
+            <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
+          </Pressable>)}
+          {!membersQuery.isLoading && recentMembers.length === 0 ? <View style={styles.emptyMembers}><Ionicons name="people-outline" size={22} color={colors.textSecondary} /><Text style={styles.emptyText}>New member profiles will appear here.</Text></View> : null}
+        </View> : null}
+      </View>
+    </PulseDashboardLayout>
+  );
+}
+
+function ReceptionMetric({ icon, label, value, tone, styles }: { icon: keyof typeof Ionicons.glyphMap; label: string; value?: number; tone: string; styles: any }) {
+  return <View style={styles.metric}><View style={[styles.metricIcon, { backgroundColor: `${tone}18` }]}><Ionicons name={icon} size={20} color={tone} /></View><Text style={styles.metricValue}>{typeof value === "number" ? String(value) : "—"}</Text><Text style={styles.metricLabel}>{label}</Text></View>;
+}
+
+const createReceptionDashboardStyles = (colors: any) => StyleSheet.create({
+  screen: { gap: 16, paddingTop: 8, paddingBottom: 32 },
+  intro: { gap: 3, paddingTop: 4, paddingHorizontal: 2 },
+  eyebrow: { color: colors.textSecondary, fontSize: 13, fontWeight: "600" },
+  title: { color: colors.ink, fontSize: 28, lineHeight: 34, fontWeight: "700", letterSpacing: -0.4 },
+  subtitle: { color: colors.textSecondary, fontSize: 16, lineHeight: 22, marginTop: 2 },
+  checkInCard: { minHeight: 142, flexDirection: "row", alignItems: "center", gap: 14, borderRadius: 20, padding: 18, backgroundColor: colors.primary },
+  checkInIcon: { width: 50, height: 50, alignItems: "center", justifyContent: "center", borderRadius: 16, backgroundColor: "rgba(255,255,255,0.18)" },
+  checkInCopy: { flex: 1, minWidth: 0, gap: 2 },
+  checkInKicker: { color: "rgba(255,255,255,0.78)", fontSize: 11, fontWeight: "700", letterSpacing: 0.8 },
+  checkInTitle: { color: "#FFFFFF", fontSize: 22, lineHeight: 28, fontWeight: "700" },
+  checkInText: { color: "rgba(255,255,255,0.86)", fontSize: 13, lineHeight: 18 },
+  checkInArrow: { width: 38, height: 38, alignItems: "center", justifyContent: "center", borderRadius: 19, backgroundColor: "#FFFFFF" },
+  pressed: { opacity: 0.86 },
+  sectionHeader: { minHeight: controlMetrics.minimumTouchSize, flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 12, marginTop: 4 },
+  sectionTitle: { flex: 1, color: colors.ink, fontSize: 20, lineHeight: 26, fontWeight: "700", letterSpacing: -0.2 },
+  loadingLabel: { color: colors.textSecondary, fontSize: 13 },
+  metricGrid: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
+  metric: { flexGrow: 1, flexBasis: "45%", minWidth: 128, minHeight: 122, justifyContent: "space-between", borderRadius: 16, padding: 14, backgroundColor: colors.card },
+  metricIcon: { width: 36, height: 36, alignItems: "center", justifyContent: "center", borderRadius: 11 },
+  metricValue: { color: colors.ink, fontSize: 28, lineHeight: 33, fontWeight: "700", marginTop: 10 },
+  metricLabel: { color: colors.textSecondary, fontSize: 12, lineHeight: 16, marginTop: 2 },
+  notice: { flexDirection: "row", alignItems: "flex-start", gap: 10, borderRadius: 14, padding: 13, backgroundColor: colors.warningSoft },
+  noticeText: { flex: 1, color: colors.ink, fontSize: 13, lineHeight: 18 },
+  group: { overflow: "hidden", borderRadius: 16, backgroundColor: colors.card },
+  actionRow: { minHeight: 66, flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 14, paddingVertical: 10 },
+  actionDivider: { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.border },
+  rowPressed: { backgroundColor: colors.surfaceMuted },
+  actionIcon: { width: 36, height: 36, alignItems: "center", justifyContent: "center", borderRadius: 11, backgroundColor: colors.primarySoft },
+  actionCopy: { flex: 1, minWidth: 0 },
+  actionTitle: { color: colors.ink, fontSize: 16, lineHeight: 21, fontWeight: "600" },
+  actionDetail: { color: colors.textSecondary, fontSize: 13, lineHeight: 18, marginTop: 1 },
+  textButton: { minWidth: controlMetrics.minimumTouchSize, minHeight: controlMetrics.minimumTouchSize, alignItems: "flex-end", justifyContent: "center" },
+  textButtonLabel: { color: colors.primary, fontSize: 16, fontWeight: "600" },
+  memberRow: { minHeight: 64, flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 14, paddingVertical: 10 },
+  avatar: { width: 38, height: 38, alignItems: "center", justifyContent: "center", borderRadius: 19, backgroundColor: colors.primarySoft },
+  avatarLabel: { color: colors.primary, fontSize: 14, fontWeight: "700" },
+  emptyMembers: { minHeight: 86, alignItems: "center", justifyContent: "center", gap: 7, padding: 16 },
+  emptyText: { color: colors.textSecondary, fontSize: 14, textAlign: "center" },
+});
 
 export function GymOwnerDashboardContentView({ model }: { model: ReturnType<typeof useGymOwnerDashboardContentPresentation> }): React.ReactNode {
   const [showDetails, setShowDetails] = useState(false);

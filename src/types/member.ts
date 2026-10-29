@@ -230,6 +230,22 @@ export type MemberTrainer = {
   trainer_notes?: string | null;
 };
 
+export type TrainerFeedback = {
+  id: string;
+  trainer_id: string;
+  review_month: string;
+  rating: number;
+  feedback_option?: string | null;
+  feedback_text?: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type TrainerFeedbackPayload = Pick<TrainerFeedback, "rating"> & {
+  feedback_option?: string | null;
+  feedback_text?: string | null;
+};
+
 export type MemberClass = {
   class_uuid: string;
   class_name: string;

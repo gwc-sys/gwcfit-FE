@@ -152,7 +152,7 @@ test('member payment, workout and reward summaries retain their existing arithme
 });
 
 test('native tablet tabs remain visible while desktop web uses its sidebar', () => {
-  for (const role of ['gym_owner', 'super_admin', 'sub_admin', 'trainer']) {
+  for (const role of ['gym_owner', 'super_admin', 'sub_admin', 'trainer', 'receptionist']) {
     const tabNames = [];
     for (const platform of ['native', 'web']) {
       const h = harness(platform, role, { width: 1280 });
@@ -166,6 +166,25 @@ test('native tablet tabs remain visible while desktop web uses its sidebar', () 
     }
     assert.deepEqual(tabNames[0], tabNames[1], role);
   }
+});
+
+test('reception desktop routes preserve the workspace shell and complete menu', () => {
+  const navigator = fs.readFileSync(path.join(root, 'navigation/RootNavigator.tsx'), 'utf8');
+  const shell = fs.readFileSync(path.join(root, 'components/dashboard/PulseDashboardLayout.tsx'), 'utf8');
+  const plansController = fs.readFileSync(path.join(root, 'screens/saas/MembershipPlanScreen.tsx'), 'utf8');
+  const plansView = fs.readFileSync(path.join(root, 'ui/web/pages/saas/MembershipPlanScreen.tsx'), 'utf8');
+
+  assert.match(navigator, /usesDesktopSidebar\s*=\s*\([^;]*isReceptionist[^;]*\)\s*&&\s*width\s*>=\s*1100/);
+  assert.match(navigator, /role !== "gym_owner" && role !== "sub_admin" && role !== "receptionist"/);
+  assert.match(navigator, /role === "receptionist" \? "Reception" : "Gym Owner"/);
+  assert.match(shell, /role === "gym_owner" \|\| role === "sub_admin" \|\| role === "receptionist"/);
+
+  for (const label of ['Dashboard', 'Members', 'Trainers', 'Receptionists', 'Invitations', 'Attendance', 'Workouts', 'Nutrition', 'Payments', 'Reports', 'Messages', 'Plans', 'Settings']) {
+    assert.match(shell, new RegExp(`label: "${label}"`));
+  }
+
+  assert.match(plansController, /const isReceptionist = user\?\.role === "receptionist"/);
+  assert.match(plansView, /<PulseDashboardLayout activeLabel="Plans" roleLabel="Reception">/);
 });
 
 test('platform resolution includes only the intended UI tree and UI files contain no server query implementations', () => {

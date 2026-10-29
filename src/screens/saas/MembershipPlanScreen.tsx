@@ -113,6 +113,7 @@ const starterPlans: DisplayPlan[] = [
 export function useMembershipPlanScreenPresentation() {
   const user = useAuthStore((state) => state.user);
   const isSuperAdmin = user?.role === "super_admin";
+  const isReceptionist = user?.role === "receptionist";
   const allowed = useAuthStore((state) =>
     state.hasPermission("manage_membership_plans"),
   );
@@ -155,7 +156,7 @@ export function useMembershipPlanScreenPresentation() {
         queryKey: ["operations", "membership-plans"],
       }),
   });
-  if (!allowed) return { kind: "view1" as const, props: {  } };
+  if (!allowed) return { kind: "view1" as const, props: { isReceptionist } };
   const plans: DisplayPlan[] = isSuperAdmin
     ? (platformQuery.data ?? []).map((plan) => ({
         id: plan.id,
@@ -179,7 +180,7 @@ export function useMembershipPlanScreenPresentation() {
           saved.name.trim().toLowerCase() === template.name.trim().toLowerCase()
         )),
       ];
-  return { kind: "view2" as const, props: { isSuperAdmin, styles, query, installStarters, setPlatformPlanDraft, platformQuery, colors, plans, PlanCard, setEditingPlan, setDetailsPlan, PlanActionModal, detailsPlan, PlanEditModal, editingPlan, queryClient, PlatformPlanCrudModal, platformPlanDraft } };
+  return { kind: "view2" as const, props: { isSuperAdmin, isReceptionist, styles, query, installStarters, setPlatformPlanDraft, platformQuery, colors, plans, PlanCard, setEditingPlan, setDetailsPlan, PlanActionModal, detailsPlan, PlanEditModal, editingPlan, queryClient, PlatformPlanCrudModal, platformPlanDraft } };
 }
 
 export function MembershipPlanScreen(...args: Parameters<typeof useMembershipPlanScreenPresentation>): React.JSX.Element {

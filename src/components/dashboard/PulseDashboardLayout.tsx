@@ -105,6 +105,16 @@ const ownerNavItems: PulseNavItem[] = [
   { label: "Settings", icon: "settings-outline", route: "Settings" },
 ];
 
+// Receptionists share the owner-panel layout, but should only see the modules
+// used for front-desk operations. This limits the visible navigation only;
+// route registration and permission/business rules remain unchanged.
+const receptionistNavItems: PulseNavItem[] = ownerNavItems.filter(
+  ({ label }) =>
+    !["Receptionists", "Workouts", "Nutrition", "Messages", "Reports"].includes(
+      label,
+    ),
+);
+
 const platformNavItems: PulseNavItem[] = [
   {
     label: "Overview",
@@ -132,7 +142,11 @@ function getNavItems(role?: string) {
     return platformNavItems;
   }
 
-  if (role === "gym_owner" || role === "sub_admin" || role === "receptionist") {
+  if (role === "receptionist") {
+    return receptionistNavItems;
+  }
+
+  if (role === "gym_owner" || role === "sub_admin") {
     return ownerNavItems;
   }
 

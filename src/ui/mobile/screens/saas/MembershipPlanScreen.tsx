@@ -23,15 +23,15 @@ export function MembershipPlanScreenView({ model }: { model: ReturnType<typeof u
   if (typeof model !== "object" || !("kind" in model)) return model;
   switch (model.kind) {
     case "view1": {
-      
-      return (<AccessDeniedScreen />);
+      const { isReceptionist } = model.props;
+      return isReceptionist ? <PulseDashboardLayout activeLabel="Plans" roleLabel="Reception"><AccessDeniedScreen /></PulseDashboardLayout> : <AccessDeniedScreen />;
     }
     case "view2": {
-      const { isSuperAdmin, styles, query, installStarters, setPlatformPlanDraft, platformQuery, colors, plans, PlanCard, setEditingPlan, setDetailsPlan, PlanActionModal, detailsPlan, PlanEditModal, editingPlan, queryClient, PlatformPlanCrudModal, platformPlanDraft } = model.props;
+      const { isSuperAdmin, isReceptionist, styles, query, installStarters, setPlatformPlanDraft, platformQuery, colors, plans, PlanCard, setEditingPlan, setDetailsPlan, PlanActionModal, detailsPlan, PlanEditModal, editingPlan, queryClient, PlatformPlanCrudModal, platformPlanDraft } = model.props;
       return ((
     <PulseDashboardLayout
-      activeLabel="Membership plans"
-      roleLabel={isSuperAdmin ? "Super Admin" : "Gym Owner"}
+      activeLabel={isReceptionist ? "Plans" : "Membership plans"}
+      roleLabel={isSuperAdmin ? "Super Admin" : isReceptionist ? "Reception" : "Gym Owner"}
       contentStyle={styles.screen}
     >
       <View style={styles.header}>

@@ -60,7 +60,7 @@ export function MainTabsView({ model }: { model: ReturnType<typeof useMainTabsPr
       <Tabs.Screen
         name="Dashboard"
         component={RoleDashboardScreen}
-        options={user?.role === "receptionist" ? { tabBarStyle: { display: "none" } } : { title: "Home" }}
+        options={{ title: "Home" }}
       />
       {isPlatformAdmin ? (
         <Tabs.Screen name="Directory" component={SuperAdminManageGymsScreen} options={{ title: "Gyms" }} />

@@ -445,7 +445,7 @@ export function MemberTrainerScreenView({ model }: { model: ReturnType<typeof us
   if (typeof model !== "object" || !("kind" in model)) return model;
   switch (model.kind) {
     case "view1": {
-      const { styles, queryRefresh, query, SectionTitle, navigation } = model.props;
+      const { styles, queryRefresh, query, feedbackQuery, saveFeedback, rating, setRating, feedbackOption, setFeedbackOption, customFeedback, setCustomFeedback, submitFeedback, SectionTitle, navigation } = model.props;
       return ((
     <Screen scroll contentContainerStyle={styles.screen} refreshControl={queryRefresh(query.isRefetching, () => query.refetch())}>
       <ScreenHeader title="My Trainer" subtitle="Coach and availability" icon="person-outline" />
@@ -472,6 +472,15 @@ export function MemberTrainerScreenView({ model }: { model: ReturnType<typeof us
           {[...query.data.assigned_workout_plans, ...query.data.assigned_meal_plans].map((plan) => (
             <ScrollListCard key={plan} title={plan} icon="document-text-outline" />
           ))}
+          <SectionTitle title="Rate your trainer" />
+          <View style={styles.panel}>
+            <Text style={styles.kicker}>{feedbackQuery.data ? "Edit this month’s review" : "Your feedback helps your gym improve"}</Text>
+            <View style={{ flexDirection: "row", gap: 8, marginTop: 10 }}>{[1, 2, 3, 4, 5].map((star) => <Pressable key={star} accessibilityRole="button" accessibilityLabel={`Rate ${star} stars`} onPress={() => setRating(star)}><Text style={{ fontSize: 28, color: star <= rating ? "#F59E0B" : colors.border }}>★</Text></Pressable>)}</View>
+            <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8, marginTop: 12 }}>{["Knowledgeable and helpful", "Motivating and encouraging", "Personalized my workouts", "Clear communication", "Could improve availability", "Other"].map((option) => <Pressable key={option} accessibilityRole="button" onPress={() => setFeedbackOption(option)} style={{ borderWidth: 1, borderColor: feedbackOption === option ? colors.primary : colors.border, borderRadius: 16, paddingHorizontal: 10, paddingVertical: 7 }}><Text style={{ color: colors.ink }}>{option}</Text></Pressable>)}</View>
+            {feedbackOption === "Other" ? <FormTextField label="Your feedback" value={customFeedback} onChangeText={setCustomFeedback} placeholder="Tell us more" multiline /> : null}
+            {saveFeedback.error ? <NoticeBanner tone="error" message={getApiErrorMessage(saveFeedback.error)} /> : null}
+            <PrimaryButton title={feedbackQuery.data ? "Update Review" : "Submit Review"} loading={saveFeedback.isPending} onPress={submitFeedback} style={{ marginTop: 12 }} />
+          </View>
           <PrimaryButton title="Message Trainer" icon="chatbubble-ellipses-outline" onPress={() => navigation.navigate("MemberSupport")} />
         </>
       ) : null}

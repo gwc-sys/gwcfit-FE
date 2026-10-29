@@ -117,9 +117,10 @@ export function useMainTabsPresentation() {
   const isPlatformAdmin = isSuperAdmin;
   const isSubAdmin = user?.role === "sub_admin";
   const isGymOwner = user?.role === "gym_owner";
+  const isReceptionist = user?.role === "receptionist";
   const isTrainer = user?.role === "trainer";
   const isMember = user?.role === "member";
-  const usesDesktopSidebar = (isGymOwner || isSubAdmin || isPlatformAdmin || isTrainer) && width >= 1100;
+  const usesDesktopSidebar = (isGymOwner || isSubAdmin || isReceptionist || isPlatformAdmin || isTrainer) && width >= 1100;
   const canManageMembers = isGymOwner || hasPermission("manage_members");
   const canViewReports = isSuperAdmin || isGymOwner || hasPermission("manage_reports");
 
@@ -229,9 +230,9 @@ function withOwnerPanelLayout(Component: ComponentType<any>, activeLabel: string
     if (role === "trainer") {
       return <PulseDashboardLayout activeLabel={activeLabel} roleLabel="Trainer"><Component {...props} /></PulseDashboardLayout>;
     }
-    if (role !== "gym_owner" && role !== "sub_admin") return <Component {...props} />;
+    if (role !== "gym_owner" && role !== "sub_admin" && role !== "receptionist") return <Component {...props} />;
     const ownerActiveLabel = activeLabel === "Staff" ? "Receptionists" : activeLabel === "Diets" ? "Nutrition" : activeLabel;
-    return <PulseDashboardLayout activeLabel={ownerActiveLabel} roleLabel="Gym Owner"><Component {...props} /></PulseDashboardLayout>;
+    return <PulseDashboardLayout activeLabel={ownerActiveLabel} roleLabel={role === "receptionist" ? "Reception" : "Gym Owner"}><Component {...props} /></PulseDashboardLayout>;
   };
 }
 
