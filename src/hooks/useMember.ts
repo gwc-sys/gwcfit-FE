@@ -8,6 +8,7 @@ import type {
   MemberProfileUpdate,
   MemberProgressLogCreate,
   TrainerFeedbackPayload,
+  GymFeedbackPayload,
   SupportTicketCreate,
 } from "../types/member";
 
@@ -23,6 +24,7 @@ export const memberQueryKeys = {
   progress: () => ["member", "progress"] as const,
   trainer: () => ["member", "trainer"] as const,
   trainerFeedback: () => ["member", "trainer-feedback"] as const,
+  gymFeedback: () => ["member", "gym-feedback"] as const,
   classes: () => ["member", "classes"] as const,
   notifications: (unreadOnly = false) =>
     ["member", "notifications", unreadOnly] as const,
@@ -218,6 +220,19 @@ export function useSaveTrainerFeedback() {
     mutationFn: (payload: TrainerFeedbackPayload) => memberApi.saveTrainerFeedback(payload),
     retry: false,
     onSuccess: () => queryClient.invalidateQueries({ queryKey: memberQueryKeys.trainerFeedback() }),
+  });
+}
+
+export function useGymFeedback() {
+  return useMemberQuery(memberQueryKeys.gymFeedback(), memberApi.getGymFeedback);
+}
+
+export function useSaveGymFeedback() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: GymFeedbackPayload) => memberApi.saveGymFeedback(payload),
+    retry: false,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: memberQueryKeys.gymFeedback() }),
   });
 }
 

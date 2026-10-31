@@ -246,6 +246,17 @@ export type TrainerFeedbackPayload = Pick<TrainerFeedback, "rating"> & {
   feedback_text?: string | null;
 };
 
+export type GymFeedback = {
+  id: string;
+  review_month: string;
+  rating: number;
+  feedback_text?: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type GymFeedbackPayload = Pick<GymFeedback, "rating"> & { feedback_text?: string | null };
+
 export type MemberClass = {
   class_uuid: string;
   class_name: string;

@@ -1,5 +1,5 @@
 import { apiClient } from "./client";
-import type { DashboardStats, PlatformReport } from "../../types/saas";
+import type { DashboardStats, GymFeedbackSummary, PlatformReport } from "../../types/saas";
 
 export const reportsApi = {
   async dashboard() {
@@ -8,6 +8,10 @@ export const reportsApi = {
   },
   async platform() {
     const response = await apiClient.get<PlatformReport>("/reports/platform");
+    return response.data;
+  },
+  async gymFeedback() {
+    const response = await apiClient.get<GymFeedbackSummary>("/reports/gym-feedback");
     return response.data;
   }
 };

@@ -40,6 +40,12 @@ export function useReportsScreenPresentation() {
     enabled: !isSuperAdmin && hasPermission("manage_reports"),
     retry: false
   });
+  const gymFeedbackQuery = useQuery({
+    queryKey: ["reports", "gym-feedback", "screen"],
+    queryFn: reportsApi.gymFeedback,
+    enabled: !isSuperAdmin && hasPermission("manage_reports"),
+    retry: false
+  });
   const platformQuery = useQuery({
     queryKey: ["reports", "platform", "screen"],
     queryFn: reportsApi.platform,
@@ -55,7 +61,7 @@ export function useReportsScreenPresentation() {
     return { kind: "view2" as const, props: { styles, platformQuery, PlatformReportView } };
   }
 
-  return { kind: "view3" as const, props: { styles, dashboardQuery, ReportBar, OwnerRevenueView, ownerPaymentsQuery } };
+  return { kind: "view3" as const, props: { styles, dashboardQuery, ReportBar, OwnerRevenueView, ownerPaymentsQuery, gymFeedbackQuery } };
 }
 
 export function ReportsScreen(...args: Parameters<typeof useReportsScreenPresentation>): React.JSX.Element {

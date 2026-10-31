@@ -228,3 +228,18 @@ test('member renderers do not import their screen controller at runtime', () => 
     assert.ok(output.includes('require("../../../../utils/memberFeatureMetrics")'), file);
   }
 });
+
+
+test("trainer details view displays average rating, total reviews, star distribution, member feedback, and review dates on both platforms", () => {
+  for (const file of ["ui/mobile/screens/saas/TrainersScreen.tsx", "ui/web/pages/saas/TrainersScreen.tsx"]) {
+    const content = fs.readFileSync(path.join(root, file), "utf8");
+    assert.match(content, /detailTrainer/);
+    assert.match(content, /avgRating|average_rating/);
+    assert.match(content, /totalReviews|total_reviews/);
+    assert.match(content, /starDistribution|star_distribution/);
+    assert.match(content, /feedbackQuery.*reviews/);
+    assert.match(content, /reviewDateFormatted|reviewDate|toLocaleDateString/);
+    assert.match(content, /feedback_option/);
+    assert.match(content, /feedback_text/);
+  }
+});

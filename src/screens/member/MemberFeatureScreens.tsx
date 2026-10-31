@@ -51,6 +51,8 @@ import {
   useMemberTrainer,
   useTrainerFeedback,
   useSaveTrainerFeedback,
+  useGymFeedback,
+  useSaveGymFeedback,
   useMemberWorkouts,
   useUpdateGoal
 } from "../../hooks/useMember";
@@ -400,15 +402,29 @@ export function useMemberSupportScreenPresentation() {
   const styles = useMemo(() => createFeatureStyles(featureColors), [featureColors]);
 
   const createTicket = useCreateSupportTicket();
+  const gymFeedbackQuery = useGymFeedback();
+  const saveGymFeedback = useSaveGymFeedback();
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
   const [category, setCategory] = useState("support");
+  const [gymRating, setGymRating] = useState(5);
+  const [gymFeedbackText, setGymFeedbackText] = useState("");
+  const [gymFeedbackOption, setGymFeedbackOption] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (gymFeedbackQuery.data) {
+      setGymRating(gymFeedbackQuery.data.rating);
+      setGymFeedbackText(gymFeedbackQuery.data.feedback_text ?? "");
+    }
+  }, [gymFeedbackQuery.data]);
 
   const submit = () => {
     createTicket.mutate({ category, subject, message });
   };
 
-  return { kind: "view1" as const, props: { styles, SectionTitle, category, setCategory, subject, setSubject, message, setMessage, createTicket, submit } };
+  const submitGymFeedback = () => saveGymFeedback.mutate({ rating: gymRating, feedback_text: gymFeedbackText.trim() || null });
+
+  return { kind: "view1" as const, props: { styles, SectionTitle, category, setCategory, subject, setSubject, message, setMessage, createTicket, submit, gymFeedbackQuery, saveGymFeedback, gymRating, setGymRating, gymFeedbackText, setGymFeedbackText, gymFeedbackOption, setGymFeedbackOption, submitGymFeedback } };
 }
 
 export function MemberSupportScreen(...args: Parameters<typeof useMemberSupportScreenPresentation>): React.JSX.Element {

@@ -35,12 +35,12 @@ export function ReportsScreenView({ model }: { model: ReturnType<typeof useRepor
     ));
     }
     case "view3": {
-      const { styles, dashboardQuery, ReportBar, OwnerRevenueView, ownerPaymentsQuery } = model.props;
+      const { styles, dashboardQuery, ReportBar, OwnerRevenueView, ownerPaymentsQuery, gymFeedbackQuery } = model.props;
       return ((
     <Screen
       scroll
       contentContainerStyle={styles.screen}
-      refreshControl={<RefreshControl refreshing={dashboardQuery.isFetching} onRefresh={() => dashboardQuery.refetch()} />}
+      refreshControl={<RefreshControl refreshing={dashboardQuery.isFetching || gymFeedbackQuery.isFetching} onRefresh={() => { void dashboardQuery.refetch(); void gymFeedbackQuery.refetch(); }} />}
     >
       <ScreenHeader title="Reports" subtitle="Gym-specific performance" icon="analytics-outline" />
       <DataState loading={dashboardQuery.isLoading} error={dashboardQuery.error ? getApiErrorMessage(dashboardQuery.error) : null} />
@@ -56,6 +56,20 @@ export function ReportsScreenView({ model }: { model: ReturnType<typeof useRepor
             <ReportBar label="Members" value={dashboardQuery.data.active_members} max={Math.max(dashboardQuery.data.active_members, dashboardQuery.data.trainers, 1)} tone="success" />
             <ReportBar label="Trainers" value={dashboardQuery.data.trainers} max={Math.max(dashboardQuery.data.active_members, dashboardQuery.data.trainers, 1)} tone="info" />
             <ReportBar label="Check-ins" value={dashboardQuery.data.checkins_today} max={Math.max(dashboardQuery.data.active_members, dashboardQuery.data.checkins_today, 1)} tone="warning" />
+          </SurfacePanel>
+          <SurfacePanel title="Gym feedback & ratings" kicker={gymFeedbackQuery.data ? `${gymFeedbackQuery.data.total_reviews} member reviews · ${gymFeedbackQuery.data.average_rating.toFixed(1)} / 5` : "Member reviews"} icon="chatbubbles-outline">
+            {gymFeedbackQuery.isLoading ? <Text style={styles.emptyText}>Loading member feedback...</Text> : null}
+            {gymFeedbackQuery.data?.reviews.map((review) => (
+              <View key={review.id} style={styles.transactionRow}>
+                <View style={styles.transactionMain}>
+                  <Text style={styles.reportLabel}>{review.member_name}</Text>
+                  <Text style={styles.transactionMeta}>{"★".repeat(review.rating)}{"☆".repeat(5 - review.rating)} · {new Date(review.updated_at).toLocaleDateString("en-IN", { month: "short", day: "numeric", year: "numeric" })}</Text>
+                  {review.feedback_text ? <Text style={styles.transactionMeta}>{review.feedback_text}</Text> : null}
+                </View>
+                <Text style={styles.transactionAmount}>{review.rating}.0</Text>
+              </View>
+            ))}
+            {!gymFeedbackQuery.isLoading && gymFeedbackQuery.data?.reviews.length === 0 ? <Text style={styles.emptyText}>No member feedback yet.</Text> : null}
           </SurfacePanel>
           <OwnerRevenueView payments={ownerPaymentsQuery.data ?? []} loading={ownerPaymentsQuery.isLoading} />
         </>

@@ -4,115 +4,127 @@ import { StyleSheet } from "react-native";
 import { radius, spacing, typography } from "../../../theme/theme";
 import type { ThemeColors } from "../../../theme/theme";
 
-export const createStyles = (colors: ThemeColors) => adaptPageStyles(StyleSheet.create({ screen: {
-      gap: spacing.md,
-      paddingTop: spacing.md,
-      paddingBottom: 32
-    }, pageHeader: {
-      flexDirection: "column",
-      justifyContent: "space-between",
-      gap: spacing.lg
-    }, title: { ...typography.h1, color: colors.ink }, subtitle: { ...typography.body, color: colors.muted, marginTop: 4 }, headerActions: {
-      flex: undefined,
-      flexDirection: "row",
-      justifyContent: "flex-start",
-      alignItems: "center",
-      gap: spacing.sm,
-      width: "100%",
-      flexWrap: "wrap"
-    }, searchBox: {
-      width: "100%",
-      minHeight: 44,
-      flexDirection: "row",
-      alignItems: "center",
-      gap: spacing.sm,
-      borderWidth: 0,
-      borderColor: colors.border,
-      borderRadius: radius.sm,
-      paddingHorizontal: spacing.sm,
-      backgroundColor: colors.surfaceMuted
-    }, searchInput: { flex: 1, color: colors.ink, ...typography.body }, outlineButton: { minHeight: controlMetrics.minimumTouchSize, flexDirection: "row", alignItems: "center", gap: spacing.xs, borderWidth: 1, borderColor: colors.border, borderRadius: radius.sm, paddingHorizontal: spacing.md, backgroundColor: colors.surface }, buttonText: { ...typography.small, color: colors.ink }, addButton: { minHeight: 44 }, statsGrid: {
-      flexDirection: "row",
-      gap: spacing.md,
-      flexWrap: "wrap"
-    }, statCard: {
-      flex: undefined,
-      minWidth: 0,
-      minHeight: 112,
-      flexDirection: "column",
-      alignItems: "flex-start",
-      gap: spacing.md,
-      borderWidth: 0,
-      borderColor: colors.border,
-      borderRadius: 20,
-      padding: spacing.md,
-      backgroundColor: colors.surface,
-      flexGrow: 1,
-      flexBasis: "44%"
-    }, statIcon: {
-      width: 34,
-      height: 34,
-      alignItems: "center",
-      justifyContent: "center",
-      borderRadius: radius.sm
-    }, statLabel: { ...typography.small, color: colors.muted }, statValue: { ...typography.h2, color: colors.ink }, statTrend: { ...typography.small, color: colors.success }, tableCard: { borderWidth: 1, borderColor: colors.border, borderRadius: radius.md, overflow: "hidden", backgroundColor: colors.surface }, filterBar: {
-      minHeight: 64,
-      flexDirection: "column",
-      alignItems: "stretch",
-      justifyContent: "space-between",
-      gap: spacing.md,
-      padding: spacing.sm,
-      borderBottomWidth: 1,
-      borderBottomColor: colors.border
-    }, tabs: { flexDirection: "row", flexWrap: "wrap", gap: 2 }, tab: { paddingHorizontal: spacing.md, paddingVertical: spacing.sm, borderRadius: radius.sm, minHeight: controlMetrics.minimumTouchSize, justifyContent: "center" }, tabActive: { backgroundColor: colors.primarySoft }, tabText: { ...typography.small, color: colors.muted }, tabTextActive: { color: colors.primary, fontWeight: "800" }, sortBox: { minHeight: 40, flexDirection: "row", alignItems: "center", gap: spacing.xs, borderWidth: 1, borderColor: colors.border, borderRadius: radius.sm, paddingHorizontal: spacing.sm }, tableHeader: {
-      minHeight: 48,
-      flexDirection: "row",
-      alignItems: "center",
-      gap: spacing.sm,
-      paddingHorizontal: spacing.md,
-      borderBottomWidth: 1,
-      borderBottomColor: colors.border,
-      display: "none"
-    }, columnHeader: { flex: 1, ...typography.small, color: colors.muted }, trainerCol: {
-      flex: undefined
-    }, row: {
-      minHeight: 82,
-      flexDirection: "column",
-      alignItems: "stretch",
-      gap: 12,
-      paddingHorizontal: spacing.md,
-      paddingVertical: 18
-    }, separator: { height: 1, backgroundColor: colors.border }, trainerCell: { flexDirection: "row", alignItems: "center", gap: spacing.sm, minWidth: 0 }, avatar: { width: 42, height: 42, alignItems: "center", justifyContent: "center", borderRadius: 21, backgroundColor: colors.primarySoft }, avatarText: { color: colors.primary, fontWeight: "800" }, identity: { flex: 1, minWidth: 0 }, name: { ...typography.body, color: colors.ink, fontWeight: "800" }, meta: { ...typography.small, color: colors.muted, marginTop: 2 }, contactCell: {
-      flex: undefined,
-      minWidth: 0
-    }, specialtyCell: {
-      flex: undefined,
-      minWidth: 0,
-      flexDirection: "row",
-      flexWrap: "wrap",
-      gap: 4
-    }, specialtyTag: { ...typography.small, color: colors.primary, backgroundColor: colors.primarySoft, borderRadius: 4, paddingHorizontal: 6, paddingVertical: 4 }, ratingCell: {
-      flex: undefined
-    }, stars: { color: "#FBBF24", fontSize: 12 }, assignedCell: {
-      flex: undefined
-    }, progress: { height: 5, width: 65, marginTop: 5, borderRadius: 5, backgroundColor: colors.surfaceMuted }, progressFill: { width: "70%", height: 5, borderRadius: 5, backgroundColor: colors.primary }, statusCell: {
-      flex: undefined
-    }, dateCell: {
-      flex: undefined,
-      ...typography.small,
-      color: colors.ink
-    }, actions: {
-      flex: undefined,
-      flexDirection: "row",
-      justifyContent: "flex-end",
-      gap: 4
-    }, iconButton: { width: controlMetrics.minimumTouchSize, height: controlMetrics.minimumTouchSize, alignItems: "center", justifyContent: "center", borderWidth: 1, borderColor: colors.border, borderRadius: radius.sm }, cellText: { ...typography.small, color: colors.ink }, pagination: {
-      minHeight: 58,
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "space-between",
-      paddingHorizontal: spacing.md,
-      flexWrap: "wrap",
-      gap: 12,
-      paddingVertical: 12
-    }, paginationText: { ...typography.small, color: colors.muted }, paginationActions: { flexDirection: "row", alignItems: "center", gap: spacing.sm }, pageButton: { width: controlMetrics.minimumTouchSize, height: controlMetrics.minimumTouchSize, alignItems: "center", justifyContent: "center", borderWidth: 1, borderColor: colors.border, borderRadius: radius.sm }, pageNumber: { color: colors.primary, fontWeight: "800" }, modalBackdrop: { flex: 1, justifyContent: "center", alignItems: "center", padding: spacing.lg, backgroundColor: "rgba(2,6,23,0.7)" }, formCard: { width: "100%", maxWidth: 480, gap: spacing.sm, padding: spacing.lg, borderWidth: 1, borderColor: colors.border, borderRadius: radius.md, backgroundColor: colors.surface }, formTitle: { ...typography.h2, color: colors.ink }, input: { minHeight: 46, borderWidth: 1, borderColor: colors.border, borderRadius: radius.sm, paddingHorizontal: spacing.md, color: colors.ink, backgroundColor: colors.surfaceMuted }, formActions: { flexDirection: "row", gap: spacing.sm, marginTop: spacing.sm } }));
+export const createStyles = (colors: ThemeColors) =>
+  adaptPageStyles(
+    StyleSheet.create({
+      screen: { gap: spacing.md, paddingTop: spacing.md, paddingBottom: 32 },
+      pageHeader: { flexDirection: "column", justifyContent: "space-between", gap: spacing.lg },
+      title: { ...typography.h1, color: colors.ink },
+      subtitle: { ...typography.body, color: colors.muted, marginTop: 4 },
+      headerActions: { flex: undefined, flexDirection: "row", justifyContent: "flex-start", alignItems: "center", gap: spacing.sm, width: "100%", flexWrap: "wrap" },
+      searchBox: { width: "100%", minHeight: 44, flexDirection: "row", alignItems: "center", gap: spacing.sm, borderWidth: 0, borderColor: colors.border, borderRadius: radius.sm, paddingHorizontal: spacing.sm, backgroundColor: colors.surfaceMuted },
+      searchInput: { flex: 1, color: colors.ink, ...typography.body },
+      outlineButton: { minHeight: controlMetrics.minimumTouchSize, flexDirection: "row", alignItems: "center", gap: spacing.xs, borderWidth: 1, borderColor: colors.border, borderRadius: radius.sm, paddingHorizontal: spacing.md, backgroundColor: colors.surface },
+      buttonText: { ...typography.small, color: colors.ink },
+      addButton: { minHeight: 44 },
+      statsGrid: { flexDirection: "row", gap: spacing.md, flexWrap: "wrap" },
+      statCard: { flex: undefined, minWidth: 0, minHeight: 112, flexDirection: "column", alignItems: "flex-start", gap: spacing.md, borderWidth: 0, borderColor: colors.border, borderRadius: 20, padding: spacing.md, backgroundColor: colors.surface, flexGrow: 1, flexBasis: "44%" },
+      statIcon: { width: 34, height: 34, alignItems: "center", justifyContent: "center", borderRadius: radius.sm },
+      statLabel: { ...typography.small, color: colors.muted },
+      statValue: { ...typography.h2, color: colors.ink },
+      statTrend: { ...typography.small, color: colors.success },
+      tableCard: { borderWidth: 1, borderColor: colors.border, borderRadius: radius.md, overflow: "hidden", backgroundColor: colors.surface },
+      filterBar: { minHeight: 64, flexDirection: "column", alignItems: "stretch", justifyContent: "space-between", gap: spacing.md, padding: spacing.sm, borderBottomWidth: 1, borderBottomColor: colors.border },
+      tabs: { flexDirection: "row", flexWrap: "wrap", gap: 2 },
+      tab: { paddingHorizontal: spacing.md, paddingVertical: spacing.sm, borderRadius: radius.sm, minHeight: controlMetrics.minimumTouchSize, justifyContent: "center" },
+      tabActive: { backgroundColor: colors.primarySoft },
+      tabText: { ...typography.small, color: colors.muted },
+      tabTextActive: { color: colors.primary, fontWeight: "800" },
+      sortBox: { minHeight: 40, flexDirection: "row", alignItems: "center", gap: spacing.xs, borderWidth: 1, borderColor: colors.border, borderRadius: radius.sm, paddingHorizontal: spacing.sm },
+      tableHeader: { minHeight: 48, flexDirection: "row", alignItems: "center", gap: spacing.sm, paddingHorizontal: spacing.md, borderBottomWidth: 1, borderBottomColor: colors.border, display: "none" },
+      columnHeader: { flex: 1, ...typography.small, color: colors.muted },
+      trainerCol: { flex: undefined },
+      specialtyCol: { flex: undefined },
+      ratingHeader: { flex: undefined },
+      actionHeader: { flex: 0.8, textAlign: "right" },
+      row: { minHeight: 82, flexDirection: "column", alignItems: "stretch", gap: 12, paddingHorizontal: spacing.md, paddingVertical: 18 },
+      separator: { height: 1, backgroundColor: colors.border },
+      trainerCell: { flexDirection: "row", alignItems: "center", gap: spacing.sm, minWidth: 0 },
+      avatar: { width: 42, height: 42, alignItems: "center", justifyContent: "center", borderRadius: 21, backgroundColor: colors.primarySoft },
+      avatarText: { color: colors.primary, fontWeight: "800" },
+      identity: { flex: 1, minWidth: 0 },
+      name: { ...typography.body, color: colors.ink, fontWeight: "800" },
+      meta: { ...typography.small, color: colors.muted, marginTop: 2 },
+      contactCell: { flex: undefined, minWidth: 0 },
+      specialtyCell: { flex: undefined, minWidth: 0, flexDirection: "row", flexWrap: "wrap", gap: 4 },
+      specialtyTag: { ...typography.small, color: colors.primary, backgroundColor: colors.primarySoft, borderRadius: 4, paddingHorizontal: 6, paddingVertical: 4 },
+      ratingCell: { flex: undefined },
+      stars: { color: "#FBBF24", fontSize: 12 },
+      assignedCell: { flex: undefined },
+      progress: { height: 5, width: 65, marginTop: 5, borderRadius: 5, backgroundColor: colors.surfaceMuted },
+      progressFill: { width: "70%", height: 5, borderRadius: 5, backgroundColor: colors.primary },
+      statusCell: { flex: undefined },
+      dateCell: { flex: undefined, ...typography.small, color: colors.ink },
+      actions: { flex: undefined, flexDirection: "row", justifyContent: "flex-end", gap: 4 },
+      iconButton: { width: controlMetrics.minimumTouchSize, height: controlMetrics.minimumTouchSize, alignItems: "center", justifyContent: "center", borderWidth: 1, borderColor: colors.border, borderRadius: radius.sm },
+      cellText: { ...typography.small, color: colors.ink },
+      pagination: { minHeight: 58, flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: spacing.md, flexWrap: "wrap", gap: 12, paddingVertical: 12 },
+      paginationText: { ...typography.small, color: colors.muted },
+      paginationActions: { flexDirection: "row", alignItems: "center", gap: spacing.sm },
+      pageButton: { width: controlMetrics.minimumTouchSize, height: controlMetrics.minimumTouchSize, alignItems: "center", justifyContent: "center", borderWidth: 1, borderColor: colors.border, borderRadius: radius.sm },
+      pageNumber: { color: colors.primary, fontWeight: "800" },
+
+      /* Add / Edit Form Modal */
+      modalBackdrop: { flex: 1, justifyContent: "center", alignItems: "center", padding: spacing.lg, backgroundColor: "rgba(2,6,23,0.7)" },
+      formCard: { width: "100%", maxWidth: 480, gap: spacing.sm, padding: spacing.lg, borderWidth: 1, borderColor: colors.border, borderRadius: radius.md, backgroundColor: colors.surface },
+      formTitle: { ...typography.h2, color: colors.ink },
+      input: { minHeight: 46, borderWidth: 1, borderColor: colors.border, borderRadius: radius.sm, paddingHorizontal: spacing.md, color: colors.ink, backgroundColor: colors.surfaceMuted },
+      formActions: { flexDirection: "row", gap: spacing.sm, marginTop: spacing.sm },
+
+      /* Trainer Details Full Page Styles (Apple HIG Mobile) */
+      pageBackNav: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: spacing.sm, paddingBottom: 4 },
+      backButton: { flexDirection: "row", alignItems: "center", gap: 6, paddingVertical: 8, paddingHorizontal: 14, borderRadius: 20, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border },
+      backButtonText: { ...typography.body, fontWeight: "700", color: colors.ink, fontSize: 13 },
+      breadcrumbText: { ...typography.small, color: colors.muted, fontWeight: "500", display: "none" },
+
+      pageHeroCard: { flexDirection: "column", alignItems: "flex-start", gap: spacing.md, padding: spacing.md, backgroundColor: colors.surface, borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border },
+      heroAvatar: { width: 58, height: 58, borderRadius: 29, backgroundColor: colors.primarySoft, alignItems: "center", justifyContent: "center", borderWidth: 2, borderColor: colors.border },
+      heroAvatarText: { color: colors.primary, fontWeight: "900", fontSize: 20 },
+      heroTitleRow: { flexDirection: "row", alignItems: "center", gap: spacing.sm, flexWrap: "wrap" },
+      heroName: { ...typography.h1, fontSize: 20, color: colors.ink },
+      heroMetaRow: { flexDirection: "column", alignItems: "flex-start", gap: 4, marginTop: 4 },
+      heroMetaItem: { flexDirection: "row", alignItems: "center", gap: 6 },
+      heroMetaText: { ...typography.small, color: colors.muted },
+      specialtiesRow: { flexDirection: "row", flexWrap: "wrap", gap: 6, marginTop: 6 },
+      specialtyChip: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 12, backgroundColor: colors.surfaceMuted, borderWidth: 1, borderColor: colors.border },
+      specialtyChipText: { ...typography.small, color: colors.primary, fontWeight: "600", fontSize: 12 },
+
+      sectionCard: { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border, borderRadius: radius.lg, padding: spacing.md, gap: spacing.md },
+      sectionHeaderRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+      sectionHeaderTitle: { ...typography.h2, fontSize: 16, color: colors.ink },
+
+      ratingGrid: { flexDirection: "column", alignItems: "stretch", gap: 16, paddingVertical: spacing.xs },
+      scoreDisplay: { alignItems: "center", justifyContent: "center", paddingBottom: spacing.sm, borderBottomWidth: 1, borderBottomColor: colors.border },
+      scoreNumber: { fontSize: 44, fontWeight: "900", color: colors.ink, lineHeight: 50 },
+      starsContainer: { flexDirection: "row", alignItems: "center", gap: 3, marginTop: 4 },
+      scoreSub: { ...typography.small, color: colors.muted, marginTop: 4, textAlign: "center" },
+
+      distributionList: { width: "100%", gap: 7 },
+      distRow: { flexDirection: "row", alignItems: "center", gap: spacing.xs },
+      distStar: { width: 28, ...typography.small, fontWeight: "700", color: colors.muted, textAlign: "right" },
+      distTrack: { flex: 1, height: 9, backgroundColor: colors.surfaceMuted, borderRadius: 5, overflow: "hidden" },
+      distFill: { height: "100%", backgroundColor: "#F59E0B", borderRadius: 5 },
+      distVal: { width: 62, ...typography.small, color: colors.muted, textAlign: "right", fontSize: 11, fontWeight: "600" },
+
+      feedbackCountBadge: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: 12, backgroundColor: colors.primarySoft },
+      feedbackCountText: { ...typography.small, color: colors.primary, fontWeight: "700" },
+
+      feedbackCard: { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border, borderRadius: radius.md, padding: spacing.md, gap: 8 },
+      feedbackHeader: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: spacing.xs },
+      feedbackUser: { flexDirection: "row", alignItems: "center", gap: spacing.xs },
+      feedbackAvatar: { width: 32, height: 32, borderRadius: 16, backgroundColor: colors.primarySoft, alignItems: "center", justifyContent: "center" },
+      feedbackAvatarText: { fontSize: 12, fontWeight: "800", color: colors.primary },
+      feedbackUserName: { ...typography.body, fontWeight: "700", color: colors.ink, fontSize: 14 },
+      reviewDate: { ...typography.small, color: colors.muted, fontSize: 11 },
+      feedbackStarsRow: { flexDirection: "row", alignItems: "center", gap: 6 },
+      ratingScoreText: { ...typography.small, color: colors.muted, fontSize: 11, fontWeight: "600" },
+      feedbackTag: { alignSelf: "flex-start", paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8, backgroundColor: "rgba(10, 132, 255, 0.12)" },
+      feedbackTagText: { ...typography.small, color: "#0A84FF", fontWeight: "700", fontSize: 11 },
+      feedbackQuoteBox: { paddingLeft: spacing.sm, borderLeftWidth: 3, borderLeftColor: "#0A84FF", marginTop: 2, paddingVertical: 2 },
+      feedbackQuoteText: { ...typography.body, fontStyle: "italic", color: colors.ink, lineHeight: 19, fontSize: 13 },
+
+      emptyFeedbackBox: { alignItems: "center", justifyContent: "center", padding: spacing.lg, borderRadius: radius.md, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surface, gap: spacing.xs },
+      emptyFeedbackTitle: { ...typography.body, fontWeight: "700", color: colors.ink },
+      emptyFeedbackSub: { ...typography.small, color: colors.muted, textAlign: "center", maxWidth: 300 }
+    })
+  );

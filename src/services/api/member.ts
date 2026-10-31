@@ -21,6 +21,8 @@ import type {
   MemberTrainer,
   TrainerFeedback,
   TrainerFeedbackPayload,
+  GymFeedback,
+  GymFeedbackPayload,
   MemberWorkout,
   SupportTicket,
   SupportTicketCreate
@@ -131,6 +133,14 @@ export const memberApi = {
 
   async saveTrainerFeedback(payload: TrainerFeedbackPayload) {
     return (await apiClient.put<TrainerFeedback>("/member/trainer/feedback", payload)).data;
+  },
+
+  async getGymFeedback() {
+    return (await apiClient.get<GymFeedback | null>("/member/gym/feedback")).data;
+  },
+
+  async saveGymFeedback(payload: GymFeedbackPayload) {
+    return (await apiClient.put<GymFeedback>("/member/gym/feedback", payload)).data;
   },
 
   async getMemberClasses() {

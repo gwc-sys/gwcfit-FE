@@ -418,6 +418,13 @@ export type TrainerRatingSummary = {
   reviews: Array<{ id: string; member_id: string; member_name: string; review_month: string; rating: number; feedback_option?: string | null; feedback_text?: string | null; created_at: string; updated_at: string }>;
 };
 
+export type GymFeedbackSummary = {
+  average_rating: number;
+  total_reviews: number;
+  star_distribution: Record<number, number>;
+  reviews: Array<{ id: string; member_id: string; member_name: string; review_month: string; rating: number; feedback_text?: string | null; created_at: string; updated_at: string }>;
+};
+
 export type TrainerCreatePayload = {
   full_name: string;
   email?: string | null;

@@ -146,7 +146,7 @@ function getNavItems(role?: string) {
     return receptionistNavItems;
   }
 
-  if (role === "gym_owner" || role === "sub_admin") {
+  if (role === "gym_owner" || role === "sub_admin" || role === "receptionist") {
     return ownerNavItems;
   }
 

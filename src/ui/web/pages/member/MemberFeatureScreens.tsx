@@ -692,7 +692,15 @@ export function MemberSupportScreenView({ model }: { model: ReturnType<typeof us
   if (typeof model !== "object" || !("kind" in model)) return model;
   switch (model.kind) {
     case "view1": {
-      const { styles, SectionTitle, category, setCategory, subject, setSubject, message, setMessage, createTicket, submit } = model.props;
+      const { styles, SectionTitle, category, setCategory, subject, setSubject, message, setMessage, createTicket, submit, gymFeedbackQuery, saveGymFeedback, gymRating, setGymRating, gymFeedbackText, setGymFeedbackText, gymFeedbackOption, setGymFeedbackOption, submitGymFeedback } = model.props;
+      const feedbackOptions = [
+        ["Clean and well maintained", "I have had a very positive experience with the cleanliness and maintenance of the gym. The workout areas, changing spaces, and equipment are generally kept tidy, organised, and ready to use. It makes every visit feel comfortable and welcoming. I appreciate the effort the team puts into maintaining a hygienic environment, especially during busy hours. Continuing to check equipment regularly and keeping shared areas clean will help members feel confident and enjoy their workouts even more."],
+        ["Friendly staff", "The gym staff have been friendly, approachable, and helpful whenever I have needed assistance. They create a welcoming atmosphere and make it easier to ask questions about equipment, classes, or general gym facilities. Their positive attitude makes the gym feel like a supportive place to work towards personal fitness goals. I appreciate the way the team treats members with respect and patience. Please continue offering this level of care and support, because it makes a real difference to the overall member experience."],
+        ["Great equipment", "I am happy with the variety and quality of the equipment available at the gym. There are useful options for strength training, cardio, and general fitness, which helps me follow my workouts without unnecessary interruptions. The machines and free weights are easy to access and are usually in good working condition. I appreciate the investment in equipment and the effort to keep it available for members. Adding more variety over time and maintaining the most popular machines will make the experience even better."],
+        ["Helpful trainers", "The trainers are knowledgeable, encouraging, and willing to help members improve their workouts safely. Their guidance has made it easier for me to understand exercises, use equipment correctly, and stay motivated. I value their professional approach and the time they take to answer questions or suggest improvements. The support from the training team makes the gym feel more personal than simply working out alone. Please continue providing clear guidance and regular availability, as it helps members build confidence and stay consistent with their fitness goals."],
+        ["Could be improved", "My overall experience at the gym has been positive, but there are a few areas that could be improved to make visits more comfortable and effective. Better availability of equipment during busy periods, clearer communication about schedules, and faster attention to maintenance requests would be helpful. I am sharing this feedback because I value the gym and would like to see the member experience improve further. I hope the team can review these areas and continue making practical changes that support every member’s fitness journey."],
+        ["Other", ""]
+      ] as const;
       return ((
     <Screen scroll contentContainerStyle={styles.screen}>
       <ScreenHeader title="Support" subtitle="Trainer and gym contact" icon="chatbubbles-outline" />
@@ -704,9 +712,20 @@ export function MemberSupportScreenView({ model }: { model: ReturnType<typeof us
         <PrimaryButton title="Send Request" icon="send-outline" loading={createTicket.isPending} onPress={submit} />
         <NoticeBanner message={createTicket.error ? getApiErrorMessage(createTicket.error) : createTicket.data ? "Request sent." : null} tone={createTicket.error ? "error" : "success"} />
       </View>
-      <ScrollListCard title="Trainer message" subtitle="Send a request to your assigned trainer" icon="person-outline" />
-      <ScrollListCard title="Reception" subtitle="Contact the gym desk" icon="call-outline" />
-      <ScrollListCard title="Feedback" subtitle="Share feedback with your gym" icon="heart-outline" />
+      <ScrollListCard title="Trainer message" subtitle="Send a request to your assigned trainer" icon="person-outline" actionLabel="Select" onAction={() => { setCategory("trainer"); setSubject("Training support"); }} />
+      <ScrollListCard title="Reception" subtitle="Contact the gym desk" icon="call-outline" actionLabel="Select" onAction={() => { setCategory("reception"); setSubject("Front desk support"); }} />
+      <ScrollListCard title="Feedback" subtitle="Share feedback with your gym" icon="heart-outline" actionLabel="Select" onAction={() => { setCategory("feedback"); setSubject("Gym feedback"); }} />
+      {category === "feedback" ? <View style={styles.feedbackPanel}>
+        <View style={styles.feedbackHeader}><Text style={styles.feedbackTitle}>Rate your gym</Text><Text style={styles.kicker}>{gymFeedbackQuery.data ? "Update your review for this month." : "How was your experience? Your feedback helps the team improve."}</Text></View>
+        <View style={styles.feedbackScoreRow}>
+          <View style={styles.feedbackStars}>{[1, 2, 3, 4, 5].map((star) => <Pressable key={star} accessibilityRole="button" accessibilityLabel={`Rate ${star} out of 5`} onPress={() => setGymRating(star)} style={[styles.feedbackStarButton, star <= gymRating && styles.feedbackStarButtonActive]}><Text style={[styles.feedbackStar, { color: star <= gymRating ? "#F59E0B" : colors.muted }]}>★</Text></Pressable>)}</View>
+          <Text style={styles.feedbackScoreText}>{gymRating} of 5</Text>
+        </View>
+        <View style={styles.feedbackHeader}><Text style={styles.feedbackScoreText}>What would you like to share? (optional)</Text><View style={styles.feedbackOptions}>{feedbackOptions.map(([option, draft]) => <Pressable key={option} accessibilityRole="button" onPress={() => { setGymFeedbackOption(option); setGymFeedbackText(draft); }} style={[styles.feedbackOption, gymFeedbackOption === option && styles.feedbackOptionActive]}><Text style={styles.feedbackOptionText}>{option}</Text></Pressable>)}</View></View>
+        <FormTextField label={gymFeedbackOption === "Other" ? "Write your own message" : "Add more detail (optional)"} helper={`${gymFeedbackText.trim() ? gymFeedbackText.trim().split(/\s+/).length : 0} words · 100–150 words is ideal`} value={gymFeedbackText} onChangeText={(value) => { setGymFeedbackText(value); if (gymFeedbackOption && gymFeedbackOption !== "Other" && value !== gymFeedbackOption) setGymFeedbackOption("Other"); }} placeholder={gymFeedbackOption === "Other" ? "Tell us about your experience — what worked well and what could be improved." : "Share more about your experience — 100 to 150 words is ideal."} multiline style={{ height: 160, textAlignVertical: "top" }} />
+        <PrimaryButton title={gymFeedbackQuery.data ? "Update review" : "Submit review"} icon="star-outline" loading={saveGymFeedback.isPending} onPress={submitGymFeedback} style={{ alignSelf: "flex-start", minWidth: 190 }} />
+        <NoticeBanner message={saveGymFeedback.error ? getApiErrorMessage(saveGymFeedback.error) : saveGymFeedback.data ? "Thanks for sharing your feedback." : null} tone={saveGymFeedback.error ? "error" : "success"} />
+      </View> : null}
       <ScrollListCard title="FAQ" subtitle="Common membership and billing questions" icon="help-circle-outline" />
     </Screen>
   ));
