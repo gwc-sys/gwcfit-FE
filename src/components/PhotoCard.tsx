@@ -43,7 +43,7 @@ export function PhotoCard({
     >
       <ImageBackground source={image} resizeMode="cover" style={styles.image} imageStyle={styles.imageRadius}>
         <LinearGradient
-          colors={["rgba(5,7,10,0.12)", "rgba(5,7,10,0.84)"]}
+          colors={["rgba(0, 0, 0,0.12)", "rgba(0, 0, 0,0.84)"]}
           style={styles.overlay}
         >
           <View style={styles.topRow}>

@@ -5,6 +5,10 @@ export type PlatformPlanUpdate = Partial<Omit<PlatformPlan, "id" | "slug">>;
 export type PlatformPlanCreate = Omit<PlatformPlan, "id">;
 
 export const platformPlansApi = {
+  async listPublic() {
+    const response = await apiClient.get<PlatformPlan[]>("/platform-plans/public");
+    return response.data;
+  },
   async list() {
     const response = await apiClient.get<PlatformPlan[]>("/platform-plans");
     return response.data;

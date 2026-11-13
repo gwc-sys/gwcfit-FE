@@ -9,6 +9,8 @@ import type {
   Gym,
   DeveloperGym,
   GymCreatePayload,
+  GymSoftwareSubscription,
+  GymSupportTicket,
   GymUpdatePayload,
   GymUser,
   ManagedUser,
@@ -98,6 +100,22 @@ export const gymsApi = {
   },
   async updateMyGym(payload: GymUpdatePayload) {
     const response = await apiClient.patch<Gym>("/gyms/me", payload);
+    return response.data;
+  },
+  async getSubscription() {
+    const response = await apiClient.get<GymSoftwareSubscription>("/gyms/me/subscription");
+    return response.data;
+  },
+  async getSupportTickets() {
+    const response = await apiClient.get<GymSupportTicket[]>("/gyms/me/support-tickets");
+    return response.data;
+  },
+  async createSupportTicket(payload: { category: string; summary: string; description: string }) {
+    const response = await apiClient.post<GymSupportTicket>("/gyms/me/support-tickets", payload);
+    return response.data;
+  },
+  async requestDeletion(payload: { reason: string; confirmation_text: string; password: string }) {
+    const response = await apiClient.post<MessageResponse>("/gyms/me/deletion-request", payload);
     return response.data;
   },
   async get(gymId: string) {

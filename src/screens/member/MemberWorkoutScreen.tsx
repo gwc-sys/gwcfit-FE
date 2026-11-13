@@ -2,14 +2,26 @@ import type * as React from "react";
 import { MemberWorkoutScreenView, ButtonView, MetricView, WorkoutCardView, StateView } from "./MemberWorkoutScreen.presentation";
 import { ui, makeStyles } from "./MemberWorkoutScreen.styles";
 import { Ionicons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useMemo, useState } from "react";
 import { ActivityIndicator, Image, Pressable, RefreshControl, StyleSheet, Text, useWindowDimensions, View } from "react-native";
 
 import { Screen } from "../../components/Screen";
 import { genderExerciseLibrary } from "../../data/genderExerciseLibrary";
-import { useMemberWorkouts } from "../../hooks/useMember";
+import {
+  useBookClass,
+  useCancelClass,
+  useCompleteWorkout,
+  useMemberActivity,
+  useMemberClasses,
+  useMemberNotifications,
+  useMemberProfile,
+  useMemberProgress,
+  useMemberTrainer,
+  useMemberWorkouts
+} from "../../hooks/useMember";
+import { useAuthStore } from "../../store/useAuthStore";
 import { getApiErrorMessage } from "../../services/api/client";
 import { useAppTheme } from "../../theme/AppThemeProvider";
 import { shadows, typography } from "../../theme/theme";
@@ -59,7 +71,18 @@ function durationText(minutes: number) {
 
 export function useMemberWorkoutScreenPresentation() {
   const query = useMemberWorkouts();
+  const classesQuery = useMemberClasses();
+  const bookClass = useBookClass();
+  const cancelClass = useCancelClass();
+  const completeWorkout = useCompleteWorkout();
+  const activityQuery = useMemberActivity();
+  const progressQuery = useMemberProgress();
+  const profileQuery = useMemberProfile();
+  const notificationsQuery = useMemberNotifications(true);
+  const trainerQuery = useMemberTrainer();
+  const user = useAuthStore((state) => state.user);
   const navigation = useNavigation<any>();
+  const route = useRoute<any>();
   const { colors } = useAppTheme();
   const { width } = useWindowDimensions();
   const compact = width < 760;
@@ -67,11 +90,15 @@ export function useMemberWorkoutScreenPresentation() {
   const [filter, setFilter] = useState<Filter>("all");
   const [recent, setRecent] = useState(true);
   const workouts = query.data ?? [];
+  const classes = classesQuery.data ?? [];
+  const progressLogs = progressQuery.data ?? [];
+  const unreadNotifications = notificationsQuery.data ?? [];
+  const trainer = trainerQuery.data ?? null;
 
   const completed = workouts.reduce((sum, item) => sum + (item.completed_workouts ?? 0), 0);
   const consistency = workouts.length ? Math.round(workouts.reduce((sum, item) => sum + (item.weekly_consistency ?? 0), 0) / workouts.length) : 0;
-  const calories = workouts.reduce((sum, item) => sum + Math.max(1, item.completed_workouts ?? 0) * 180, 0);
-  const duration = workouts.reduce((sum, item) => sum + Math.max(1, item.sessions?.length ?? 0) * 45, 0);
+  const calories = workouts.reduce((sum, item) => sum + (item.completed_workouts ?? 0) * 180, 0);
+  const duration = workouts.reduce((sum, item) => sum + (item.completed_workouts ?? 0) * 45, 0);
   const visible = useMemo(() => {
     const items = filter === "all" ? workouts : workouts.filter((item) => statusOf(item) === filter);
     return [...items].sort((a, b) => {
@@ -81,7 +108,45 @@ export function useMemberWorkoutScreenPresentation() {
     });
   }, [filter, recent, workouts]);
 
-  return { kind: "view1" as const, props: { styles, query, colors, Metric, completed, consistency, calories, durationText, duration, setFilter, filter, navigation, ui, setRecent, recent, State, visible, WorkoutCard, compact, workouts, Button } };
+  return {
+    kind: "view1" as const,
+    props: {
+      styles,
+      query,
+      classesQuery,
+      classes,
+      bookClass,
+      cancelClass,
+      completeWorkout,
+      activity: activityQuery.data,
+      progressLogs,
+      profile: profileQuery.data,
+      unreadNotifications,
+      trainer,
+      user,
+      authUid: user?.id ?? null,
+      routeParams: route?.params,
+      colors,
+      Metric,
+      completed,
+      consistency,
+      calories,
+      durationText,
+      duration,
+      setFilter,
+      filter,
+      navigation,
+      ui,
+      setRecent,
+      recent,
+      State,
+      visible,
+      WorkoutCard,
+      compact,
+      workouts,
+      Button
+    }
+  };
 }
 
 export function MemberWorkoutScreen(...args: Parameters<typeof useMemberWorkoutScreenPresentation>): React.JSX.Element {

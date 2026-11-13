@@ -16,10 +16,12 @@ import { LoginScreen } from "../screens/auth/LoginScreen";
 import { InvitationSignUpScreen } from "../screens/auth/InvitationSignUpScreen";
 import { AccountRecoveryScreen } from "../screens/auth/AccountRecoveryScreen";
 import { RoleDashboardScreen } from "../screens/saas/RoleDashboardScreen";
+import { RatingsFeedbackScreen } from "../screens/saas/RatingsFeedbackScreen";
 import { ManageGymsScreen } from "../screens/saas/ManageGymsScreen";
 import { CreateGymAdminScreen } from "../screens/saas/CreateGymAdminScreen";
 import { InvitationManagementScreen } from "../screens/saas/InvitationManagementScreen";
 import { MemberListScreen } from "../screens/saas/MemberListScreen";
+import { ExistingMemberClaimsScreen } from "../screens/saas/ExistingMemberClaimsScreen";
 import { MemberFormScreen } from "../screens/saas/MemberFormScreen";
 import { MemberProfileScreen as AdminMemberProfileScreen } from "../screens/saas/MemberProfileScreen";
 import { StaffScreen } from "../screens/saas/StaffScreen";
@@ -42,7 +44,7 @@ import { AccessDeniedScreen } from "../screens/saas/AccessDeniedScreen";
 import { MemberDashboardScreen } from "../screens/member/MemberDashboardScreen";
 import { MemberProfileScreen } from "../screens/member/MemberProfileScreen";
 import { MemberMembershipScreen } from "../screens/member/MemberMembershipScreen";
-import { MemberPaymentsScreen } from "../screens/member/MemberPaymentsScreen";
+
 import { MemberAttendanceScreen } from "../screens/member/MemberAttendanceScreen";
 import { MemberWorkoutScreen } from "../screens/member/MemberWorkoutScreen";
 import { MemberWorkoutDetailScreen } from "../screens/member/MemberWorkoutDetailScreen";
@@ -74,6 +76,7 @@ const memberTabNames: Array<keyof MemberTabParamList> = [
   "MemberHome",
   "MemberAttendance",
   "MemberWorkout",
+  "MemberMealPlan",
   "MemberProgress",
   "MemberProfileHome"
 ];
@@ -133,13 +136,16 @@ function MainTabs(...args: Parameters<typeof useMainTabsPresentation>): React.JS
 
 function getMemberTabIcon(routeName: keyof MemberTabParamList, focused: boolean): TabIconName {
   if (routeName === "MemberHome") {
-    return focused ? "speedometer" : "speedometer-outline";
+    return focused ? "pulse" : "pulse-outline";
   }
   if (routeName === "MemberProfileHome") {
-    return focused ? "id-card" : "id-card-outline";
+    return focused ? "person" : "person-outline";
+  }
+  if (routeName === "MemberMealPlan") {
+    return focused ? "nutrition" : "nutrition-outline";
   }
   if (routeName === "MemberAttendance") {
-    return focused ? "walk" : "walk-outline";
+    return focused ? "qr-code" : "qr-code-outline";
   }
   if (routeName === "MemberWorkout") {
     return focused ? "barbell" : "barbell-outline";
@@ -154,9 +160,11 @@ export function useMemberTabsNavigatorPresentation({ onActiveRouteChange }: { on
   const { colors } = useAppTheme();
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
+  const user = useAuthStore((state) => state.user);
+  const authUid = user?.id ?? null;
   const styles = useMemo(() => createMemberTabStyles(colors, width, insets.bottom), [colors, insets.bottom, width]);
 
-  return { kind: "view1" as const, props: { MemberTabs, width, onActiveRouteChange, memberTabNames, colors, styles, getMemberTabIcon } };
+  return { kind: "view1" as const, props: { MemberTabs, width, onActiveRouteChange, memberTabNames, colors, styles, getMemberTabIcon, user, authUid } };
 }
 
 function MemberTabsNavigator(...args: Parameters<typeof useMemberTabsNavigatorPresentation>): React.JSX.Element {
@@ -170,8 +178,10 @@ function withMemberDesktopLayout(Component: ComponentType<any>) {
 }
 
 export function useMemberAppTabsScreenPresentation({ route }: any) {
-  const [activeTab, setActiveTab] = useState<keyof MemberTabParamList>("MemberHome");
   const requestedTab = route?.params?.screen as keyof MemberTabParamList | undefined;
+  const [activeTab, setActiveTab] = useState<keyof MemberTabParamList>(() =>
+    requestedTab && memberTabNames.includes(requestedTab) ? requestedTab : "MemberHome",
+  );
 
   useEffect(() => {
     if (requestedTab && memberTabNames.includes(requestedTab)) {
@@ -186,7 +196,7 @@ function MemberAppTabsScreen(...args: Parameters<typeof useMemberAppTabsScreenPr
   return <MemberAppTabsScreenView model={useMemberAppTabsScreenPresentation(...args)} />;
 }
 const MemberMembershipLayoutScreen = withMemberDesktopLayout(MemberMembershipScreen);
-const MemberPaymentsLayoutScreen = withMemberDesktopLayout(MemberPaymentsScreen);
+
 const MemberWorkoutLayoutScreen = withMemberDesktopLayout(MemberWorkoutScreen);
 const MemberWorkoutDetailLayoutScreen = withMemberDesktopLayout(MemberWorkoutDetailScreen);
 const MemberExerciseDetailLayoutScreen = withMemberDesktopLayout(MemberExerciseDetailScreen);
@@ -228,11 +238,11 @@ function withOwnerPanelLayout(Component: ComponentType<any>, activeLabel: string
       );
     }
     if (role === "trainer") {
-      return <PulseDashboardLayout activeLabel={activeLabel} roleLabel="Trainer"><Component {...props} /></PulseDashboardLayout>;
+      return <PulseDashboardLayout activeLabel={activeLabel} roleLabel="Trainer" hideDefaultHeader={activeLabel === "Members" || activeLabel === "Trainers" || activeLabel === "Staff" || activeLabel === "Profile" || activeLabel === "Account" || activeLabel === "Workouts"}><Component {...props} /></PulseDashboardLayout>;
     }
     if (role !== "gym_owner" && role !== "sub_admin" && role !== "receptionist") return <Component {...props} />;
     const ownerActiveLabel = activeLabel === "Staff" ? "Receptionists" : activeLabel === "Diets" ? "Nutrition" : activeLabel;
-    return <PulseDashboardLayout activeLabel={ownerActiveLabel} roleLabel={role === "receptionist" ? "Reception" : "Gym Owner"}><Component {...props} /></PulseDashboardLayout>;
+    return <PulseDashboardLayout activeLabel={ownerActiveLabel} roleLabel={role === "receptionist" ? "Reception" : "Gym Owner"} hideDefaultHeader={ownerActiveLabel === "Members" || ownerActiveLabel === "Trainers" || ownerActiveLabel === "Staff" || ownerActiveLabel === "Receptionists" || ownerActiveLabel === "Invitations" || ownerActiveLabel === "Profile" || ownerActiveLabel === "Account" || ownerActiveLabel === "Settings" || ownerActiveLabel === "Attendance" || ownerActiveLabel === "Pass" || ownerActiveLabel === "Workflows" || ownerActiveLabel === "Workouts" || ownerActiveLabel === "Ratings & Feedback" || ownerActiveLabel === "Reports"}><Component {...props} /></PulseDashboardLayout>;
   };
 }
 
@@ -243,6 +253,7 @@ const OwnerAttendanceScreen = withOwnerPanelLayout(AttendanceScreen, "Attendance
 const OwnerWorkoutPlansScreen = withOwnerPanelLayout(WorkoutPlansScreen, "Workouts");
 const OwnerPaymentsScreen = withOwnerPanelLayout(PaymentScreen, "Payments");
 const OwnerReportsScreen = withOwnerPanelLayout(ReportsScreen, "Reports");
+const OwnerRatingsFeedbackScreen = withOwnerPanelLayout(RatingsFeedbackScreen, "Ratings & Feedback");
 const RoleInvitationsScreen = withOwnerPanelLayout(InvitationManagementScreen, "Invitations");
 const SuperAdminSettingsScreen = withOwnerPanelLayout(SettingsScreen, "Settings");
 const SuperAdminManageGymsScreen = withOwnerPanelLayout(ManageGymsScreen, "Gyms");
@@ -256,7 +267,8 @@ export function useOwnerSettingsScreenPresentation(props: any) {
 function OwnerSettingsScreen(...args: Parameters<typeof useOwnerSettingsScreenPresentation>): React.JSX.Element {
   return <OwnerSettingsScreenView model={useOwnerSettingsScreenPresentation(...args)} />;
 }
-const OwnerProfileScreen = withOwnerPanelLayout(ProfileScreen, "Profile");
+const OwnerProfileScreen = withOwnerPanelLayout(ProfileScreen, "Account");
+const OwnerMemberClaimsScreen = withOwnerPanelLayout(ExistingMemberClaimsScreen, "Claims");
 const OwnerMemberFormScreen = withOwnerPanelLayout(MemberFormScreen, "Members");
 const OwnerMemberProfileScreen = withOwnerPanelLayout(AdminMemberProfileScreen, "Members");
 const OwnerFeatureModuleScreen = withOwnerPanelLayout(FeaturePlaceholderScreen, "");
@@ -309,7 +321,7 @@ export function useRootNavigatorPresentation() {
     }
   };
 
-  return { kind: "view1" as const, props: { navTheme, Stack, navigationState, user, isMember, MemberAppTabsScreen, MemberMembershipLayoutScreen, MemberPaymentsLayoutScreen, MemberWorkoutLayoutScreen, MemberWorkoutDetailLayoutScreen, MemberExerciseDetailLayoutScreen, MemberWorkoutSessionLayoutScreen, MemberMealPlanLayoutScreen, MemberTrainerLayoutScreen, MemberClassesLayoutScreen, MemberNotificationsLayoutScreen, MemberGoalsLayoutScreen, MemberRewardsLayoutScreen, MemberSupportLayoutScreen, MemberSettingsLayoutScreen, MainTabs, SuperAdminManageGymsScreen, SuperAdminCreateGymAdminScreen, RoleInvitationsScreen, OwnerStaffScreen, OwnerMembersScreen, OwnerMemberFormScreen, OwnerMemberProfileScreen, OwnerAttendanceScreen, OwnerPaymentsScreen, OwnerTrainersScreen, OwnerWorkoutPlansScreen, RoleDietPlansScreen, OwnerReportsScreen, RoleNotificationsScreen, OwnerSettingsScreen, OwnerProfileScreen, RoleAIWorkoutGeneratorScreen, RoleWorkoutPlanScreen, RoleExerciseDetailScreen, RoleFeaturePlaceholderScreen } };
+  return { kind: "view1" as const, props: { navTheme, Stack, navigationState, user, isMember, MemberAppTabsScreen, MemberMembershipLayoutScreen, MemberWorkoutLayoutScreen, MemberWorkoutDetailLayoutScreen, MemberExerciseDetailLayoutScreen, MemberWorkoutSessionLayoutScreen, MemberMealPlanLayoutScreen, MemberTrainerLayoutScreen, MemberClassesLayoutScreen, MemberNotificationsLayoutScreen, MemberGoalsLayoutScreen, MemberRewardsLayoutScreen, MemberSupportLayoutScreen, MemberSettingsLayoutScreen, MainTabs, SuperAdminManageGymsScreen, SuperAdminCreateGymAdminScreen, RoleInvitationsScreen, OwnerStaffScreen, OwnerMembersScreen, OwnerMemberClaimsScreen, OwnerMemberFormScreen, OwnerMemberProfileScreen, OwnerAttendanceScreen, OwnerPaymentsScreen, OwnerTrainersScreen, OwnerWorkoutPlansScreen, RoleDietPlansScreen, OwnerReportsScreen, OwnerRatingsFeedbackScreen, RoleNotificationsScreen, OwnerSettingsScreen, OwnerProfileScreen, RoleAIWorkoutGeneratorScreen, RoleWorkoutPlanScreen, RoleExerciseDetailScreen, RoleFeaturePlaceholderScreen } };
 }
 
 export function RootNavigator(...args: Parameters<typeof useRootNavigatorPresentation>): React.JSX.Element {

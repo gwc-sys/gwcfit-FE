@@ -1,12 +1,13 @@
 import type * as React from "react";
 import { MemberWorkoutDetailScreenView, ActionView, InfoView, PanelView, SummaryView, ExercisePanelView, TipsView, TipView, ProgressChartView } from "./MemberWorkoutDetailScreen.presentation";
-import { s } from "./MemberWorkoutDetailScreen.styles";
+import { s, createStyles } from "./MemberWorkoutDetailScreen.styles";
 import { showAlert } from "../../utils/appAlert";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { useMemo, useState } from "react";
 import { ActivityIndicator, Image, Pressable, RefreshControl, StyleSheet, Text, useWindowDimensions, View } from "react-native";
 import Svg, { Circle, Line, Polyline, Text as SvgText } from "react-native-svg";
+import { useAppTheme } from "../../theme/AppThemeProvider";
 
 import { Screen } from "../../components/Screen";
 import { genderExerciseLibrary, type GenderExerciseAsset } from "../../data/genderExerciseLibrary";
@@ -56,7 +57,9 @@ function resolveExerciseImage(gender: string, exerciseId: string, name: string) 
 }
 
 export function exercisesOf(workout: MemberWorkout): ExerciseData[] {
-  return (workout.sessions?.length ? workout.sessions : workout.weekly_plan ?? []).map((session, index) => {
+  const todayObj = workout.today_workout as Record<string, unknown> | null | undefined;
+  const rawList = Array.isArray(todayObj?.exercises) && todayObj.exercises.length ? todayObj.exercises : workout.sessions?.length ? workout.sessions : workout.weekly_plan ?? [];
+  return rawList.map((session, index) => {
     const name = value(session, ["name", "title", "exercise_name"], `Exercise ${index + 1}`);
     const gender = value(session, ["gender"]);
     const exerciseId = value(session, ["exerciseId", "exercise_id", "slug"]);
@@ -79,13 +82,15 @@ function planStatus(workout: MemberWorkout) {
 }
 
 export function useMemberWorkoutDetailScreenPresentation() {
+  const { colors } = useAppTheme();
+  const s = useMemo(() => createStyles(colors), [colors]);
   const route = useRoute<any>();
   const navigation = useNavigation<any>();
   const query = useMemberWorkouts();
   const { width } = useWindowDimensions();
   const stacked = width < 1080;
   const [tab, setTab] = useState<Tab>("plan");
-  const workout = query.data?.find((item) => item.workout_plan_uuid === route.params?.workoutPlanUuid);
+  const workout = query.data?.find((item) => item.workout_plan_uuid === route.params?.workoutPlanUuid) ?? query.data?.[0];
   const exercises = useMemo(() => workout ? exercisesOf(workout) : [], [workout]);
 
   if (query.isLoading) return { kind: "view1" as const, props: { s } };

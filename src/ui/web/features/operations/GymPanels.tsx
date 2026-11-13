@@ -59,7 +59,7 @@ export function GymManagementPanelView({ model }: { model: ReturnType<typeof use
           icon="checkmark-circle-outline"
           label="Active gyms"
           value={String(activeGyms)}
-          color="#46C77A"
+          color="#34C759"
           styles={styles}
           onPress={() => setGymStatusFilter("active")}
           active={gymStatusFilter === "active"}
@@ -68,7 +68,7 @@ export function GymManagementPanelView({ model }: { model: ReturnType<typeof use
           icon="pause-circle-outline"
           label="Suspended gyms"
           value={String(suspendedGyms)}
-          color="#F0B429"
+          color="#E91E63"
           styles={styles}
           onPress={() => setGymStatusFilter("suspended")}
           active={gymStatusFilter === "suspended"}
@@ -77,7 +77,7 @@ export function GymManagementPanelView({ model }: { model: ReturnType<typeof use
           icon="layers-outline"
           label="Other status"
           value={String(otherGyms)}
-          color="#6EA8FE"
+          color="#007AFF"
           styles={styles}
           onPress={() => setGymStatusFilter("other")}
           active={gymStatusFilter === "other"}
@@ -247,7 +247,7 @@ export function GymManagementPanelView({ model }: { model: ReturnType<typeof use
           refreshControl={
             <RefreshControl
               refreshing={gymsQuery.isFetching}
-              onRefresh={() => gymsQuery.refetch()}
+              onRefresh={() => { void gymsQuery.refetch(); }}
             />
           }
           renderItem={({ item }) => (
@@ -455,25 +455,25 @@ export function GymDetailsPanelView({ model }: { model: ReturnType<typeof useGym
           label="Active members"
           value={String(activeMembers.length)}
           icon="fitness-outline"
-          color="#46C77A"
+          color="#34C759"
         />
         <DetailMetric
           label="Subscriptions"
           value={String(plansQuery.data?.length ?? 0)}
           icon="card-outline"
-          color="#6EA8FE"
+          color="#007AFF"
         />
         <DetailMetric
           label="Expiring in 10 days"
           value={String(expiringSoon.length)}
           icon="notifications-outline"
-          color="#F0B429"
+          color="#E91E63"
         />
       </View>
 
       {expiringSoon.length > 0 ? (
         <View style={styles.alert}>
-          <Ionicons name="alert-circle-outline" size={21} color="#F0B429" />
+          <Ionicons name="alert-circle-outline" size={21} color="#E91E63" />
           <View style={styles.alertCopy}>
             <Text style={styles.alertTitle}>Renewal reminders</Text>
             <Text style={styles.alertText}>
@@ -615,7 +615,7 @@ export function GymDetailsPanelView({ model }: { model: ReturnType<typeof useGym
             <Text style={styles.legendText}>Completed</Text>
             <View style={[styles.legendDot, styles.remainingDot]} />
             <Text style={styles.legendText}>Remaining</Text>
-            <View style={[styles.legendDot, { backgroundColor: "#FF453A" }]} /><Text style={styles.legendText}>Expiry</Text>
+            <View style={[styles.legendDot, { backgroundColor: "#FF3B30" }]} /><Text style={styles.legendText}>Expiry</Text>
           </View>
         </View>
         <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 12, marginTop: 12 }}>
@@ -636,10 +636,10 @@ export function GymDetailsPanelView({ model }: { model: ReturnType<typeof useGym
             const inPlan = start != null && expiry != null && date >= start && date <= expiry;
             const completed = inPlan && date < today;
             const remaining = inPlan && !completed && !isExpiry;
-            const tone = isExpiry ? "#FF453A" : completed ? "#FFD60A" : remaining ? "#30D158" : null;
-            return <View key={date.toISOString()} accessibilityLabel={`${date.toLocaleDateString("en-IN")}, ${isExpiry ? "Plan expires" : completed ? "Completed" : remaining ? "Remaining" : "Outside plan"}${isToday ? ", Today" : ""}`} style={{ width: 88, height: 162, borderRadius: 48, backgroundColor: isToday ? "#0A84FF" : "#1C1C1E", alignItems: "center", justifyContent: "space-between", paddingTop: 22, paddingBottom: 10 }}>
+            const tone = isExpiry ? "#FF3B30" : completed ? "#E91E63" : remaining ? "#34C759" : null;
+            return <View key={date.toISOString()} accessibilityLabel={`${date.toLocaleDateString("en-IN")}, ${isExpiry ? "Plan expires" : completed ? "Completed" : remaining ? "Remaining" : "Outside plan"}${isToday ? ", Today" : ""}`} style={{ width: 88, height: 162, borderRadius: 48, backgroundColor: isToday ? "#E91E63" : "#1C1C1E", alignItems: "center", justifyContent: "space-between", paddingTop: 22, paddingBottom: 10 }}>
               <Text style={{ color: "#FFFFFF", fontSize: 20 }}>{date.toLocaleDateString("en-IN", { weekday: "short" })}</Text>
-              <View style={{ width: 70, height: 70, borderRadius: 35, backgroundColor: tone ?? (isToday ? "#FFFFFF" : "#2C2C2E"), alignItems: "center", justifyContent: "center" }}><Text style={{ color: tone ? isExpiry ? "#FFFFFF" : "#000000" : isToday ? "#0A84FF" : "#FFFFFF", fontSize: 27, fontWeight: "500" }}>{date.getDate()}</Text></View>
+              <View style={{ width: 70, height: 70, borderRadius: 35, backgroundColor: tone ?? (isToday ? "#FFFFFF" : "#1C1C1E"), alignItems: "center", justifyContent: "center" }}><Text style={{ color: tone ? isExpiry ? "#FFFFFF" : "#000000" : isToday ? "#E91E63" : "#FFFFFF", fontSize: 27, fontWeight: "500" }}>{date.getDate()}</Text></View>
               <Text style={{ color: "#FFFFFF", fontSize: 10 }}>{isExpiry ? "Expires" : isToday ? "Today" : completed ? "Completed" : remaining ? "Remaining" : ""}</Text>
             </View>;
           })}

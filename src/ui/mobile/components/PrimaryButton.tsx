@@ -39,7 +39,7 @@ export function PrimaryButton({
   const styles = useMemo(() => createStyles(colors), [colors]);
   const text = label ?? title ?? "";
   const compact = width < 390;
-  const buttonHeight = compact ? 50 : 54;
+  const buttonHeight = compact ? 48 : 52;
   const buttonPadding = compact ? 16 : 20;
   const labelSize = 17;
   const iconColor = disabled ? colors.muted : foregroundColor ?? (variant === "ghost" ? colors.primary : variant === "secondary" ? colors.ink : colors.white);
@@ -106,7 +106,7 @@ const createStyles = (colors: ThemeColors) =>
   base: {
     minHeight: 54,
     minWidth: controlMetrics.minimumTouchSize,
-    borderRadius: radius.md,
+    borderRadius: radius.sm,
     borderWidth: 1,
     borderColor: "transparent",
     alignItems: "center",

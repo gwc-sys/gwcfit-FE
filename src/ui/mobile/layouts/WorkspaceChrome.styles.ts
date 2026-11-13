@@ -6,7 +6,7 @@ export const createWorkspaceChromeStyles = (c: ThemeColors, width: number) => {
   const gutter = width < 380 ? 16 : width >= 768 ? 28 : 20;
   return StyleSheet.create({
     root: { backgroundColor: c.background },
-    dashboardContent: { paddingBottom: 32, flexGrow: 1 },
+    dashboardContent: { paddingBottom: 130, flexGrow: 1 },
     pageContent: { flex: 1 },
     navigationBar: { minHeight: 60, flexDirection: "row", alignItems: "center", gap: 10, paddingHorizontal: gutter, paddingVertical: 10, borderBottomWidth: 0, borderBottomColor: c.borderMuted },
     brand: { flex: 1, flexDirection: "row", alignItems: "center", gap: 10, minWidth: 0 },
@@ -18,6 +18,7 @@ export const createWorkspaceChromeStyles = (c: ThemeColors, width: number) => {
     notificationDot: { position: "absolute", top: 8, right: 9, width: 7, height: 7, borderRadius: 4, backgroundColor: c.danger, borderWidth: 1, borderColor: c.surface },
     accountButton: { width: controlMetrics.minimumTouchSize, height: undefined, borderRadius: 22, backgroundColor: c.primarySoft, alignItems: "center", justifyContent: "center", minHeight: controlMetrics.minimumTouchSize },
     accountInitials: { color: c.primary, fontSize: 14, fontWeight: "700" },
+    ownerAccountTrigger: { backgroundColor: c.surface, borderWidth: 1, borderColor: c.border },
     overview: { paddingHorizontal: gutter, paddingTop: 26, paddingBottom: 22, gap: 5 },
     eyebrow: { color: c.muted, fontSize: 11, lineHeight: 17, letterSpacing: 1.5, fontWeight: "600" },
     title: { fontSize: getResponsiveFontSize(width, 28), lineHeight: getResponsiveFontSize(width, 34), fontWeight: "700", letterSpacing: -1, color: c.ink },

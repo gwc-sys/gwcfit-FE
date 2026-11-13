@@ -44,94 +44,96 @@ export const LIGHT_UI: DashboardPalette = {
   background: "#F2F2F7",
   surface: "#FFFFFF",
   panel: "#FFFFFF",
-  border: "#E5E5EA",
-  borderStrong: "#D1D1D6",
-  text: "#1D1D1F",
-  muted: "#6E6E73",
-  subtle: "#6E6E73",
-  navLabel: "#3A3A3C",
-  primary: "#0066CC",
-  primaryDark: "#0066CC",
+  // Low-contrast semantic separators keep cards grouped without drawing boxes
+  // around every surface. The alpha also lets them adapt to the surface below.
+  border: "transparent",
+  borderStrong: "rgba(0, 0, 0, 0.18)",
+  text: "#000000",
+  muted: "rgba(0, 0, 0, 0.60)",
+  subtle: "rgba(0, 0, 0, 0.40)",
+  navLabel: "rgba(0, 0, 0, 0.65)",
+  primary: "#E91E63",
+  primaryDark: "#E91E63",
   onPrimary: "#FFFFFF",
-  success: "#1E7835",
-  danger: "#C9342A",
-  warning: "#F97316",
-  cyan: "#14B8A6",
-  blue: "#3B82F6",
-  pink: "#EC4899",
-  softPurple: "#EAF2FF",
-  softGreen: "#E9FAEF",
-  softBlue: "#EAF2FF",
-  softPink: "#FDEAF5",
-  softOrange: "#FFF2E8",
-  softCyan: "#E7FAF7",
-  premiumBackground: "#EAF2FF",
-  premiumTitle: "#0066CC",
-  scheduleTime: "#27364F",
-  upcomingPill: "#EEF4FF",
-  upcomingPillText: "#2563EB",
-  ringTrack: "#E5E5EA",
-  progressTrack: "#E5E5EA",
-  calorieTrack: "#ECEEF5",
-  shadowColor: "#0F172A"
+  success: "#34C759",
+  danger: "#FF3B30",
+  warning: "#E91E63",
+  cyan: "#007AFF",
+  blue: "#007AFF",
+  pink: "#E91E63",
+  softPurple: "rgba(233,30,99,0.08)",
+  softGreen: "rgba(52,199,89,0.08)",
+  softBlue: "rgba(0,122,255,0.08)",
+  softPink: "rgba(233,30,99,0.08)",
+  softOrange: "rgba(233, 30, 99,0.08)",
+  softCyan: "rgba(0, 122, 255,0.08)",
+  premiumBackground: "rgba(233,30,99,0.06)",
+  premiumTitle: "#E91E63",
+  scheduleTime: "#007AFF",
+  upcomingPill: "rgba(0,122,255,0.10)",
+  upcomingPillText: "#007AFF",
+  ringTrack: "rgba(0, 0, 0, 0.08)",
+  progressTrack: "rgba(0, 0, 0, 0.08)",
+  calorieTrack: "rgba(0, 0, 0, 0.08)",
+  shadowColor: "rgba(0, 0, 0, 0.06)"
 };
 
 export const DARK_UI: DashboardPalette = {
   background: "#000000",
   surface: "#1C1C1E",
   panel: "#1C1C1E",
-  border: "#38383A",
-  borderStrong: "#48484A",
+  border: "transparent",
+  borderStrong: "rgba(255, 255, 255, 0.12)",
   text: "#FFFFFF",
-  muted: "#A1A1A8",
-  subtle: "#8E8E93",
-  navLabel: "#D1D1D6",
-  primary: "#0A84FF",
-  primaryDark: "#64D2FF",
+  muted: "rgba(255, 255, 255, 0.65)",
+  subtle: "rgba(255, 255, 255, 0.45)",
+  navLabel: "rgba(255, 255, 255, 0.65)",
+  primary: "#E91E63",
+  primaryDark: "#E91E63",
   onPrimary: "#FFFFFF",
-  success: "#30D158",
-  danger: "#FF453A",
-  warning: "#FF9F0A",
-  cyan: "#2DD4BF",
-  blue: "#0A84FF",
-  pink: "#F472B6",
-  softPurple: "rgba(0,122,255,0.18)",
-  softGreen: "rgba(34,197,94,0.16)",
-  softBlue: "rgba(96,165,250,0.16)",
-  softPink: "rgba(244,114,182,0.16)",
-  softOrange: "rgba(251,146,60,0.16)",
-  softCyan: "rgba(45,212,191,0.16)",
-  premiumBackground: "rgba(0,122,255,0.12)",
-  premiumTitle: "#64D2FF",
-  scheduleTime: "#CBD5E1",
-  upcomingPill: "rgba(37,99,235,0.20)",
-  upcomingPillText: "#93C5FD",
-  ringTrack: "#38383A",
-  progressTrack: "#38383A",
-  calorieTrack: "rgba(148,163,184,0.18)",
+  success: "#34C759",
+  danger: "#FF3B30",
+  warning: "#E91E63",
+  cyan: "#007AFF",
+  blue: "#007AFF",
+  pink: "#E91E63",
+  softPurple: "rgba(233,30,99,0.18)",
+  softGreen: "rgba(52,199,89,0.16)",
+  softBlue: "rgba(0,122,255,0.16)",
+  softPink: "rgba(233,30,99,0.16)",
+  softOrange: "rgba(233, 30, 99,0.16)",
+  softCyan: "rgba(0, 122, 255,0.16)",
+  premiumBackground: "rgba(233,30,99,0.12)",
+  premiumTitle: "#E91E63",
+  scheduleTime: "#007AFF",
+  upcomingPill: "rgba(0,122,255,0.20)",
+  upcomingPillText: "#007AFF",
+  ringTrack: "rgba(233,30,99,0.12)",
+  progressTrack: "#1C1C1E",
+  calorieTrack: "#1C1C1E",
   shadowColor: "#000000"
 };
 
 function createCardShadow(ui: DashboardPalette) {
   return Platform.OS === "web"
-    ? { boxShadow: "0 18px 50px rgba(15,23,42,0.08)" }
+    ? { boxShadow: "none" }
     : {
         shadowColor: ui.shadowColor,
         shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.03,
-        shadowRadius: 8,
+        shadowOpacity: 0,
+        shadowRadius: 0,
         elevation: 0
       };
 }
 
 function createSoftShadow(ui: DashboardPalette) {
   return Platform.OS === "web"
-    ? { boxShadow: "0 12px 26px rgba(15,23,42,0.06)" }
+    ? { boxShadow: "none" }
     : {
         shadowColor: ui.shadowColor,
         shadowOffset: { width: 0, height: 8 },
-        shadowOpacity: 0.03,
-        shadowRadius: 16,
+        shadowOpacity: 0,
+        shadowRadius: 0,
         elevation: 0
       };
 }
@@ -362,7 +364,7 @@ export function createStyles(ui: DashboardPalette) {
       alignItems: "stretch"
     },
     panel: {
-      borderRadius: 0,
+      borderRadius: 12,
       borderWidth: 0,
       borderColor: ui.border,
       backgroundColor: "transparent",
@@ -410,7 +412,7 @@ export function createStyles(ui: DashboardPalette) {
       gap: 8,
       marginTop: 8,
     },
-    quickAction: { flexGrow: 1, flexBasis: "20%", minWidth: 0, minHeight: 92, flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 10, borderRadius: 14, borderWidth: 1, borderColor: ui.border, backgroundColor: ui.surface, padding: 8 },
+    quickAction: { flexGrow: 1, flexBasis: "20%", minWidth: 0, minHeight: 88, flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, borderRadius: 12, borderWidth: 1, borderColor: ui.border, backgroundColor: ui.surface, padding: 8 },
     quickIconBox: {
       width: 30,
       height: 30,
@@ -754,6 +756,57 @@ export function createStyles(ui: DashboardPalette) {
       color: ui.muted,
       fontSize: 12,
       lineHeight: 16
+    },
+    achievementStatusPill: {
+      borderRadius: 10,
+      paddingHorizontal: 8,
+      paddingVertical: 3,
+      backgroundColor: "rgba(255, 255, 255, 0.06)"
+    },
+    achievementStatusText: {
+      color: ui.muted,
+      fontSize: 11,
+      lineHeight: 14,
+      fontWeight: "500",
+      textTransform: "capitalize"
+    },
+    workoutDiscoveryCard: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      padding: 12,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: "rgba(0, 122, 255, 0.18)",
+      backgroundColor: "rgba(0, 122, 255, 0.06)",
+      marginTop: 2
+    },
+    workoutDiscoveryText: {
+      flex: 1,
+      color: ui.primary,
+      fontSize: 12,
+      lineHeight: 16,
+      fontWeight: "600",
+      marginLeft: 8
+    },
+    awardsFooter: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      padding: 12,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: ui.border,
+      backgroundColor: "rgba(255, 255, 255, 0.02)",
+      marginTop: 2
+    },
+    awardsFooterText: {
+      flex: 1,
+      color: ui.muted,
+      fontSize: 12,
+      lineHeight: 16,
+      fontWeight: "500",
+      marginLeft: 8
     },
     pressed: {
       opacity: 0.78,

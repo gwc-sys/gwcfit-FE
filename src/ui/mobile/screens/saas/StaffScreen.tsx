@@ -3,7 +3,8 @@ import { Pressable } from "../../components/NativePressable";
 import { controlMetrics } from "../../theme/theme";
 import { showAlert } from "../../../../utils/appAlert";
 import { Ionicons } from "@expo/vector-icons";
-import { FlatList, RefreshControl, Text, TextInput, View } from "react-native";
+import { FlatList, RefreshControl, ScrollView, Text, TextInput, View } from "react-native";
+import { useResponsiveLayout } from "../../hooks/useResponsiveLayout";
 import { DataState } from "../../components/DataState";
 import { FormTextField } from "../../components/FormTextField";
 import { PrimaryButton } from "../../components/PrimaryButton";
@@ -11,10 +12,12 @@ import { Screen } from "../../components/Screen";
 import { StatusBadge } from "../../components/StatusBadge";
 import { SurfacePanel } from "../../components/SurfacePanel";
 import { getApiErrorMessage } from "../../../../services/api/client";
-import type { UserStatus } from "../../../../types/saas";
+import type { ManagedUser, UserStatus } from "../../../../types/saas";
 import { relatedDisplayName } from "../../../../utils/displayNames";
 import { formatDate, formatRole, initials } from "../../../../utils/formatters";
 import { AccessDeniedScreen } from "../../../../screens/saas/AccessDeniedScreen";
+import { referenceStaffStyles, createReferenceStaffStyles } from "../../styles/screens/saas/StaffScreen.styles";
+import { useNavigation } from "@react-navigation/native";
 import type * as React from "react";
 import type { useStaffScreenPresentation, useCountCardPresentation, useDetailPresentation, useUserRowPresentation } from "../../../../screens/saas/StaffScreen";
 
@@ -28,63 +31,127 @@ export function StaffScreenView({ model }: { model: ReturnType<typeof useStaffSc
     }
     case "view2": {
       const { styles, compact, usersQuery, countsQuery, isSuperAdmin, colors, beginCreate, CountCard, users, counts, platformRoleOptions, roleOptions, roleFilter, setRoleFilter, setSearch, search, showForm, editingUser, formErrors, setFormValues, formValues, user, createRoleOptions, gymsQuery, createUser, updateUser, isMutating, submitForm, closeForm, selectedUser, setSelectedUser, Detail, beginEdit, notice, deactivateUser, UserRow, confirmDeactivate, setShowForm , developerCount, gymOwnerCount } = model.props;
-      return ((
-    <Screen
-      scroll
-      keyboard
-      contentContainerStyle={[styles.screen, compact && styles.screenCompact]}
-      refreshControl={
-        <RefreshControl
-          refreshing={usersQuery.isFetching || countsQuery.isFetching}
-          onRefresh={() => {
-            usersQuery.refetch();
-            countsQuery.refetch();
-          }}
-        />
-      }
-    >
-      <View style={[styles.pageHeader, compact && styles.pageHeaderCompact]}>
-        <View style={{ width: "100%" }}><ScreenHeader title="Staff" subtitle={isSuperAdmin ? "Manage application developers and gym owners across the platform" : "Invite, manage and control staff for your gym"} /></View>
-        <View style={styles.headerActions}><Pressable accessibilityRole="button" style={styles.headerButton} onPress={() => showAlert("Export users", "User export is ready to connect to your backend export endpoint.")}><Ionicons name="download-outline" size={17} color={colors.ink} /><Text style={styles.headerButtonText}>Export</Text></Pressable><PrimaryButton title="Invite User" onPress={beginCreate} style={styles.addButton} /></View>
-      </View>
+      const { isSmallPhone, isLargeFont } = useResponsiveLayout();
+      const s = createReferenceStaffStyles(colors);
+      const navigation = useNavigation<any>();
+      const trainerCount = counts.trainer ?? users.filter((u) => u.role === "trainer").length;
+      const receptionistCount = counts.receptionist ?? users.filter((u) => u.role === "receptionist").length;
+      const subAdminCount = counts.sub_admin ?? users.filter((u) => u.role === "sub_admin").length;
+      const allCount = (counts.trainer || 0) + (counts.receptionist || 0) + (counts.sub_admin || 0) || users.length;
 
-      <View style={styles.metrics}>{isSuperAdmin ? <><CountCard label="Total Admins" value={users.length} icon="people-circle-outline" /><CountCard label="Application Developers" value={developerCount} icon="code-slash-outline" /><CountCard label="Gym Owners" value={gymOwnerCount} icon="business-outline" /></> : <><CountCard label="Total Staff" value={counts.trainer + counts.receptionist + counts.sub_admin} icon="people-circle-outline" /><CountCard label="Trainers" value={counts.trainer} icon="barbell-outline" /><CountCard label="Reception" value={counts.receptionist} icon="headset-outline" /><CountCard label="Sub Admins" value={counts.sub_admin} icon="shield-checkmark-outline" /></>}</View>
+      const staffToRender: ManagedUser[] = users;
 
-      <View style={styles.filterRow}>
-        {(isSuperAdmin ? platformRoleOptions : roleOptions).map((option) => {
-          const selected = roleFilter === option.value;
-          return (
+      return (
+        <Screen
+          scroll
+          keyboard
+          contentContainerStyle={s.screen}
+          refreshControl={
+            <RefreshControl
+              refreshing={usersQuery.isFetching || countsQuery.isFetching}
+              onRefresh={() => {
+                usersQuery.refetch();
+                countsQuery.refetch();
+              }}
+              tintColor={colors.primary}
+            />
+          }
+        >
+          {/* Header Row: Title & Subtitle on left, + Invite on right */}
+          <View style={s.headerRow}>
+            <View style={s.headerTitleContainer}>
+              <Text style={s.headerTitle}>Staff Directory</Text>
+              <Text style={s.headerSubtitle}>Invite & control gym personnel</Text>
+            </View>
+
             <Pressable
               accessibilityRole="button"
-              accessibilityState={{ selected }}
-              key={option.value}
-              onPress={() => setRoleFilter(option.value)}
-              style={({ pressed }) => [styles.filterPill, selected && styles.filterPillSelected, pressed && styles.pressed]}
+              accessibilityLabel="Invite staff"
+              onPress={() => navigation.navigate("Invitations")}
+              style={s.inviteButton}
             >
-              <Ionicons name={option.icon} size={17} color={selected ? colors.white : colors.muted} />
-              <Text style={[styles.filterText, selected && styles.filterTextSelected]}>{option.label}</Text>
+              <Ionicons name="add" size={18} color="#FFFFFF" />
+              <Text style={s.inviteButtonText}>Invite</Text>
             </Pressable>
-          );
-        })}
-      </View>
+          </View>
 
-      <View style={styles.searchWrap}>
-        <Ionicons name="search-outline" size={20} color={colors.muted} />
-        <TextInput
-          autoCapitalize="none"
-          maxLength={120}
-          onChangeText={setSearch}
-          placeholder="Search name, email, or phone"
-          placeholderTextColor={colors.subtle}
-          style={styles.searchInput}
-          value={search}
-        />
-        {search ? (
-          <Pressable accessibilityRole="button" onPress={() => setSearch("")} accessibilityLabel={"Clear search"} style={{ minWidth: controlMetrics.minimumTouchSize, minHeight: controlMetrics.minimumTouchSize, alignItems: "center", justifyContent: "center" }}>
-            <Ionicons name="close-circle" size={20} color={colors.muted} />
-          </Pressable>
-        ) : null}
-      </View>
+          {/* Filter Tabs Strip (Horizontal scrollable to prevent wrapping/clipping) */}
+          <View style={s.filterTabsContainer}>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{ flexDirection: "row", alignItems: "center", gap: 6 }}
+            >
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={`All (${allCount})`}
+                onPress={() => setRoleFilter("all")}
+                style={[s.filterTab, roleFilter === "all" && s.filterTabActive, { minWidth: 70, paddingHorizontal: 12 }]}
+              >
+                <Text style={[s.filterTabText, roleFilter === "all" && s.filterTabTextActive]}>
+                  All ({allCount})
+                </Text>
+              </Pressable>
+
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={`Trainers (${trainerCount})`}
+                onPress={() => setRoleFilter("trainer")}
+                style={[s.filterTab, roleFilter === "trainer" && s.filterTabActive, { minWidth: 90, paddingHorizontal: 12 }]}
+              >
+                <Text style={[s.filterTabText, roleFilter === "trainer" && s.filterTabTextActive]}>
+                  Trainers ({trainerCount})
+                </Text>
+              </Pressable>
+
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={`Reception (${receptionistCount})`}
+                onPress={() => setRoleFilter("receptionist")}
+                style={[s.filterTab, roleFilter === "receptionist" && s.filterTabActive, { minWidth: 96, paddingHorizontal: 12 }]}
+              >
+                <Text style={[s.filterTabText, roleFilter === "receptionist" && s.filterTabTextActive]}>
+                  Reception ({receptionistCount})
+                </Text>
+              </Pressable>
+
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={`Admins (${subAdminCount})`}
+                onPress={() => setRoleFilter("sub_admin")}
+                style={[s.filterTab, roleFilter === "sub_admin" && s.filterTabActive, { minWidth: 84, paddingHorizontal: 12 }]}
+              >
+                <Text style={[s.filterTabText, roleFilter === "sub_admin" && s.filterTabTextActive]}>
+                  Admins ({subAdminCount})
+                </Text>
+              </Pressable>
+            </ScrollView>
+          </View>
+
+          {/* Search Bar */}
+          <View style={s.searchContainer}>
+            <Ionicons name="search-outline" size={18} color={colors.subtle} />
+            <TextInput
+              autoCapitalize="none"
+              maxLength={120}
+              onChangeText={setSearch}
+              placeholder="Search staff by name or email..."
+              placeholderTextColor={colors.subtle}
+              style={s.searchInput}
+              value={search}
+              accessibilityLabel="Search staff"
+            />
+            {search ? (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Clear search"
+                onPress={() => setSearch("")}
+                style={{ padding: 4 }}
+              >
+                <Ionicons name="close" size={18} color={colors.subtle} />
+              </Pressable>
+            ) : null}
+          </View>
 
       {showForm ? (
         <SurfacePanel title={editingUser ? "Edit user" : "Create user"} kicker="Users" icon="person-add-outline">
@@ -210,23 +277,21 @@ export function StaffScreenView({ model }: { model: ReturnType<typeof useStaffSc
       {notice ? <Text style={styles.notice}>{notice}</Text> : null}
       {deactivateUser.error ? <Text style={styles.error}>{getApiErrorMessage(deactivateUser.error)}</Text> : null}
 
-      <View style={styles.tableCard}>
-        {!compact && <View style={styles.tableHeader}><Text style={[styles.columnHeader, styles.userColumn]}>User</Text><Text style={styles.columnHeader}>Role</Text><Text style={styles.columnHeader}>Gym</Text><Text style={styles.columnHeader}>Status</Text><Text style={styles.columnHeader}>Joined On</Text><Text style={[styles.columnHeader, styles.actionColumn]}>Actions</Text></View>}
       <DataState
         loading={usersQuery.isLoading}
         error={usersQuery.error ? getApiErrorMessage(usersQuery.error) : null}
-        empty={!usersQuery.isLoading && users.length === 0}
-        emptyTitle={search ? "No users match" : "No users found"}
-        emptyMessage={search ? "Clear the search or try another detail." : user?.role === "super_admin" ? "Create the first staff user for the platform." : "Create the first staff user for this gym."}
-        emptyActionLabel={search ? "Clear Search" : "Create User"}
+        empty={!usersQuery.isLoading && staffToRender.length === 0}
+        emptyTitle={search ? "No staff match" : "No staff found"}
+        emptyMessage={search ? "Clear the search or try another detail." : "Invite staff to manage your gym."}
+        emptyActionLabel={search ? "Clear Search" : "Invite"}
         onEmptyAction={search ? () => setSearch("") : beginCreate}
       />
 
-      {users.length > 0 ? (
+      {staffToRender.length > 0 ? (
         <FlatList
-          data={users}
+          data={staffToRender}
           keyExtractor={(item) => item.id}
-          ItemSeparatorComponent={() => <View style={styles.separator} />}
+          scrollEnabled={false}
           renderItem={({ item }) => (
             <UserRow
               user={item}
@@ -240,12 +305,10 @@ export function StaffScreenView({ model }: { model: ReturnType<typeof useStaffSc
               }}
             />
           )}
-          scrollEnabled={false}
         />
       ) : null}
-      </View>
     </Screen>
-  ));
+  );
     }
   }
 }
@@ -290,27 +353,82 @@ export function UserRowView({ model }: { model: ReturnType<typeof useUserRowPres
   if (typeof model !== "object" || !("kind" in model)) return model;
   switch (model.kind) {
     case "view1": {
-      const { styles, user, roleTone, statusTone, onView, colors, canEdit, isBusy, onEdit, onDeactivate } = model.props;
-      return ((
-    <View style={styles.userRow}>
-      <View style={styles.userCell}><View style={styles.avatar}><Text style={styles.avatarText}>{initials(user.name)}</Text></View><View style={styles.userBody}><Text style={styles.userName} numberOfLines={1}>{user.name}</Text><Text style={styles.userMeta} numberOfLines={1}>{user.email}</Text><Text style={styles.userMeta} numberOfLines={1}>{user.phone || "No phone"}</Text></View></View>
-      <View style={styles.roleCell}><StatusBadge label={formatRole(user.role)} tone={roleTone(user.role)} /></View>
-      <View style={styles.gymCell}><Text style={styles.cellText} numberOfLines={1}>{relatedDisplayName(user.gym_name, "Assigned gym")}</Text><Text style={styles.userMeta}>Current gym</Text></View>
-      <View style={styles.statusCell}><StatusBadge label={user.status === "active" ? "Active" : "Inactive"} tone={statusTone(user.status)} /></View>
-      <View style={styles.joinCell}><Text style={styles.cellText}>{formatDate(user.created_at)}</Text></View>
-      <View style={styles.rowActions}>
-        <Pressable accessibilityRole="button" onPress={onView} style={styles.iconButton} accessibilityLabel={"View user details"}>
-          <Ionicons name="eye-outline" size={19} color={colors.ink} />
+      const { styles, user, onView, colors, canEdit, isBusy, onEdit, onDeactivate } = model.props;
+      const s = createReferenceStaffStyles(colors);
+      const userInitials = initials(user.name);
+      const isSubAdmin = user.role === "sub_admin";
+      const isReception = user.role === "receptionist";
+      const isTrainer = user.role === "trainer";
+
+      const roleBadgeStyle = isSubAdmin
+        ? s.roleBadgeSubAdmin
+        : isReception
+        ? s.roleBadgeReception
+        : isTrainer
+        ? s.roleBadgeTrainer
+        : s.roleBadgeDefault;
+
+      const roleTextStyle = isSubAdmin
+        ? s.roleTextSubAdmin
+        : isReception
+        ? s.roleTextReception
+        : isTrainer
+        ? s.roleTextTrainer
+        : s.roleTextDefault;
+
+      const roleLabel = isSubAdmin
+        ? "Sub Admin"
+        : isReception
+        ? "Reception"
+        : isTrainer
+        ? "Trainer"
+        : formatRole(user.role);
+
+      const joinedDate = new Date(user.created_at).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      });
+
+      return (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={`Staff member ${user.name}`}
+          onPress={onEdit || onView}
+          style={s.staffCard}
+        >
+          {/* Top Row: Avatar, Name & Email, Role Badge */}
+          <View style={s.cardTopRow}>
+            <View style={s.avatar}>
+              <Text style={s.avatarText}>{userInitials}</Text>
+            </View>
+
+            <View style={s.staffInfo}>
+              <Text numberOfLines={1} style={s.staffName}>{user.name}</Text>
+              <Text numberOfLines={1} style={s.staffEmail}>{user.email}</Text>
+            </View>
+
+            <View style={roleBadgeStyle}>
+              <Text style={roleTextStyle}>{roleLabel}</Text>
+            </View>
+          </View>
+
+          {/* Bottom Row: Joined Date & Status */}
+          <View style={s.cardBottomRow}>
+            <View style={s.joinedRow}>
+              <Text style={s.joinedLabel}>Joined: </Text>
+              <Text style={s.joinedDate}>{joinedDate}</Text>
+            </View>
+
+            <View style={s.statusRow}>
+              <View style={user.status === "active" ? s.statusDot : s.statusDotInactive} />
+              <Text style={user.status === "active" ? s.statusText : s.statusTextInactive}>
+                {user.status === "active" ? "Active" : "Inactive"}
+              </Text>
+            </View>
+          </View>
         </Pressable>
-        <Pressable accessibilityRole="button" disabled={!canEdit || isBusy} onPress={onEdit} style={[styles.iconButton, (!canEdit || isBusy) && styles.disabledIcon]} accessibilityLabel={"Edit record"} accessibilityState={{ disabled: !canEdit || isBusy }}>
-          <Ionicons name="create-outline" size={19} color={colors.ink} />
-        </Pressable>
-        <Pressable accessibilityRole="button" disabled={isBusy || user.status === "inactive"} onPress={onDeactivate} style={[styles.iconButton, (isBusy || user.status === "inactive") && styles.disabledIcon]} accessibilityLabel={"Deactivate user"} accessibilityState={{ disabled: isBusy || user.status === "inactive" }}>
-          <Ionicons name="ban-outline" size={19} color={colors.danger} />
-        </Pressable>
-      </View>
-    </View>
-  ));
+      );
     }
   }
 }

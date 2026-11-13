@@ -54,14 +54,16 @@ export function requestBrowserNotificationsOnInteraction(userId: string): () => 
 
 export function useNotificationDelivery(navigation: any, userId: string | undefined, _unread: number) {
   const client = useQueryClient();
+  const gymId = useAuthStore(state => state.user?.gym_id);
+  const role = useAuthStore(state => state.user?.role);
   useLiveNotifications(userId);
   useEffect(() => {
     if (userId) return requestBrowserNotificationsOnInteraction(userId);
   }, [userId]);
   // The polling query is shared with the notification centre.
   const query = useQuery({
-    queryKey: ["notifications", "all", userId],
-    queryFn: () => notificationsApi.list(),
+    queryKey: ["notifications", "all", userId, gymId, role],
+    queryFn: ({ signal }) => notificationsApi.list(false, signal),
     enabled: Boolean(userId),
     refetchInterval: 60000,
     refetchIntervalInBackground: true,
@@ -69,21 +71,12 @@ export function useNotificationDelivery(navigation: any, userId: string | undefi
   });
 
   useEffect(() => {
-    const refresh = () => {
-      if (document.visibilityState === "visible") {
-        void client.invalidateQueries({ queryKey: ["notifications"] });
-      }
-    };
-    window.addEventListener("focus", refresh);
-    document.addEventListener("visibilitychange", refresh);
-    return () => {
-      window.removeEventListener("focus", refresh);
-      document.removeEventListener("visibilitychange", refresh);
-    };
-  }, [client]);
+    if ((query.isFetching || query.error) && useAuthStore.getState().user?.role === "trainer") void disableNotificationDelivery();
+  }, [query.isFetching, query.error]);
 
   useEffect(() => {
-    if (!userId || !query.data || useAuthStore.getState().user?.id !== userId) return;
+    const current = useAuthStore.getState().user;
+    if (!userId || !query.data || current?.id !== userId || current.gym_id !== gymId || current.role !== role) return;
     // Seed the first successful snapshot so old unread alerts don't flood the desktop.
     if (deliveryUser !== userId) {
       deliveryUser = userId;
@@ -95,12 +88,14 @@ export function useNotificationDelivery(navigation: any, userId: string | undefi
       seen.add(item.id);
       if (item.status !== "unread" || !("Notification" in window) || window.Notification.permission !== "granted") continue;
       try {
-        const alert = new window.Notification(item.title, { body: item.body, tag: item.id });
+        const trainer = useAuthStore.getState().user?.role === "trainer";
+        const alert = new window.Notification(trainer ? "PulseFit update" : item.title, { body: trainer ? "Open PulseFit to view your notification." : item.body, tag: item.id });
         activeAlerts.add(alert);
         alert.onclose = () => activeAlerts.delete(alert);
         alert.onclick = () => {
           alert.close();
-          if (useAuthStore.getState().user?.id !== userId) return;
+          const currentUser = useAuthStore.getState().user;
+          if (currentUser?.id !== userId || currentUser.gym_id !== gymId || currentUser.role !== role) return;
           window.focus();
           navigation.navigate("Notifications");
           void notificationsApi.markRead(item.id).then(() => client.invalidateQueries({ queryKey: ["notifications"] })).catch(() => {});
@@ -110,7 +105,7 @@ export function useNotificationDelivery(navigation: any, userId: string | undefi
         // The same update remains available in the in-app notification centre.
       }
     }
-  }, [query.data, userId, navigation, client]);
+  }, [query.data, userId, gymId, role, navigation, client]);
 }
 
 let deliveryUser: string | undefined;
@@ -121,7 +116,7 @@ export async function disableNotificationDelivery(): Promise<void> {
   activeAlerts.clear();
 }
 useAuthStore.subscribe((state, previous) => {
-  if (state.user?.id === previous.user?.id) return;
+  if (state.user?.id === previous.user?.id && state.user?.gym_id === previous.user?.gym_id && state.user?.role === previous.user?.role) return;
   deliveryUser = undefined;
   seen.clear();
   for (const alert of activeAlerts) alert.close();

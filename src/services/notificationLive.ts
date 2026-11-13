@@ -6,6 +6,8 @@ const connections = new Map<string, Connection>();
 
 // Share one authenticated connection between mounted dashboard screens.
 export function subscribeNotificationChanges(userId: string, listener: () => void): () => void {
+  const gymId = useAuthStore.getState().user?.gym_id;
+  const role = useAuthStore.getState().user?.role;
   let connection = connections.get(userId);
   if (!connection) {
     const listeners = new Set<() => void>();
@@ -14,7 +16,7 @@ export function subscribeNotificationChanges(userId: string, listener: () => voi
     let retry: ReturnType<typeof setTimeout> | undefined;
     let watchdog: ReturnType<typeof setTimeout> | undefined;
     let attempts = 0;
-    const current = () => !stopped && useAuthStore.getState().user?.id === userId;
+    const current = () => !stopped && useAuthStore.getState().user?.id === userId && useAuthStore.getState().user?.gym_id === gymId && useAuthStore.getState().user?.role === role;
     const alive = () => {
       clearTimeout(watchdog);
       watchdog = setTimeout(() => socket?.close(), 45000);
@@ -49,6 +51,7 @@ export function subscribeNotificationChanges(userId: string, listener: () => voi
       socket.onclose = event => {
         clearTimeout(watchdog);
         if (!current()) return;
+        for (const notify of listeners) notify();
         if (event.code === 4401) {
           // Use the existing single-flight HTTP refresh flow before reconnecting.
           void apiClient.get("/auth/me").catch(() => {}).finally(schedule);
@@ -61,7 +64,7 @@ export function subscribeNotificationChanges(userId: string, listener: () => voi
       retry = setTimeout(connect, Math.min(30000, 1000 * 2 ** Math.min(attempts++, 5)) + Math.random() * 250);
     };
     const unsubscribeAuth = useAuthStore.subscribe((state) => {
-      if (state.user?.id !== userId) stop();
+      if (state.user?.id !== userId || state.user?.gym_id !== gymId || state.user?.role !== role) stop();
     });
     const stop = () => {
       stopped = true;

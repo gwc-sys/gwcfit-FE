@@ -2,13 +2,13 @@ import { adaptPageStyles } from "../../adaptPageStyles";
 import { Platform, StyleSheet } from "react-native";
 import { useAppTheme } from "../../../../../theme/AppThemeProvider";
 
-export const createStyles = (colors: ReturnType<typeof useAppTheme>["colors"], isDark: boolean) => adaptPageStyles(StyleSheet.create({
+export const createStyles = (colors: ReturnType<typeof useAppTheme>["colors"], isDark: boolean): any => adaptPageStyles(StyleSheet.create({
   shell: { flex: 1, flexDirection: "row" },
   sidebar: {
     width: 268,
     minHeight: 0,
     borderRightWidth: 1,
-    borderRightColor: colors.border,
+    borderRightColor: "transparent",
     backgroundColor: colors.surface,
   },
   sidebarScroll: { flex: 1 },
@@ -25,7 +25,7 @@ export const createStyles = (colors: ReturnType<typeof useAppTheme>["colors"], i
     paddingHorizontal: 6,
     marginBottom: 20,
   },
-  brand: { color: isDark ? colors.ink : "#17120A", fontSize: 27, lineHeight: 32, fontWeight: "700" },
+  brand: { color: isDark ? colors.ink : "#000000", fontSize: 27, lineHeight: 32, fontWeight: "700" },
   role: { color: colors.primaryDark, fontSize: 12, lineHeight: 17, fontWeight: "800" },
   navList: { gap: 5, paddingBottom: 16 },
   navItem: {
@@ -47,7 +47,7 @@ export const createStyles = (colors: ReturnType<typeof useAppTheme>["colors"], i
     alignItems: "center",
     gap: 10,
     borderWidth: 1,
-    borderColor: isDark ? colors.border : "rgba(23,18,10,0.18)",
+    borderColor: "transparent",
     borderRadius: 11,
     paddingHorizontal: 12,
     marginTop: 8,
@@ -63,13 +63,13 @@ export const createStyles = (colors: ReturnType<typeof useAppTheme>["colors"], i
   },
   userCopy: { flex: 1, minWidth: 0 },
   userName: {
-    color: isDark ? colors.ink : "#17120A",
+    color: isDark ? colors.ink : "#000000",
     fontSize: 12,
     lineHeight: 16,
     fontWeight: "800",
   },
   userRole: {
-    color: isDark ? "#64D2FF" : "#6B4F00",
+    color: isDark ? "#E91E63" : "#1C1C1E",
     fontSize: 10,
     lineHeight: 14,
     fontWeight: "600",
@@ -77,16 +77,16 @@ export const createStyles = (colors: ReturnType<typeof useAppTheme>["colors"], i
   heartCard: {
     gap: 9,
     borderWidth: 1,
-    borderColor: isDark ? colors.border : "rgba(23,18,10,0.18)",
+    borderColor: "transparent",
     borderRadius: 13,
     padding: 16,
     marginBottom: 8,
     backgroundColor: isDark ? colors.surfaceElevated : colors.background,
   },
   heartTitle: { flexDirection: "row", alignItems: "center", gap: 8 },
-  heartLabel: { color: isDark ? colors.ink : "#17120A", fontSize: 12, fontWeight: "700" },
+  heartLabel: { color: isDark ? colors.ink : "#000000", fontSize: 12, fontWeight: "700" },
   heartValueRow: { flexDirection: "row", alignItems: "baseline", gap: 8 },
-  heartValue: { color: isDark ? colors.ink : "#17120A", fontSize: 29, fontWeight: "700" },
+  heartValue: { color: isDark ? colors.ink : "#000000", fontSize: 29, fontWeight: "700" },
   heartUnit: { color: colors.textSecondary, fontSize: 11 },
   heartChart: {
     height: 32,
@@ -94,7 +94,7 @@ export const createStyles = (colors: ReturnType<typeof useAppTheme>["colors"], i
     alignItems: "center",
     gap: 4,
   },
-  heartBar: { width: 3, borderRadius: 2, backgroundColor: "#E11D48" },
+  heartBar: { width: 3, borderRadius: 2, backgroundColor: "#E91E63" },
   heartHint: { color: colors.textSecondary, fontSize: 10 },
   mobileShell: { flex: 1 },
   content: { flex: 1, minWidth: 0, backgroundColor: colors.background },
@@ -121,7 +121,7 @@ export const createStyles = (colors: ReturnType<typeof useAppTheme>["colors"], i
   },
   greeting: { flex: 1, minWidth: 210 },
   greetingName: {
-    color: isDark ? colors.ink : "#17120A",
+    color: isDark ? colors.ink : "#000000",
     fontSize: 34,
     lineHeight: 41,
     fontWeight: "700",
@@ -146,7 +146,7 @@ export const createStyles = (colors: ReturnType<typeof useAppTheme>["colors"], i
     alignItems: "center",
     gap: 12,
     borderWidth: 1,
-    borderColor: isDark ? colors.border : "rgba(23,18,10,0.18)",
+    borderColor: "transparent",
     borderRadius: 11,
     paddingHorizontal: 18,
     backgroundColor: colors.background,
@@ -164,7 +164,7 @@ export const createStyles = (colors: ReturnType<typeof useAppTheme>["colors"], i
     alignItems: "center",
     gap: 12,
     borderWidth: 1,
-    borderColor: isDark ? colors.border : "rgba(23,18,10,0.18)",
+    borderColor: "transparent",
     borderRadius: 11,
     paddingHorizontal: 18,
     backgroundColor: colors.background,
@@ -176,7 +176,7 @@ export const createStyles = (colors: ReturnType<typeof useAppTheme>["colors"], i
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1,
-    borderColor: isDark ? colors.border : "rgba(23,18,10,0.18)",
+    borderColor: "transparent",
     borderRadius: 30,
     backgroundColor: colors.background,
   },
@@ -195,7 +195,7 @@ export const createStyles = (colors: ReturnType<typeof useAppTheme>["colors"], i
     alignItems: "center",
     justifyContent: "center",
     borderRadius: 19,
-    backgroundColor: isDark ? colors.primarySoft : "#FFFFFF",
+    backgroundColor: colors.primarySoft,
   },
   profileMenu: {
     position: "absolute",
@@ -204,13 +204,13 @@ export const createStyles = (colors: ReturnType<typeof useAppTheme>["colors"], i
     zIndex: 100,
     overflow: "hidden",
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: "transparent",
     borderRadius: 15,
     backgroundColor: colors.surfaceElevated,
     ...(Platform.OS === "web"
       ? { boxShadow: "0 12px 48px rgba(0,0,0,0.35)" }
       : {
-          shadowColor: "#000000",
+          shadowColor: colors.shadowColor,
           shadowOffset: { width: 0, height: 12 },
           shadowOpacity: 0.35,
           shadowRadius: 24,
@@ -232,13 +232,13 @@ export const createStyles = (colors: ReturnType<typeof useAppTheme>["colors"], i
     alignItems: "center",
     justifyContent: "center",
     borderRadius: 29,
-    backgroundColor: "#FFB180",
+    backgroundColor: colors.primary,
   },
   profileMenuInitials: { color: "#FFFFFF", fontSize: 20, fontWeight: "700" },
   profileMenuIdentity: { flex: 1, minWidth: 0, gap: 5 },
   profileMenuName: { color: colors.ink, fontSize: 16, fontWeight: "700" },
   profileMenuEmail: { color: colors.textSecondary, fontSize: 12, fontWeight: "600" },
-  profileMenuDivider: { height: 1, backgroundColor: colors.border },
+  profileMenuDivider: { height: 1, backgroundColor: "transparent" },
   profileMenuItem: {
     minHeight: 58,
     flexDirection: "row",
@@ -249,5 +249,5 @@ export const createStyles = (colors: ReturnType<typeof useAppTheme>["colors"], i
   profileMenuItemPressed: { backgroundColor: colors.primarySoft },
   profileMenuItemText: { color: colors.ink, fontSize: 15, fontWeight: "800" },
   profileMenuLogout: { minHeight: 72 },
-  profileMenuLogoutText: { color: "#FF4D55", fontSize: 15, fontWeight: "700" },
+  profileMenuLogoutText: { color: "#E91E63", fontSize: 15, fontWeight: "700" },
 }));

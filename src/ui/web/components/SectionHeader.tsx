@@ -52,14 +52,13 @@ const createStyles = (colors: ThemeColors) =>
     alignItems: "center",
     justifyContent: "center",
     borderRadius: radius.sm,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surfaceElevated,
-    paddingHorizontal: spacing.md
+    borderWidth: 0,
+    backgroundColor: "transparent",
+    paddingHorizontal: spacing.sm
   },
   action: {
     ...typography.body,
     color: colors.primary,
-    fontWeight: "800"
+    fontWeight: "500"
   }
   });

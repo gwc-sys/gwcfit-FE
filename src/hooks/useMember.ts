@@ -5,11 +5,13 @@ import { memberApi } from "../services/api/member";
 import type {
   MemberGoalCreate,
   MemberGoalUpdate,
+  MemberMealPlanCreate,
   MemberProfileUpdate,
   MemberProgressLogCreate,
   TrainerFeedbackPayload,
   GymFeedbackPayload,
   SupportTicketCreate,
+  MemberActivitySync,
 } from "../types/member";
 
 export const memberQueryKeys = {
@@ -31,6 +33,7 @@ export const memberQueryKeys = {
   activity: () => ["member", "activity"] as const,
   goals: () => ["member", "goals"] as const,
   rewards: () => ["member", "rewards"] as const,
+  gamification: () => ["member", "gamification"] as const,
 };
 
 function shouldRetryRequest(failureCount: number, error: unknown) {
@@ -163,6 +166,18 @@ export function useMemberMeals() {
   return useMemberQuery(memberQueryKeys.meals(), memberApi.getMemberMeals);
 }
 
+export function useCreateMemberMealPlan() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: MemberMealPlanCreate) => memberApi.createMemberMealPlan(payload),
+    retry: false,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: memberQueryKeys.meals() });
+      queryClient.invalidateQueries({ queryKey: memberQueryKeys.dashboard() });
+    },
+  });
+}
+
 export function useCompleteMeal() {
   const queryClient = useQueryClient();
   return useMutation({
@@ -206,6 +221,20 @@ export function useCreateProgressLog() {
   });
 }
 
+export function useDeleteProgressLog() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (progressUuid: string) => memberApi.deleteProgressLog(progressUuid),
+    retry: false,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: memberQueryKeys.progress() });
+      queryClient.invalidateQueries({ queryKey: memberQueryKeys.profile() });
+      queryClient.invalidateQueries({ queryKey: memberQueryKeys.dashboard() });
+      queryClient.invalidateQueries({ queryKey: memberQueryKeys.activity() });
+    },
+  });
+}
+
 export function useMemberTrainer() {
   return useMemberQuery(memberQueryKeys.trainer(), memberApi.getMemberTrainer);
 }
@@ -219,7 +248,10 @@ export function useSaveTrainerFeedback() {
   return useMutation({
     mutationFn: (payload: TrainerFeedbackPayload) => memberApi.saveTrainerFeedback(payload),
     retry: false,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: memberQueryKeys.trainerFeedback() }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: memberQueryKeys.trainerFeedback() });
+      queryClient.invalidateQueries({ queryKey: memberQueryKeys.trainer() });
+    },
   });
 }
 
@@ -286,6 +318,48 @@ export function useMarkNotificationRead() {
   });
 }
 
+export function useMarkAllNotificationsRead() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: memberApi.markAllNotificationsRead,
+    retry: false,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["member", "notifications"] });
+      queryClient.invalidateQueries({ queryKey: memberQueryKeys.dashboard() });
+      queryClient.invalidateQueries({ queryKey: memberQueryKeys.activity() });
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+    },
+  });
+}
+
+export function useDismissNotification() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: memberApi.dismissNotification,
+    retry: false,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["member", "notifications"] });
+      queryClient.invalidateQueries({ queryKey: memberQueryKeys.dashboard() });
+      queryClient.invalidateQueries({ queryKey: memberQueryKeys.activity() });
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+    },
+  });
+}
+
+export function useClearAllNotifications() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: memberApi.clearAllNotifications,
+    retry: false,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["member", "notifications"] });
+      queryClient.invalidateQueries({ queryKey: memberQueryKeys.dashboard() });
+      queryClient.invalidateQueries({ queryKey: memberQueryKeys.activity() });
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+    },
+  });
+}
+
 export function useMemberGoals() {
   return useMemberQuery(memberQueryKeys.goals(), memberApi.getMemberGoals);
 }
@@ -326,6 +400,24 @@ export function useMemberRewards() {
   return useMemberQuery(memberQueryKeys.rewards(), memberApi.getMemberRewards);
 }
 
+export function useMemberGamification() {
+  return useMemberQuery(memberQueryKeys.gamification(), memberApi.getMemberGamification);
+}
+
+export function useRedeemMemberPerk() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (perkId: string) => memberApi.redeemMemberPerk(perkId),
+    retry: false,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: memberQueryKeys.gamification() });
+      queryClient.invalidateQueries({ queryKey: memberQueryKeys.rewards() });
+      queryClient.invalidateQueries({ queryKey: memberQueryKeys.profile() });
+      queryClient.invalidateQueries({ queryKey: memberQueryKeys.dashboard() });
+    },
+  });
+}
+
 export function useCreateSupportTicket() {
   const queryClient = useQueryClient();
   return useMutation({
@@ -341,4 +433,16 @@ export function useCreateSupportTicket() {
 
 export function useMemberActivity(limit = 30) {
   return useMemberQuery([...memberQueryKeys.activity(), limit], () => memberApi.getActivity(limit));
+}
+
+export function useSyncMemberActivity() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: MemberActivitySync) => memberApi.syncActivity(payload),
+    retry: false,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: memberQueryKeys.activity() });
+      queryClient.invalidateQueries({ queryKey: memberQueryKeys.dashboard() });
+    },
+  });
 }

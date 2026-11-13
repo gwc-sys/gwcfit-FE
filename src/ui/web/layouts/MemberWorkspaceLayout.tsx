@@ -1,9 +1,10 @@
 import { Ionicons } from "@expo/vector-icons";
 import { type ReactNode } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
-import { requestLogoutConfirmation } from "../../../utils/logoutConfirmation";
 import type * as React from "react";
 import type { useMemberDesktopLayoutPresentation } from "../../../components/member/MemberDesktopLayout";
+import { MemberMembershipCalendar } from "../components/member/MemberMembershipCalendar";
+import { AppLogo } from "../../../components/AppLogo";
 
 export function MemberDesktopLayoutView({ model }: { model: ReturnType<typeof useMemberDesktopLayoutPresentation> }): React.ReactNode {
   if (model == null) return null;
@@ -20,33 +21,56 @@ export function MemberDesktopLayoutView({ model }: { model: ReturnType<typeof us
     ));
     }
     case "view2": {
-      const { styles, colors, coachMode, visibleItems, activeNavLabel, setSelectedNavLabel, navigation, activeNavColor, chromeIconColor, user, logout, content } = model.props;
+      const { styles, colors, coachMode, visibleItems, navigationGroups, activeNavLabel, setSelectedNavLabel, setProfileMenuOpen, calendarOpen, setCalendarOpen, navigation, activeNavColor, chromeIconColor, content, memberMenuVisible, setMemberMenuVisible } = model.props;
       return ((
     <View style={[styles.shell, { backgroundColor: colors.background }]}>
-      <View style={styles.sidebar}>
+      <View style={[styles.sidebar, !memberMenuVisible && styles.sidebarCollapsed]}>
         <ScrollView
           style={styles.sidebarScroll}
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.sidebarContent}
+          contentContainerStyle={[styles.sidebarContent, !memberMenuVisible && styles.sidebarContentCollapsed]}
         >
-          <View style={styles.brandRow}>
-            <Ionicons name="pulse" size={34} color={colors.primary} />
-            <View>
-              <Text style={styles.brand}>PulseFit</Text>
-              <Text style={styles.role}>
-                {coachMode ? "AI COACH" : "Member Dashboard"}
-              </Text>
-            </View>
+          <View style={[styles.brandRow, !memberMenuVisible && styles.brandRowCollapsed]}>
+            {memberMenuVisible ? <>
+              <AppLogo size={32} />
+              <View style={styles.brandCopy}>
+                <Text style={styles.brand}>
+                  Pulse<Text style={{ color: "#E91E63" }}>Fit</Text>
+                </Text>
+                <Text style={styles.role}>Member Dashboard</Text>
+              </View>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Collapse member navigation menu"
+                accessibilityState={{ expanded: true }}
+                onPress={() => setMemberMenuVisible(false)}
+                style={({ pressed }) => [styles.sidebarToggle, pressed && styles.pressed]}
+              >
+                <Ionicons name="chevron-back" size={16} color={chromeIconColor} />
+              </Pressable>
+            </> : <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Expand member navigation menu"
+              accessibilityState={{ expanded: false }}
+              onPress={() => setMemberMenuVisible(true)}
+              style={({ pressed }) => [styles.collapsedLogoButton, pressed && styles.pressed]}
+            >
+              <AppLogo size={30} />
+            </Pressable>}
           </View>
-          <View style={styles.navList}>
-            {visibleItems.map((item) => {
+          <View style={[styles.navList, !memberMenuVisible && styles.navListCollapsed]}>
+            {navigationGroups.map((group) => <View key={group} style={styles.navGroup}>
+              {memberMenuVisible ? <Text style={styles.navGroupLabel}>{group}</Text> : null}
+              {visibleItems.filter((item) => item.group === group).map((item) => {
               const active = activeNavLabel === item.label;
               return (
                 <Pressable
                   key={item.label}
                   accessibilityRole="button"
+                  accessibilityLabel={item.label}
                   accessibilityState={{ selected: active }}
                   onPress={() => {
+                    setProfileMenuOpen(false);
                     setSelectedNavLabel(item.label);
                     if (item.tab)
                       navigation.navigate("AppTabs", { screen: item.route });
@@ -54,67 +78,33 @@ export function MemberDesktopLayoutView({ model }: { model: ReturnType<typeof us
                   }}
                   style={({ pressed }) => [
                     styles.navItem,
+                    !memberMenuVisible && styles.navItemCollapsed,
                     active && styles.navItemActive,
                     pressed && styles.pressed,
                   ]}
                 >
                   <Ionicons
                     name={item.icon}
-                    size={21}
-                    color={active ? activeNavColor : chromeIconColor}
+                    size={18}
+                    color={active ? colors.primary : chromeIconColor}
                   />
-                  <Text
+                  {memberMenuVisible ? <Text
                     style={[
                       styles.navText,
                       { color: active ? activeNavColor : chromeIconColor },
                     ]}
                   >
                     {item.label}
-                  </Text>
+                  </Text> : null}
                 </Pressable>
               );
-            })}
-          </View>
-          {coachMode ? (
-            <View style={styles.heartCard}>
-              <View style={styles.heartTitle}>
-                <Ionicons name="heart" size={18} color="#EC4899" />
-                <Text style={styles.heartLabel}>Live Heart Rate</Text>
-              </View>
-              <View style={styles.heartValueRow}>
-                <Text style={styles.heartValue}>--</Text>
-                <Text style={styles.heartUnit}>BPM</Text>
-              </View>
-              <View style={styles.heartChart}>
-                {[9, 15, 8, 19, 12, 22, 11, 25, 16, 29, 18].map(
-                  (height, index) => (
-                    <View key={index} style={[styles.heartBar, { height }]} />
-                  ),
-                )}
-              </View>
-              <Text style={styles.heartHint}>Sensor not connected</Text>
-            </View>
-          ) : null}
-          <View style={styles.userCard}>
-            <View style={styles.avatar}>
-              <Ionicons name="person" size={20} color={colors.primary} />
-            </View>
-            <View style={styles.userCopy}>
-              <Text numberOfLines={1} style={styles.userName}>
-                {user?.full_name ?? "Member"}
-              </Text>
-              <Text style={styles.userRole}>Member</Text>
-            </View>
-            <Pressable accessibilityRole="button"
-              accessibilityLabel="Log out"
-              onPress={() => requestLogoutConfirmation(() => logout.mutate())}
-            >
-              <Ionicons name="chevron-down" size={21} color={chromeIconColor} />
-            </Pressable>
+              })}
+            </View>)}
           </View>
         </ScrollView>
       </View>
       {content}
+      {calendarOpen ? <MemberMembershipCalendar onClose={() => setCalendarOpen(false)} /> : null}
     </View>
   ));
     }

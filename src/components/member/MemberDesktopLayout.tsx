@@ -5,7 +5,6 @@ import { Ionicons } from "@expo/vector-icons";
 import { useNavigation, useNavigationState } from "@react-navigation/native";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import {
-  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -16,6 +15,8 @@ import {
 } from "react-native";
 
 import { useLogout } from "../../hooks/useAuthActions";
+import { useLiveNotifications } from "../../hooks/useLiveNotifications";
+import { useMemberNotifications } from "../../hooks/useMember";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useAppTheme } from "../../theme/AppThemeProvider";
 import { requestLogoutConfirmation } from "../../utils/logoutConfirmation";
@@ -26,53 +27,47 @@ const items: Array<{
   label: string;
   icon: IconName;
   route: string;
+  group: "Overview" | "Plan" | "Account";
   tab?: boolean;
 }> = [
-  { label: "Dashboard", icon: "home-outline", route: "MemberHome", tab: true },
+  { label: "Dashboard", icon: "home-outline", route: "MemberHome", group: "Overview", tab: true },
   {
     label: "Workouts",
     icon: "barbell-outline",
     route: "MemberWorkout",
-    tab: true,
+    group: "Overview", tab: true,
   },
-  { label: "Meal Plan", icon: "restaurant-outline", route: "MemberMealPlan" },
-  { label: "Membership", icon: "ribbon-outline", route: "MemberMembership" },
-  { label: "Payments", icon: "card-outline", route: "MemberPayments" },
-  { label: "My trainer", icon: "person-outline", route: "MemberTrainer" },
-  {
-    label: "Progress",
-    icon: "stats-chart-outline",
-    route: "MemberProgress",
-    tab: true,
-  },
+  { label: "Meal Plan", icon: "restaurant-outline", route: "MemberMealPlan", group: "Overview" },
+  { label: "Membership", icon: "ribbon-outline", route: "MemberMembership", group: "Account" },
+  { label: "My trainer", icon: "person-outline", route: "MemberTrainer", group: "Plan" },
   {
     label: "Measurements",
     icon: "body-outline",
     route: "MemberProgress",
-    tab: true,
+    group: "Plan", tab: true,
   },
-  { label: "Goals", icon: "radio-button-on-outline", route: "MemberGoals" },
-  { label: "Schedule", icon: "calendar-outline", route: "MemberClasses" },
+  { label: "Goals", icon: "radio-button-on-outline", route: "MemberGoals", group: "Plan" },
+  { label: "Schedule", icon: "calendar-outline", route: "MemberClasses", group: "Plan" },
   {
     label: "Attendance",
     icon: "checkbox-outline",
     route: "MemberAttendance",
-    tab: true,
+    group: "Plan", tab: true,
   },
   {
-    label: "Messages",
-    icon: "chatbubble-ellipses-outline",
-    route: "MemberNotifications",
+    label: "Notifications",
+    icon: "notifications-outline",
+    route: "MemberNotifications", group: "Account",
   },
-  { label: "Achievements", icon: "star-outline", route: "MemberRewards" },
+  { label: "Rewards", icon: "gift-outline", route: "MemberRewards", group: "Plan" },
   {
     label: "Profile",
     icon: "person-outline",
     route: "MemberProfileHome",
-    tab: true,
+    group: "Account", tab: true,
   },
-  { label: "Settings", icon: "settings-outline", route: "MemberSettings" },
-  { label: "Support", icon: "chatbubbles-outline", route: "MemberSupport" },
+  { label: "Settings", icon: "settings-outline", route: "MemberSettings", group: "Account" },
+  { label: "Support", icon: "chatbubbles-outline", route: "MemberSupport", group: "Account" },
 ];
 
 const coachItems: Array<{
@@ -107,7 +102,7 @@ const coachItems: Array<{
     route: "MemberWorkout",
   },
   { label: "Calendar", icon: "calendar-outline", route: "MemberClasses" },
-  { label: "Messages", icon: "mail-outline", route: "MemberNotifications" },
+  { label: "Notifications", icon: "notifications-outline", route: "MemberNotifications" },
   { label: "Settings", icon: "settings-outline", route: "MemberSettings" },
 ];
 
@@ -134,16 +129,23 @@ export function useMemberDesktopLayoutPresentation({
   const navigationRoute = useNavigationState(deepestRouteName);
   const activeRoute = activeRouteName ?? navigationRoute;
   const user = useAuthStore((state) => state.user);
+  useLiveNotifications(user?.id);
+  const unreadNotifications = useMemberNotifications(true).data ?? [];
   const logout = useLogout();
   const { colors, isDark } = useAppTheme();
   const styles = useMemo(() => createStyles(colors, isDark), [colors, isDark]);
   const chromeIconColor = isDark ? colors.textSecondary : colors.inkSoft;
-  const activeNavColor = colors.white;
+  const activeNavColor = isDark ? colors.ink : colors.primaryDark;
   const [search, setSearch] = useState("");
   const [selectedNavLabel, setSelectedNavLabel] = useState<string | null>(null);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const [calendarOpen, setCalendarOpen] = useState(false);
+  // Start with the compact icon rail on every desktop session. People can
+  // expand it from the PulseFit mark when they need the full labels.
+  const [memberMenuVisible, setMemberMenuVisible] = useState(false);
   const coachMode = activeRoute === "MemberWorkoutSession";
-  const visibleItems = coachMode ? coachItems : items;
+  const visibleItems = items;
+  const navigationGroups = ["Overview", "Plan", "Account"] as const;
   const compactHeader = width < 760;
   const firstName = user?.full_name?.trim().split(/\s+/)[0] || "Member";
   const initials =
@@ -171,7 +173,7 @@ export function useMemberDesktopLayoutPresentation({
         ? "Dashboard"
         : visibleItems.find(
             (item) =>
-              (coachMode && item.label === "AI Coach") ||
+              (coachMode && item.label === "Workouts") ||
               routeMatchesItem(item),
           )?.label;
 
@@ -182,6 +184,8 @@ export function useMemberDesktopLayoutPresentation({
       );
       return currentItem && routeMatchesItem(currentItem) ? currentLabel : null;
     });
+    setProfileMenuOpen(false);
+    setCalendarOpen(false);
   }, [activeRoute, coachMode]);
 
   const submitSearch = () => {
@@ -195,9 +199,7 @@ export function useMemberDesktopLayoutPresentation({
       setSelectedNavLabel("Meal Plan");
       navigation.navigate("MemberMealPlan");
     } else if (term.includes("progress") || term.includes("measurement")) {
-      setSelectedNavLabel(
-        term.includes("measurement") ? "Measurements" : "Progress",
-      );
+      setSelectedNavLabel("Measurements");
       navigation.navigate("AppTabs", { screen: "MemberProgress" });
     } else if (term.includes("attendance")) {
       setSelectedNavLabel("Attendance");
@@ -238,7 +240,7 @@ export function useMemberDesktopLayoutPresentation({
         <View
           style={[styles.searchBox, compactHeader && styles.searchBoxCompact]}
         >
-          <Ionicons name="search-outline" size={22} color={chromeIconColor} />
+          <Ionicons name="search-outline" size={16} color={chromeIconColor} />
           <TextInput
             value={search}
             onChangeText={setSearch}
@@ -252,36 +254,41 @@ export function useMemberDesktopLayoutPresentation({
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Open calendar"
+          accessibilityState={{ expanded: calendarOpen }}
           onPress={() => {
-            setSelectedNavLabel("Schedule");
-            navigation.navigate("MemberClasses");
+            setProfileMenuOpen(false);
+            setCalendarOpen((open) => !open);
           }}
           style={styles.dateButton}
         >
-          <Ionicons name="calendar-outline" size={21} color={chromeIconColor} />
+          <Ionicons name="calendar-outline" size={16} color={chromeIconColor} />
           <Text style={styles.dateText}>{currentDate}</Text>
-          <Ionicons name="chevron-down" size={18} color={chromeIconColor} />
+          <Ionicons name="chevron-down" size={14} color={chromeIconColor} />
         </Pressable>
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Open notifications"
           onPress={() => {
-            setSelectedNavLabel("Messages");
+            setProfileMenuOpen(false);
+            setSelectedNavLabel("Notifications");
             navigation.navigate("MemberNotifications");
           }}
           style={styles.headerIcon}
         >
-          <Ionicons name="notifications-outline" size={25} color={chromeIconColor} />
+          <Ionicons name="notifications-outline" size={18} color={chromeIconColor} />
+          {unreadNotifications.length > 0 ? (
+            <View style={{ position: "absolute", top: 8, right: 8, width: 7, height: 7, borderRadius: 4, backgroundColor: "#E91E63" }} />
+          ) : null}
         </Pressable>
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Open profile menu"
           accessibilityState={{ expanded: profileMenuOpen }}
-          onPress={() => setProfileMenuOpen((open) => !open)}
+          onPress={() => { setCalendarOpen(false); setProfileMenuOpen((open) => !open); }}
           style={styles.profileButton}
         >
           <View style={styles.profileInner}>
-            <Ionicons name="person" size={24} color={colors.primaryDark} />
+            <Ionicons name="person" size={16} color={colors.primaryDark} />
           </View>
         </Pressable>
       </View>
@@ -338,7 +345,7 @@ export function useMemberDesktopLayoutPresentation({
           <Pressable
             onPress={() => {
               setProfileMenuOpen(false);
-              setSelectedNavLabel("Messages");
+              setSelectedNavLabel("Notifications");
               navigation.navigate("MemberNotifications");
             }}
             style={({ pressed }) => [
@@ -378,7 +385,7 @@ export function useMemberDesktopLayoutPresentation({
               pressed && styles.profileMenuItemPressed,
             ]}
           >
-            <Ionicons name="log-out-outline" size={23} color="#FF4D55" />
+            <Ionicons name="log-out-outline" size={23} color="#FF3B30" />
             <Text style={styles.profileMenuLogoutText}>Log out</Text>
           </Pressable>
         </View>
@@ -389,14 +396,42 @@ export function useMemberDesktopLayoutPresentation({
   if (width < 1180)
     return { kind: "view1" as const, props: { styles, colors, children } };
 
+  const isCustomHeaderScreen =
+    activeNavLabel === "Dashboard" ||
+    activeNavLabel === "Meal Plan" ||
+    activeNavLabel === "Workouts" ||
+    activeNavLabel === "Measurements" ||
+    activeNavLabel === "Goals" ||
+    activeNavLabel === "Schedule" ||
+    activeNavLabel === "Attendance" ||
+    activeNavLabel === "Rewards" ||
+    activeNavLabel === "Achievements" ||
+    activeNavLabel === "Membership" ||
+    activeNavLabel === "Notifications" ||
+    activeNavLabel === "Profile" ||
+    activeRoute === "MemberProfileHome" ||
+    activeRoute === "MemberProfile" ||
+    activeRoute === "MemberNotifications" ||
+    activeRoute === "MemberHome" ||
+    activeRoute === "AppTabs" ||
+    activeRoute === "MemberMealPlan" ||
+    activeRoute === "MemberWorkout" ||
+    activeRoute === "MemberProgress" ||
+    activeRoute === "MemberGoals" ||
+    activeRoute === "MemberClasses" ||
+    activeRoute === "MemberAttendance" ||
+    activeRoute === "MemberRewards" ||
+    activeRoute === "MemberMembership";
+
   const content = (
     <View style={styles.content}>
-      {memberHeader}
+      {profileMenuOpen ? <Pressable accessibilityRole="button" accessibilityLabel="Close profile menu" onPress={() => setProfileMenuOpen(false)} style={[StyleSheet.absoluteFill, { zIndex: 10 }]} /> : null}
+      {!isCustomHeaderScreen ? memberHeader : null}
       <View style={styles.pageContent}>{children}</View>
     </View>
   );
 
-  return { kind: "view2" as const, props: { styles, colors, coachMode, visibleItems, activeNavLabel, setSelectedNavLabel, navigation, activeNavColor, chromeIconColor, user, logout, content } };
+  return { kind: "view2" as const, props: { styles, colors, coachMode, visibleItems, navigationGroups, activeNavLabel, setSelectedNavLabel, setProfileMenuOpen, calendarOpen, setCalendarOpen, navigation, activeNavColor, chromeIconColor, user, logout, content, memberMenuVisible, setMemberMenuVisible } };
 }
 
 export function MemberDesktopLayout(...args: Parameters<typeof useMemberDesktopLayoutPresentation>): React.JSX.Element {

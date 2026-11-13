@@ -153,7 +153,7 @@ export const attendanceConfig: ResourceCrudConfig<
   AttendanceUpdatePayload
 > = {
   key: "attendance",
-  title: "Attendance",
+  title: "Attendance Log",
   subtitle: "Manage check-ins",
   icon: "qr-code-outline",
   permission: "manage_attendance",
@@ -165,10 +165,9 @@ export const attendanceConfig: ResourceCrudConfig<
   getTitle: (record) =>
     relatedDisplayName(record.member_name, "Member check-in"),
   getMeta: (record) =>
-    `${record.source} - ${formatDateTime(record.check_in_at)}`,
+    `${record.source} • ${formatDateTime(record.check_in_at)}`,
   getDetails: (record) => [
-    `Gym: ${relatedDisplayName(record.gym_name, "Current gym")}`,
-    `Trainer: ${relatedDisplayName(record.trainer_name, "Not assigned")}`,
+    `Gym: ${relatedDisplayName(record.gym_name, "Current gym")} | Trainer: ${relatedDisplayName(record.trainer_name, "Not assigned")}`,
   ],
   getStatus: (record) => ({
     label: record.check_out_at ? "Checked out" : "Checked in",

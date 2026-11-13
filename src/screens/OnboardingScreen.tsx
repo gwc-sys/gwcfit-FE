@@ -6,7 +6,8 @@ import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { PrimaryButton } from "../components/PrimaryButton";
 import { onboardingSlides } from "../data/onboarding";
 import type { RootStackParamList } from "../navigation/types";
-import { palette, radii, spacing, type } from "../theme/theme";
+import { BASE_COLORS, ALPHA } from "../theme/colors";
+import { radii, spacing, type } from "../theme/theme";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Onboarding">;
 
@@ -25,7 +26,7 @@ export function OnboardingScreen({ navigation }: Props) {
 
   return (
     <ImageBackground source={slide.image} style={styles.root} resizeMode="cover">
-      <LinearGradient colors={["rgba(5,7,10,0.18)", "rgba(5,7,10,0.95)"]} style={styles.overlay}>
+      <LinearGradient colors={["rgba(0,0,0,0.18)", "rgba(0,0,0,0.95)"]} style={styles.overlay}>
         <Pressable onPress={() => navigation.replace("Login")} style={styles.skip}>
           <Text style={styles.skipText}>Skip</Text>
         </Pressable>
@@ -57,7 +58,7 @@ export function OnboardingScreen({ navigation }: Props) {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: palette.black
+    backgroundColor: BASE_COLORS.darkBackground
   },
   overlay: {
     flex: 1,
@@ -72,7 +73,7 @@ const styles = StyleSheet.create({
     padding: spacing.sm
   },
   skipText: {
-    color: palette.green,
+    color: BASE_COLORS.accent,
     fontSize: type.h3,
     fontWeight: "800"
   },
@@ -80,14 +81,14 @@ const styles = StyleSheet.create({
     gap: spacing.lg
   },
   title: {
-    color: palette.white,
+    color: BASE_COLORS.lightSurface,
     fontSize: 38,
     fontWeight: "900",
     textAlign: "center",
     lineHeight: 48
   },
   body: {
-    color: "#D6DAE2",
+    color: BASE_COLORS.lightBackground,
     fontSize: 18,
     lineHeight: 29,
     textAlign: "center"
@@ -102,21 +103,21 @@ const styles = StyleSheet.create({
     width: 12,
     height: 12,
     borderRadius: radii.pill,
-    backgroundColor: "#4C5565"
+    backgroundColor: ALPHA.white32
   },
   activeDot: {
     width: 18,
-    backgroundColor: palette.green
+    backgroundColor: BASE_COLORS.accent
   },
   signIn: {
     alignItems: "center"
   },
   signInText: {
-    color: "#C3C8D1",
+    color: BASE_COLORS.lightBackground,
     fontSize: type.body,
     fontWeight: "700"
   },
   signInLink: {
-    color: palette.green
+    color: BASE_COLORS.accent
   }
 });

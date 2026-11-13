@@ -4,7 +4,6 @@ import { Ionicons } from "@expo/vector-icons";
 import type { ReactNode } from "react";
 import { useMemo } from "react";
 import { StyleProp, StyleSheet, Text, useWindowDimensions, View, ViewStyle } from "react-native";
-import Animated, { FadeInUp, useReducedMotion } from "react-native-reanimated";
 import { useAppTheme } from "../../../theme/AppThemeProvider";
 import { radius, shadows, spacing, typography } from "../theme/theme";
 import type { ThemeColors } from "../theme/theme";
@@ -32,11 +31,10 @@ export function SurfacePanel({
 }: SurfacePanelProps) {
   const { colors } = useAppTheme();
   const { width } = useWindowDimensions();
-  const reduceMotion = useReducedMotion();
   const styles = useMemo(() => createStyles(colors, width), [colors, width]);
 
   return (
-    <Animated.View entering={reduceMotion ? undefined : FadeInUp.duration(240)} style={[styles.panel, style]}>
+    <View style={[styles.panel, style]}>
       {!hideHeader ? <View style={styles.header}>
         <View style={styles.titleWrap}>
           {kicker ? (
@@ -61,7 +59,7 @@ export function SurfacePanel({
         ) : null}
       </View> : null}
       {children}
-    </Animated.View>
+    </View>
   );
 }
 

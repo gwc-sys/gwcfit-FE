@@ -1,8 +1,8 @@
 import type * as React from "react";
 import { SettingsScreenView, GymOwnerSettingsScreenView, OwnerSettingsHubView, SuperAdminSettingsHubView, SettingsOptionGridView, SettingsOptionView, SettingsLinkView, GymOwnerSettingsDashboardView, LegacySuperAdminSettingsHubView, SidePanelView, OverviewRowView, HealthRowView } from "./SettingsScreen.presentation";
-import { createSimpleSettingsStyles, createOwnerDashboardStyles, createOwnerStyles, createHubStyles } from "./SettingsScreen.styles";
+import { createSimpleSettingsStyles, createClubSettingsStyles, createOwnerDashboardStyles, createOwnerStyles, createHubStyles } from "./SettingsScreen.styles";
 import { Ionicons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import { useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -17,7 +17,14 @@ import {
   View,
   useWindowDimensions,
 } from "react-native";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
+
+import { authApi } from "../../services/api/auth";
+import { gymsApi } from "../../services/api/operations";
+import { notificationsApi } from "../../services/api/notifications";
+import { membershipCheckoutApi } from "../../services/api/membershipCheckout";
+import { platformPlansApi } from "../../services/api/platformPlans";
+import { queryClient } from "../../services/queryClient";
 
 import { FormTextField } from "../../components/FormTextField";
 import { NoticeBanner } from "../../components/NoticeBanner";
@@ -105,10 +112,102 @@ export function GymOwnerSettingsScreen(...args: Parameters<typeof useGymOwnerSet
 
 export function useOwnerSettingsHubPresentation() {
   const navigation = useNavigation<any>();
-  const { colors, isDark, setColorScheme } = useAppTheme();
+  let route: any = null;
+  try {
+    route = useRoute<any>();
+  } catch {
+    route = null;
+  }
+  const { colors, isDark, setColorScheme, themeMode, setThemeMode } = useAppTheme();
   const styles = useMemo(() => createSimpleSettingsStyles(colors), [colors]);
+  const clubStyles = useMemo(() => createClubSettingsStyles(colors), [colors]);
   const logout = useLogout();
   const changePassword = useChangePassword();
+  const user = useAuthStore((state) => state.user);
+
+  // Queries
+  const gymQuery = useMyGym();
+  const subscriptionQuery = useQuery({
+    queryKey: ["owner", "subscription"],
+    queryFn: gymsApi.getSubscription,
+    enabled: Boolean(user?.gym_id),
+  });
+  const securityEventsQuery = useQuery({
+    queryKey: ["owner", "security-events"],
+    queryFn: authApi.getSecurityEvents,
+  });
+  const ticketsQuery = useQuery({
+    queryKey: ["owner", "support-tickets"],
+    queryFn: gymsApi.getSupportTickets,
+    enabled: Boolean(user?.gym_id),
+  });
+  const notificationPrefsQuery = useQuery({
+    queryKey: ["owner", "notification-preferences"],
+    queryFn: notificationsApi.getPreferences,
+  });
+  const checkoutSettingsQuery = useQuery({
+    queryKey: ["owner", "checkout-settings"],
+    queryFn: membershipCheckoutApi.settings,
+    enabled: Boolean(user?.gym_id),
+  });
+  const publicPlansQuery = useQuery({
+    queryKey: ["platform-plans", "public"],
+    queryFn: platformPlansApi.listPublic,
+  });
+
+  // Mutations
+  const updateGymMutation = useUpdateMyGym();
+  const updateProfileMutation = useMutation({
+    mutationFn: authApi.updateProfile,
+    onSuccess: (updatedUser) => {
+      useAuthStore.setState({ user: updatedUser });
+      void queryClient.invalidateQueries({ queryKey: ["auth", "me"] });
+    },
+  });
+  const confirmContactMutation = useMutation({
+    mutationFn: authApi.confirmPendingContact,
+    onSuccess: (updatedUser) => {
+      useAuthStore.setState({ user: updatedUser });
+      void queryClient.invalidateQueries({ queryKey: ["auth", "me"] });
+    },
+  });
+  const verifyStepUpMutation = useMutation({
+    mutationFn: authApi.verifyStepUp,
+  });
+  const revokeSessionsMutation = useMutation({
+    mutationFn: authApi.revokeOtherSessions,
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["owner", "security-events"] });
+    },
+  });
+  const updateNotificationPrefMutation = useMutation({
+    mutationFn: notificationsApi.updatePreference,
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["owner", "notification-preferences"] });
+    },
+  });
+  const saveCheckoutSettingsMutation = useMutation({
+    mutationFn: membershipCheckoutApi.saveSettings,
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["owner", "checkout-settings"] });
+    },
+  });
+  const uploadQrMutation = useMutation({
+    mutationFn: membershipCheckoutApi.uploadQr,
+  });
+  const createTicketMutation = useMutation({
+    mutationFn: gymsApi.createSupportTicket,
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["owner", "support-tickets"] });
+    },
+  });
+  const requestDeletionMutation = useMutation({
+    mutationFn: gymsApi.requestDeletion,
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["gyms", "me"] });
+    },
+  });
+
   const { control, handleSubmit, reset, setError, formState: { errors } } = useForm<ChangePasswordPayload>({
     defaultValues: { old_password: "", new_password: "" }
   });
@@ -123,7 +222,44 @@ export function useOwnerSettingsHubPresentation() {
     }
     changePassword.mutate(parsed.data, { onSuccess: () => reset({ old_password: "", new_password: "" }) });
   });
-  return { kind: "view1" as const, props: { styles, navigation, SettingsOptionGrid, isDark, setColorScheme, colors, control, errors, changePassword, submitPasswordChange, logout } };
+
+  return {
+    kind: "view1" as const,
+    props: {
+      styles,
+      clubStyles,
+      navigation,
+      route,
+      isDark,
+      setColorScheme,
+      themeMode,
+      setThemeMode,
+      colors,
+      control,
+      errors,
+      changePassword,
+      submitPasswordChange,
+      logout,
+      user,
+      gymQuery,
+      updateGymMutation,
+      subscriptionQuery,
+      securityEventsQuery,
+      ticketsQuery,
+      notificationPrefsQuery,
+      checkoutSettingsQuery,
+      publicPlansQuery,
+      updateProfileMutation,
+      confirmContactMutation,
+      verifyStepUpMutation,
+      revokeSessionsMutation,
+      updateNotificationPrefMutation,
+      saveCheckoutSettingsMutation,
+      uploadQrMutation,
+      createTicketMutation,
+      requestDeletionMutation,
+    }
+  };
 }
 
 function OwnerSettingsHub(...args: Parameters<typeof useOwnerSettingsHubPresentation>): React.JSX.Element {
@@ -232,24 +368,24 @@ function SettingsLink(...args: Parameters<typeof useSettingsLinkPresentation>): 
 
 
 const ownerDashboardCards = [
-  ["Gym Profile", "Update gym name, address, contact details and logo.", "business-outline", "#0A84FF"],
-  ["Business Information", "Manage business type, GST details and registration info.", "briefcase-outline", "#1685F8"],
-  ["Working Hours", "Set gym opening and closing hours and working days.", "time-outline", "#16B866"],
-  ["Subscription", "View and manage your current subscription plan.", "trophy-outline", "#F58A00"],
-  ["Membership Settings", "Configure membership rules, expiry, freeze and auto renewal.", "person-outline", "#ED4C83"],
-  ["Attendance Settings", "Manage check-in/out rules, late mark and auto checkout.", "calendar-outline", "#1685F8"],
-  ["Payment Methods", "Enable or disable payment methods and manage details.", "card-outline", "#16B866"],
-  ["Receipt & Invoice", "Customize invoice, receipt, prefix and tax settings.", "document-text-outline", "#0A84FF"],
-  ["Notification Preferences", "Configure email, SMS and in-app notification settings.", "notifications-outline", "#F58A00"],
-  ["Trainer Settings", "Set trainer commission, sessions and availability.", "person-circle-outline", "#1685F8"],
-  ["Goal Settings", "Manage default goals for members and tracking rules.", "locate-outline", "#16B866"],
-  ["Workout Settings", "Customize default workout categories and options.", "barbell-outline", "#0A84FF"],
-  ["Nutrition Settings", "Manage default diet plans, meals and nutrition goals.", "restaurant-outline", "#F58A00"],
-  ["Document Settings", "Manage document types and upload requirements.", "folder-outline", "#1685F8"],
-  ["QR Code Settings", "Configure QR for attendance check-in and check-out.", "qr-code-outline", "#16B866"],
-  ["Data & Privacy", "Manage member data, privacy and data export.", "shield-checkmark-outline", "#0A84FF"],
-  ["Backup & Restore", "Backup gym data and restore if required.", "cloud-upload-outline", "#F58A00"],
-  ["Delete Gym", "Permanently delete gym and all associated data.", "trash-outline", "#EF233C"]
+  ["Gym Profile", "Update gym name, address, contact details and logo.", "business-outline", "#E91E63"],
+  ["Business Information", "Manage business type, GST details and registration info.", "briefcase-outline", "#E91E63"],
+  ["Working Hours", "Set gym opening and closing hours and working days.", "time-outline", "#34C759"],
+  ["Subscription", "View and manage your current subscription plan.", "trophy-outline", "#007AFF"],
+  ["Membership Settings", "Configure membership rules, expiry, freeze and auto renewal.", "person-outline", "#E91E63"],
+  ["Attendance Settings", "Manage check-in/out rules, late mark and auto checkout.", "calendar-outline", "#E91E63"],
+  ["Payment Methods", "Enable or disable payment methods and manage details.", "card-outline", "#34C759"],
+  ["Receipt & Invoice", "Customize invoice, receipt, prefix and tax settings.", "document-text-outline", "#E91E63"],
+  ["Notification Preferences", "Configure email, SMS and in-app notification settings.", "notifications-outline", "#007AFF"],
+  ["Trainer Settings", "Set trainer commission, sessions and availability.", "person-circle-outline", "#E91E63"],
+  ["Goal Settings", "Manage default goals for members and tracking rules.", "locate-outline", "#34C759"],
+  ["Workout Settings", "Customize default workout categories and options.", "barbell-outline", "#E91E63"],
+  ["Nutrition Settings", "Manage default diet plans, meals and nutrition goals.", "restaurant-outline", "#007AFF"],
+  ["Document Settings", "Manage document types and upload requirements.", "folder-outline", "#E91E63"],
+  ["QR Code Settings", "Configure QR for attendance check-in and check-out.", "qr-code-outline", "#34C759"],
+  ["Data & Privacy", "Manage member data, privacy and data export.", "shield-checkmark-outline", "#E91E63"],
+  ["Backup & Restore", "Backup gym data and restore if required.", "cloud-upload-outline", "#007AFF"],
+  ["Delete Gym", "Permanently delete gym and all associated data.", "trash-outline", "#FF3B30"]
 ] as const;
 
 const ownerDashboardNav = [["Dashboard", "grid-outline", "AppTabs"], ["Members", "people-outline", "MemberList"], ["Trainers", "people-circle-outline", "Trainers"], ["Receptionists", "person-outline", "Staff"], ["Attendance", "calendar-outline", "Attendance"], ["Workouts", "barbell-outline", "WorkoutPlans"], ["Nutrition", "restaurant-outline", "DietPlans"], ["Payments", "card-outline", "Payments"], ["Reports", "document-text-outline", "Reports"], ["Messages", "mail-outline", "Notifications"]] as const;
@@ -295,145 +431,145 @@ const settingCards = [
     "General Settings",
     "Application name, branding, timezone, language, currency and basic configuration.",
     "settings-outline",
-    "#3B9BFF",
+    "#E91E63",
   ],
   [
     "Security Settings",
     "JWT, 2FA, rate limiting, IP whitelist, password policy and security configurations.",
     "shield-checkmark-outline",
-    "#22C55E",
+    "#34C759",
   ],
   [
     "Role & Permission Settings",
     "Manage roles, permissions, custom roles and feature access control.",
     "people-outline",
-    "#0A84FF",
+    "#E91E63",
   ],
   [
     "Multi-Tenant Settings",
     "Tenant isolation, limits, branding, custom domains and default configurations.",
     "business-outline",
-    "#FBBF24",
+    "#007AFF",
   ],
   [
     "Database Settings",
     "Database connection, backup, optimization, migrations and performance.",
     "server-outline",
-    "#0A84FF",
+    "#E91E63",
   ],
   [
     "Cache Settings",
     "Redis status, cache configuration, expiration and queue management.",
     "layers-outline",
-    "#2DD4BF",
+    "#007AFF",
   ],
   [
     "Storage Settings",
     "Local and cloud storage, file limits, compression and cleanup.",
     "cloud-outline",
-    "#3B9BFF",
+    "#E91E63",
   ],
   [
     "Notification Settings",
     "Email, SMS, push, WhatsApp and in-app notification settings.",
     "notifications-outline",
-    "#F97316",
+    "#E91E63",
   ],
   [
     "Payment Settings",
     "Payment gateways, GST, invoices, refunds and subscription billing.",
     "card-outline",
-    "#4ADE80",
+    "#34C759",
   ],
   [
     "API Settings",
     "API keys, webhooks, rate limits, logs and API versioning.",
     "code-slash-outline",
-    "#3B9BFF",
+    "#E91E63",
   ],
   [
     "AI Settings",
     "AI providers, models, usage limits, logs and cost monitoring.",
     "hardware-chip-outline",
-    "#0A84FF",
+    "#E91E63",
   ],
   [
     "QR Code Settings",
     "QR rotation, expiry, check-in/out rules and branding.",
     "qr-code-outline",
-    "#22D3EE",
+    "#007AFF",
   ],
   [
     "Attendance Settings",
     "Attendance rules, working hours, auto checkout and verification.",
     "calendar-outline",
-    "#F97316",
+    "#E91E63",
   ],
   [
     "Membership Settings",
     "Auto renewal, grace period, freeze, upgrade and discount rules.",
     "trophy-outline",
-    "#0A84FF",
+    "#E91E63",
   ],
   [
     "Email Settings",
     "SMTP configuration, templates, queue and delivery logs.",
     "mail-outline",
-    "#4ADE80",
+    "#34C759",
   ],
   [
     "Backup & Recovery",
     "Backups, restore, schedules and cloud backup management.",
     "cloud-upload-outline",
-    "#3B9BFF",
+    "#E91E63",
   ],
   [
     "Logs & Monitoring",
     "System logs, error logs, audit logs and security monitoring.",
     "analytics-outline",
-    "#EF4444",
+    "#FF3B30",
   ],
   [
     "Performance Settings",
     "System performance, resources usage and optimization.",
     "speedometer-outline",
-    "#3B9BFF",
+    "#E91E63",
   ],
   [
     "Feature Management",
     "Enable/disable modules, feature flags and maintenance mode.",
     "flag-outline",
-    "#0A84FF",
+    "#E91E63",
   ],
   [
     "Integrations",
     "Third-party integrations and external service configurations.",
     "extension-puzzle-outline",
-    "#22C55E",
+    "#34C759",
   ],
   [
     "Licensing",
     "License key, status, plan details and renewal configurations.",
     "ribbon-outline",
-    "#FBBF24",
+    "#007AFF",
   ],
   [
     "Analytics",
     "Users, revenue, growth, API usage and AI analytics.",
     "pie-chart-outline",
-    "#0A84FF",
+    "#E91E63",
   ],
   [
     "Maintenance",
     "System maintenance, cleanup, optimization and health check.",
     "construct-outline",
-    "#F97316",
+    "#E91E63",
   ],
   [
     "About System",
     "System information, versions, environment and license details.",
     "information-circle-outline",
-    "#2DD4BF",
+    "#007AFF",
   ],
 ] as const;
 

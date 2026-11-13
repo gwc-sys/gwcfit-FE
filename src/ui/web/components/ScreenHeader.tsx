@@ -47,7 +47,7 @@ export function ScreenHeader({ title, subtitle, icon, onBack, actionIcon, onActi
       </View>
       {actionIcon && onAction ? (
         <Pressable accessibilityLabel={`${title} action`} accessibilityRole="button" onPress={onAction} style={styles.actionButton}>
-          <Ionicons name={actionIcon} size={22} color={colors.white} />
+          <Ionicons name={actionIcon} size={22} color={colors.primary} />
         </Pressable>
       ) : null}
     </View>
@@ -94,11 +94,11 @@ const createStyles = (colors: ThemeColors) =>
     borderColor: colors.border
   },
   actionButton: {
-    width: 46,
-    height: 46,
+    width: 44,
+    height: 44,
     alignItems: "center",
     justifyContent: "center",
     borderRadius: radius.sm,
-    backgroundColor: colors.primary
+    backgroundColor: colors.primarySoft
   }
   });

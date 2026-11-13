@@ -1,43 +1,66 @@
-:root {
-  color-scheme: light dark;
-  --bg: #f5f5f7;
-  --surface: #ffffff;
-  --card: #ffffff;
-  --card-strong: #f2f2f7;
-  --border: rgba(60, 60, 67, 0.15);
-  --text-primary: #1d1d1f;
-  --text-secondary: #6e6e73;
-  --text-muted: #8e8e93;
-  --primary: #007aff;
-  --blue: #007aff;
-  --cyan: #5ac8fa;
-  --success: #34c759;
-  --warning: #ff9500;
-  --pink: #af52de;
-  --shadow-soft: 0 12px 40px rgba(0, 0, 0, 0.1);
-  --shadow-card: 0 4px 16px rgba(0, 0, 0, 0.06);
+:root,
+:root[data-theme="light"],
+[data-theme="light"] {
+  color-scheme: light;
+  --bg: #F2F2F7;
+  --surface: #FFFFFF;
+  --card: #FFFFFF;
+  --card-strong: #FFFFFF;
+  --border: rgba(0, 0, 0, 0.12);
+  --text-primary: #000000;
+  --text-secondary: #1C1C1E;
+  --text-muted: #1C1C1E;
+  --primary: #E91E63;
+  --blue: #007AFF;
+  --cyan: #007AFF;
+  --success: #34C759;
+  --warning: #1C1C1E;
+  --pink: #E91E63;
+  --shadow-soft: 0 8px 24px rgba(0, 0, 0, 0.08);
+  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.05);
   --radius-card: 20px;
-  --font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-family: "SF Pro Display", "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
     --bg: #000000;
-    --surface: #1c1c1e;
-    --card: #1c1c1e;
-    --card-strong: #2c2c2e;
-    --border: rgba(84, 84, 88, 0.65);
-    --text-primary: #f5f5f7;
-    --text-secondary: #aeaeb2;
-    --text-muted: #8e8e93;
-    --primary: #0a84ff;
-    --blue: #0a84ff;
-    --cyan: #64d2ff;
-    --success: #30d158;
-    --warning: #ff9f0a;
-    --shadow-soft: 0 12px 40px rgba(0, 0, 0, 0.36);
-    --shadow-card: 0 4px 18px rgba(0, 0, 0, 0.28);
+    --surface: #1C1C1E;
+    --card: #1C1C1E;
+    --card-strong: #1C1C1E;
+    --border: rgba(255, 255, 255, 0.16);
+    --text-primary: #FFFFFF;
+    --text-secondary: #F2F2F7;
+    --text-muted: #F2F2F7;
+    --primary: #E91E63;
+    --blue: #007AFF;
+    --cyan: #007AFF;
+    --success: #34C759;
+    --warning: #F2F2F7;
+    --shadow-soft: 0 8px 24px rgba(0, 0, 0, 0.24);
+    --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.18);
   }
+}
+
+:root[data-theme="dark"],
+[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #000000;
+  --surface: #1C1C1E;
+  --card: #1C1C1E;
+  --card-strong: #1C1C1E;
+  --border: rgba(255, 255, 255, 0.16);
+  --text-primary: #FFFFFF;
+  --text-secondary: #F2F2F7;
+  --text-muted: #F2F2F7;
+  --primary: #E91E63;
+  --blue: #007AFF;
+  --cyan: #007AFF;
+  --success: #34C759;
+  --warning: #F2F2F7;
+  --shadow-soft: 0 8px 24px rgba(0, 0, 0, 0.24);
+  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.18);
 }
 
 * {
@@ -116,8 +139,8 @@ button {
   border-radius: 14px;
   display: grid;
   place-items: center;
-  background: linear-gradient(135deg, #ffffff, rgba(255, 255, 255, 0.72));
-  color: #050a12;
+  background: #ffffff;
+  color: #000000;
   font-weight: 900;
 }
 
@@ -190,8 +213,8 @@ button {
   border-radius: 999px;
   display: grid;
   place-items: center;
-  background: linear-gradient(135deg, #dbeafe, #93c5fd);
-  color: #0f172a;
+  background: rgba(0, 122, 255, 0.12);
+  color: #007AFF;
   font-weight: 900;
 }
 
@@ -299,33 +322,33 @@ button {
   border-radius: 18px;
   display: inline-grid;
   place-items: center;
-  color: #fff;
+  color: #ffffff;
   font-size: 12px;
   font-weight: 900;
 }
 
 .violet {
-  background: #007aff;
+  background: #007AFF;
 }
 
 .green {
-  background: linear-gradient(135deg, #22c55e, #14b8a6);
+  background: #34C759;
 }
 
 .blue {
-  background: #007aff;
+  background: #007AFF;
 }
 
 .amber {
-  background: linear-gradient(135deg, #f59e0b, #f97316);
+  background: #E91E63;
 }
 
 .cyan {
-  background: linear-gradient(135deg, #14b8a6, #06b6d4);
+  background: #007AFF;
 }
 
 .pink {
-  background: linear-gradient(135deg, #ec4899, #f43f5e);
+  background: #E91E63;
 }
 
 .stat-number {
@@ -450,7 +473,7 @@ button {
   display: block;
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, var(--primary), var(--blue));
+  background: var(--primary);
 }
 
 @media (max-width: 1180px) {

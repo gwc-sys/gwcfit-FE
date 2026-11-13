@@ -23,7 +23,7 @@ export const styles = StyleSheet.create({
     fontWeight: "900"
   },
   heroBody: {
-    color: "#C9CED7",
+    color: "#F2F2F7",
     fontSize: type.body,
     lineHeight: 25
   },

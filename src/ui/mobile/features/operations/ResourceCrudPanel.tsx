@@ -514,7 +514,7 @@ export function ResourceCrudPanelView<TRead extends { id: string }, TCreate, TUp
             refreshControl={
               <RefreshControl
                 refreshing={listQuery.isFetching}
-                onRefresh={() => listQuery.refetch()}
+                onRefresh={() => { void listQuery.refetch(); }}
               />
             }
             renderItem={({ item }) => {
@@ -718,7 +718,7 @@ export function GenderWorkoutSessionPickerView({ model }: { model: ReturnType<ty
             <Text
               style={{
                 ...typography.small,
-                color: category === item ? "#fff" : colors.muted,
+                color: category === item ? "#FFFFFF" : colors.muted,
               }}
             >
               {item} ({genderExercisesByGroup[gender][item].length})

@@ -1,6 +1,5 @@
 export const memberServices = [
   { title: "Membership", description: "Plan, status and renewal dates", icon: "ribbon-outline", route: "MemberMembership" },
-  { title: "Payments", description: "Recorded payments and balances", icon: "card-outline", route: "MemberPayments" },
   { title: "Meal plan", description: "Meals, nutrition and water tracking", icon: "restaurant-outline", route: "MemberMealPlan" },
   { title: "My trainer", description: "Trainer details and assigned plans", icon: "person-outline", route: "MemberTrainer" },
   { title: "Classes", description: "Book or cancel gym classes", icon: "calendar-outline", route: "MemberClasses" },

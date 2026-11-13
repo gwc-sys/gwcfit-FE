@@ -1,7 +1,7 @@
 import * as SystemUI from "expo-system-ui";
 import { createContext, useCallback, useContext, useEffect, useMemo } from "react";
 import type { ReactNode } from "react";
-import { useColorScheme } from "react-native";
+import { Platform, useColorScheme } from "react-native";
 
 import { useFitnessStore } from "../store/useFitnessStore";
 import { useAuthStore } from "../store/useAuthStore";
@@ -57,7 +57,14 @@ export function AppThemeProvider({ children }: AppThemeProviderProps) {
 
   useEffect(() => {
     void SystemUI.setBackgroundColorAsync(themeColors.background);
-  }, [themeColors.background]);
+    if (Platform.OS === "web" && typeof document !== "undefined") {
+      document.documentElement.setAttribute("data-theme", colorScheme);
+      document.documentElement.style.colorScheme = colorScheme;
+      document.documentElement.style.backgroundColor = themeColors.background;
+      document.body.style.backgroundColor = themeColors.background;
+      document.body.style.color = themeColors.ink;
+    }
+  }, [themeColors.background, themeColors.ink, colorScheme]);
 
   const value = useMemo(
     () => ({

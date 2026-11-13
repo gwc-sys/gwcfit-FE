@@ -36,7 +36,7 @@ export function Screen({
   refreshControl,
   keyboard = false,
   maxWidth = "dashboard",
-  reference = true
+  reference = false
 }: ScreenProps) {
   const { colors, isDark } = useAppTheme();
   const embedded = useContext(EmbeddedScreenContext);
@@ -47,7 +47,9 @@ export function Screen({
   const backgroundColor = embedded ? "transparent" : dark ? colors.dark : colors.background;
   const availableWidth = Math.max(0, width - insets.left - insets.right);
   const horizontalPadding = getResponsiveScreenPadding(availableWidth);
-  const bottomPadding = getResponsiveBottomInset(width, insideTabs ? 0 : insets.bottom);
+  const bottomPadding = insideTabs
+    ? 64 + Math.max(insets.bottom, 12) + 24
+    : getResponsiveBottomInset(width, insets.bottom);
   const resolvedMaxWidth = resolveContentMaxWidth(availableWidth, maxWidth);
   const topPadding = width < breakpoints.tablet ? getResponsiveSpacing(width, spacing.md) : getResponsiveSpacing(width, spacing.lg);
   const bodyStyle = [

@@ -10,6 +10,7 @@ import type {
   MemberGoalCreate,
   MemberGoalUpdate,
   MemberMealPlan,
+  MemberMealPlanCreate,
   MemberMembership,
   MemberNotification,
   MemberPayment,
@@ -18,6 +19,8 @@ import type {
   MemberProgressLog,
   MemberProgressLogCreate,
   MemberReward,
+  MemberGamificationSummary,
+  RedeemPerkResponse,
   MemberTrainer,
   TrainerFeedback,
   TrainerFeedbackPayload,
@@ -107,6 +110,11 @@ export const memberApi = {
     return response.data;
   },
 
+  async createMemberMealPlan(payload: MemberMealPlanCreate) {
+    const response = await apiClient.post<MemberMealPlan>("/member/meals", payload);
+    return response.data;
+  },
+
   async completeMeal(mealPlanUuid: string, payload: { notes?: string; water_ml?: number; extra_meal?: unknown } = {}) {
     const response = await apiClient.post<MemberMealPlan>(`/member/meals/${mealPlanUuid}/complete`, payload);
     return response.data;
@@ -120,6 +128,10 @@ export const memberApi = {
   async createProgressLog(payload: MemberProgressLogCreate) {
     const response = await apiClient.post<MemberProgressLog>("/member/progress", payload);
     return response.data;
+  },
+
+  async deleteProgressLog(progressUuid: string) {
+    await apiClient.delete(`/member/progress/${progressUuid}`);
   },
 
   async getMemberTrainer() {
@@ -170,6 +182,21 @@ export const memberApi = {
     return response.data;
   },
 
+  async markAllNotificationsRead() {
+    const response = await apiClient.post<MemberNotification[]>("/member/notifications/read-all");
+    return response.data;
+  },
+
+  async dismissNotification(notificationUuid: string) {
+    const response = await apiClient.delete<{ status: string; notification_uuid: string }>(`/member/notifications/${notificationUuid}`);
+    return response.data;
+  },
+
+  async clearAllNotifications() {
+    const response = await apiClient.post<{ status: string; cleared_count: number }>("/member/notifications/clear-all");
+    return response.data;
+  },
+
   async getMemberGoals() {
     const response = await apiClient.get<MemberGoal[]>("/member/goals");
     return response.data;
@@ -187,6 +214,18 @@ export const memberApi = {
 
   async getMemberRewards() {
     const response = await apiClient.get<MemberReward[]>("/member/rewards");
+    return response.data;
+  },
+
+  async getMemberGamification() {
+    const response = await apiClient.get<MemberGamificationSummary>("/member/gamification");
+    return response.data;
+  },
+
+  async redeemMemberPerk(perkId: string) {
+    const response = await apiClient.post<RedeemPerkResponse>("/member/perks/redeem", {
+      perk_id: perkId,
+    });
     return response.data;
   },
 

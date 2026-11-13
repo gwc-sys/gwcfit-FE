@@ -227,7 +227,7 @@ const createStyles = (colors: ThemeColors, width: number, height: number, topIns
     flex: 1,
     justifyContent: centered ? "center" : "flex-end",
     alignItems: "center",
-    backgroundColor: "rgba(15, 23, 42, 0.45)",
+    backgroundColor: "rgba(0, 0, 0, 0.45)",
     paddingHorizontal: centered ? spacing.lg : spacing.md,
     paddingTop: Math.max(spacing.lg, topInset + spacing.sm),
     paddingBottom: centered ? spacing.lg : Math.max(spacing.md, bottomInset + spacing.sm)

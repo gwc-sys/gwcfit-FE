@@ -1,5 +1,6 @@
 import { SuperAdminDashboardScreen } from "../../../../screens/saas/SuperAdminDashboardScreen";
 import { GymAdminDashboardScreen } from "../../../../screens/saas/GymAdminDashboardScreen";
+import { GymOwnerDashboardScreen } from "../../../../screens/saas/GymOwnerDashboardScreen";
 import { TrainerDashboardScreen } from "../../../../screens/saas/TrainerDashboardScreen";
 import { MemberDashboardScreen } from "../../../../screens/member/MemberDashboardScreen";
 import type * as React from "react";
@@ -27,7 +28,7 @@ export function RoleDashboardScreenView({ model }: { model: ReturnType<typeof us
     }
     case "view5": {
       
-      return (<GymAdminDashboardScreen />);
+      return (<GymOwnerDashboardScreen />);
     }
   }
 }

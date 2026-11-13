@@ -1,8 +1,33 @@
 import { Platform } from "react-native";
+import {
+  BASE_COLORS,
+  ALPHA,
+  pulseFitColors,
+  palette,
+  colors,
+  lightColors,
+  lightThemeColors,
+  darkThemeColors,
+  getThemeColors,
+  type AppColorScheme,
+  type AppThemeMode,
+  type ThemeColors,
+} from "../../../theme/colors";
 
-export type AppColorScheme = "light" | "dark";
-
-export type AppThemeMode = AppColorScheme | "system";
+export {
+  BASE_COLORS,
+  ALPHA,
+  pulseFitColors,
+  palette,
+  colors,
+  lightColors,
+  lightThemeColors,
+  darkThemeColors,
+  getThemeColors,
+  type AppColorScheme,
+  type AppThemeMode,
+  type ThemeColors,
+};
 
 export const controlMetrics = {
   minimumTouchSize: Platform.OS === "android" ? 48 : 44,
@@ -10,61 +35,6 @@ export const controlMetrics = {
   focusBorderWidth: 2,
   iconSize: 22
 } as const;
-
-export const palette = {
-  // Semantic system colors. Keep the compatibility names below so existing
-  // feature screens inherit the redesign without changing their data flows.
-  primary: "#007AFF",
-  success: "#34C759",
-  warning: "#FF9500",
-  danger: "#FF3B30",
-
-  // Backwards-compatible palette tokens used by existing components
-  blue: "#007AFF",
-  blueDark: "#0066CC",
-  blueSoft: "rgba(0,122,255,0.14)",
-  teal: "#0D9488",
-  tealDark: "#0F766E",
-  tealSoft: "rgba(13,148,136,0.18)",
-  green: "#34C759",
-  greenDark: "#15803D",
-  greenSoft: "rgba(22,163,74,0.18)",
-  coral: "#FF3B30",
-  coralSoft: "rgba(225,29,72,0.16)",
-  amber: "#D97706",
-  amberSoft: "rgba(217,119,6,0.16)",
-  indigo: "#5856D6",
-  indigoSoft: "rgba(79,70,229,0.18)",
-
-  // Dark theme tokens
-  darkBackground: "#000000",
-  darkSurface: "#1C1C1E",
-  darkCard: "#2C2C2E",
-  darkCardBorder: "#38383A",
-
-  // Light theme tokens
-  lightBackground: "#F2F2F7",
-  lightSurface: "#FFFFFF",
-  lightBorder: "#E5E5EA",
-
-  // Text
-  textLight: "#F5F5F7",
-  textSecondaryLight: "#A1A1A8",
-  textMutedLight: "#8E8E93",
-
-  textDark: "#1C1C1E",
-  textSecondaryDark: "#6C6C70",
-  textMutedDark: "#8E8E93",
-
-  // Convenience
-  black: "#000000",
-  dark: "#000000",
-  border: "#E5E5EA",
-  muted: "#6C6C70",
-  subtle: "#8E8E93",
-  text: "#1C1C1E",
-  white: "#FFFFFF"
-};
 
 export const spacing = {
   // canonical names (legacy compatibility with existing code)
@@ -105,10 +75,54 @@ export const radii = {
 };
 
 export const font = {
-  regular: Platform.select({ ios: "System", android: "System" }),
-  medium: Platform.select({ ios: "System", android: "System" }),
-  bold: Platform.select({ ios: "System", android: "System" })
+  regular: Platform.select({ ios: undefined, android: undefined }),
+  medium: Platform.select({ ios: undefined, android: undefined }),
+  bold: Platform.select({ ios: undefined, android: undefined })
 };
+
+export const semanticTypography = {
+  pageTitle: {
+    fontSize: 28,
+    lineHeight: 34,
+    fontWeight: "700" as const
+  },
+  sectionHeading: {
+    fontSize: 20,
+    lineHeight: 26,
+    fontWeight: "600" as const
+  },
+  cardHeading: {
+    fontSize: 17,
+    lineHeight: 22,
+    fontWeight: "600" as const
+  },
+  body: {
+    fontSize: 17,
+    lineHeight: 24,
+    fontWeight: "400" as const
+  },
+  buttonLabel: {
+    fontSize: 17,
+    lineHeight: 22,
+    fontWeight: "600" as const
+  },
+  secondaryText: {
+    fontSize: 15,
+    lineHeight: 20,
+    fontWeight: "400" as const
+  },
+  caption: {
+    fontSize: 13,
+    lineHeight: 18,
+    fontWeight: "400" as const
+  },
+  dashboardMetric: {
+    fontSize: 32,
+    lineHeight: 38,
+    fontWeight: "700" as const,
+    fontVariant: ["tabular-nums"] as ("tabular-nums")[]
+  }
+} as const;
 
 export const typography = {
   // primary headings
@@ -157,39 +171,38 @@ export const typography = {
 export const shadows = {
   soft:
     Platform.OS === "web"
-      ? { boxShadow: "0 12px 40px rgba(0,0,0,0.10)" }
+      ? { boxShadow: "0 8px 24px rgba(0,0,0,0.08)" }
       : {
-          shadowColor: "#000",
-          shadowOffset: { width: 0, height: 8 },
-          shadowOpacity: 0.1,
-          shadowRadius: 20,
-          elevation: 4
-        },
-  card:
-    Platform.OS === "web"
-      ? { boxShadow: "0 4px 16px rgba(0,0,0,0.06)" }
-      : {
-          shadowColor: "#000",
+          shadowColor: "#000000",
           shadowOffset: { width: 0, height: 4 },
           shadowOpacity: 0.08,
           shadowRadius: 12,
           elevation: 2
         },
+  card:
+    Platform.OS === "web"
+      ? { boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }
+      : {
+          shadowColor: "#000000",
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.06,
+          shadowRadius: 6,
+          elevation: 1
+        },
   button:
     Platform.OS === "web"
-      ? { boxShadow: "0 4px 12px rgba(0,122,255,0.18)" }
+      ? { boxShadow: "none" }
       : {
-          shadowColor: "#007AFF",
-          shadowOffset: { width: 0, height: 4 },
-          shadowOpacity: 0.18,
-          shadowRadius: 10,
-          elevation: 3
+          shadowColor: "#000000",
+          shadowOpacity: 0,
+          shadowRadius: 0,
+          elevation: 0
         },
   subtle:
     Platform.OS === "web"
       ? { boxShadow: "0 1px 2px rgba(0,0,0,0.04)" }
       : {
-          shadowColor: "#000",
+          shadowColor: "#000000",
           shadowOffset: { width: 0, height: 1 },
           shadowOpacity: 0.06,
           shadowRadius: 2,
@@ -221,8 +234,77 @@ export const contentWidths = {
 };
 
 export function getResponsiveScreenPadding(width: number) {
+  if (width < 360) return 14;
+  if (width < 400) return layout.compactScreenPadding;
   if (width < breakpoints.tablet) return layout.phoneScreenPadding;
   return layout.screenPadding;
+}
+
+export function fluidClamp(width: number, min: number, standard: number, max: number): number {
+  const safeWidth = Math.max(320, width || 390);
+  if (safeWidth <= 320) return min;
+  if (safeWidth >= 440) return max;
+  if (safeWidth <= 390) {
+    const ratio = (safeWidth - 320) / (390 - 320);
+    return Math.round((min + (standard - min) * ratio) * 10) / 10;
+  }
+  const ratio = (safeWidth - 390) / (440 - 390);
+  return Math.round((standard + (max - standard) * ratio) * 10) / 10;
+}
+
+export type MobileViewportMetrics = {
+  width: number;
+  height: number;
+  isUltraCompact: boolean;
+  isCompact: boolean;
+  isStandard: boolean;
+  isLargePhone: boolean;
+  isTallAspect: boolean;
+  horizontalPadding: number;
+  cardPadding: number;
+  gridGap: number;
+  heroTitleSize: number;
+  sectionTitleSize: number;
+  metricValueSize: number;
+  touchTargetMin: number;
+  safeTopPadding: number;
+  safeBottomPadding: number;
+};
+
+export function getMobileViewportMetrics(
+  width: number,
+  height = 844,
+  insets?: { top?: number; bottom?: number; left?: number; right?: number } | null
+): MobileViewportMetrics {
+  const safeW = Math.max(320, width || 390);
+  const safeH = Math.max(480, height || 844);
+  const isUltraCompact = safeW < 360;
+  const isCompact = safeW < 380;
+  const isStandard = safeW >= 375 && safeW <= 395;
+  const isLargePhone = safeW >= 412;
+  const isTallAspect = safeH / safeW >= 2.1;
+
+  const basePad = isUltraCompact ? 12 : isCompact ? 14 : isLargePhone ? 18 : 16;
+  const horizontalInset = Math.max(insets?.left ?? 0, insets?.right ?? 0);
+
+  return {
+    width: safeW,
+    height: safeH,
+    isUltraCompact,
+    isCompact,
+    isStandard,
+    isLargePhone,
+    isTallAspect,
+    horizontalPadding: Math.max(basePad, horizontalInset + 10),
+    cardPadding: isUltraCompact ? 13 : isCompact ? 15 : 18,
+    gridGap: isUltraCompact ? 8 : isCompact ? 10 : 12,
+    heroTitleSize: fluidClamp(safeW, 26, 32, 34),
+    sectionTitleSize: fluidClamp(safeW, 16, 18, 20),
+    metricValueSize: fluidClamp(safeW, 19, 23, 25),
+    touchTargetMin: controlMetrics.minimumTouchSize,
+    safeTopPadding: Math.max(insets?.top ?? 0, 6),
+    safeBottomPadding: Math.max(insets?.bottom ?? 0, 16) + 20
+  };
 }
 
 export type ScreenContentWidth = keyof typeof contentWidths | number | "none";
@@ -298,104 +380,6 @@ export function getFloatingTabBarMetrics(
     width: tabBarWidth
   };
 }
-
-export const colors = {
-  // Dark theme
-  primary: "#0A84FF",
-  primaryButton: "#0A84FF",
-  accent: "#0A84FF",
-  success: "#30D158",
-  info: "#64D2FF",
-  warning: "#FF9F0A",
-  danger: "#FF453A",
-  dangerButton: "#C9342A",
-  background: "#000000",
-  surface: "#1C1C1E",
-  card: "#1C1C1E",
-  border: "#38383A",
-  white: "#FFFFFF",
-  ink: "#F5F5F7",
-  inkSoft: "#D1D1D6",
-  textPrimary: "#F5F5F7",
-  textSecondary: "#A1A1A8",
-  textMuted: "#8E8E93",
-  primaryDark: "#64D2FF",
-  dark: "#000000",
-
-  // Compat keys used across the codebase
-  muted: "#A1A1A8",
-  subtle: "#8E8E93",
-  surfaceElevated: "#2C2C2E",
-  surfaceMuted: "#2C2C2E",
-  surfaceStrong: "#3A3A3C",
-  borderMuted: "#38383A",
-
-  // Soft variants for semantic colors
-  dangerSoft: "rgba(255,69,58,0.16)",
-  successSoft: "rgba(48,209,88,0.16)",
-  infoSoft: "rgba(100,210,255,0.16)",
-  warningSoft: "rgba(255,159,10,0.16)",
-  primarySoft: "rgba(10,132,255,0.18)",
-  accentSoft: "rgba(10,132,255,0.12)",
-
-  // Light fallbacks (used when theme switches)
-  lightBackground: "#F2F2F7",
-  lightSurface: "#FFFFFF",
-  lightBorder: "#E5E5EA",
-  // additional compatibility
-  darkCard: "#1C1C1E",
-  darkCardBorder: "#38383A",
-  text: "#FFFFFF"
-};
-
-export const lightColors = {
-  primary: "#0066CC",
-  primaryButton: "#0066CC",
-  accent: "#007AFF",
-  info: "#0066CC",
-  success: "#1E7835",
-  warning: "#8A5100",
-  danger: "#C9342A",
-  dangerButton: "#C9342A",
-  background: "#F2F2F7",
-  surface: "#FFFFFF",
-  card: "#FFFFFF",
-  border: "#E5E5EA",
-  textPrimary: "#1C1C1E",
-  textSecondary: "#6C6C70",
-  textMuted: "#6C6C70",
-
-  // Compatibility keys
-  white: "#FFFFFF",
-  ink: "#1C1C1E",
-  inkSoft: "#3A3A3C",
-  muted: "#6C6C70",
-  subtle: "#6C6C70",
-  surfaceElevated: "#FFFFFF",
-  surfaceMuted: "#F2F2F7",
-  surfaceStrong: "#E5E5EA",
-  borderMuted: "rgba(60,60,67,0.08)",
-
-  // Soft semantic variants
-  dangerSoft: "rgba(255,59,48,0.10)",
-  successSoft: "rgba(52,199,89,0.10)",
-  warningSoft: "rgba(255,149,0,0.10)",
-  infoSoft: "rgba(90,200,250,0.12)",
-  primarySoft: "rgba(0,122,255,0.12)",
-  accentSoft: "rgba(0,122,255,0.08)",
-  // compatibility
-  text: "#1C1C1E",
-  primaryDark: "#0066CC",
-  dark: "#000000",
-  darkCard: "#FFFFFF",
-  darkCardBorder: "rgba(2,6,23,0.04)"
-};
-
-export function getThemeColors(colorScheme: AppColorScheme) {
-  return colorScheme === "dark" ? colors : lightColors;
-}
-
-export type ThemeColors = ReturnType<typeof getThemeColors>;
 
 export const radius = radii;
 

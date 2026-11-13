@@ -54,7 +54,7 @@ export const makeStyles = (c: any, compact: boolean) =>
       alignItems: "center",
       justifyContent: "center",
       padding: 15,
-      backgroundColor: "#fff",
+      backgroundColor: "#FFFFFF",
       borderRadius: 14,
       borderWidth: 4,
       borderColor: c.primary,
@@ -133,7 +133,7 @@ export const makeStyles = (c: any, compact: boolean) =>
     modalQr: {
       padding: 12,
       borderRadius: 14,
-      backgroundColor: "#fff",
+      backgroundColor: "#FFFFFF",
       borderWidth: 5,
       borderColor: c.primary,
     },

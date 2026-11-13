@@ -7,35 +7,35 @@ import type { AppColorScheme, ThemeColors } from "../theme/theme";
 export function nutritionColors(base: ThemeColors, scheme: AppColorScheme): ThemeColors & { dangerButton: string } {
   return scheme === "dark" ? {
     ...base,
-    dangerButton: "#C9342A",
-    primaryButton: "#0A84FF",
+    dangerButton: "#FF3B30",
+    primaryButton: "#E91E63",
     background: "#000000",
     surface: "#1C1C1E",
     card: "#1C1C1E",
-    border: "#38383A",
-    borderMuted: "#38383A",
-    muted: "#A1A1A8",
-    textSecondary: "#A1A1A8",
-    darkCardBorder: "#38383A",
+    border: "#1C1C1E",
+    borderMuted: "#1C1C1E",
+    muted: "#F2F2F7",
+    textSecondary: "#F2F2F7",
+    darkCardBorder: "#1C1C1E",
   } : {
     ...base,
-    dangerButton: "#C9342A",
-    accent: "#007AFF",
+    dangerButton: "#FF3B30",
+    accent: "#E91E63",
     background: "#F2F2F7",
-    border: "#E5E5EA",
-    ink: "#1C1C1E",
-    text: "#1C1C1E",
-    textPrimary: "#1C1C1E",
-    muted: "#6C6C70",
-    subtle: "#6C6C70",
-    textSecondary: "#6C6C70",
-    textMuted: "#6C6C70",
-    success: "#1E7835",
+    border: "#F2F2F7",
+    ink: "#000000",
+    text: "#000000",
+    textPrimary: "#000000",
+    muted: "#F2F2F7",
+    subtle: "#F2F2F7",
+    textSecondary: "#F2F2F7",
+    textMuted: "#F2F2F7",
+    success: "#34C759",
   };
 }
 
 export function NutritionAppearance({ children }: { children: (colors: ThemeColors) => ReactNode }) {
   const { colors: base, colorScheme } = useAppTheme();
   const colors = useMemo(() => nutritionColors(base, colorScheme), [base, colorScheme]);
-  return <AppThemeColorScope colors={colors}>{children(colors)}</AppThemeColorScope>;
+  return <AppThemeColorScope colors={colors as any}>{children(colors as any)}</AppThemeColorScope>;
 }

@@ -1,8 +1,9 @@
 import { Platform, StyleSheet } from "react-native";
 import { radius, spacing, typography } from "../../../theme/theme";
 
-export const createStyles = (colors: any, compactHeader: boolean) =>
-  StyleSheet.create({
+export const createStyles = (colors: any, compactHeader: boolean) => {
+  const c = colors;
+  return StyleSheet.create({
     screen: {
       gap: spacing.lg,
       paddingTop: spacing.md,
@@ -73,32 +74,32 @@ export const createStyles = (colors: any, compactHeader: boolean) =>
       justifyContent: "space-between",
       gap: 18,
       borderWidth: 1,
-      borderColor: "#17243A",
+      borderColor: c.border,
       borderRadius: 14,
       paddingHorizontal: compactHeader ? 16 : 20,
       paddingVertical: 16,
-      backgroundColor: "#050D18",
+      backgroundColor: colors.surface,
       ...(Platform.OS === "web"
-        ? { boxShadow: "0 8px 28px rgba(0,0,0,0.20)" }
+        ? { boxShadow: "0 8px 28px rgba(0,0,0,0.10)" }
         : {
-            shadowColor: "#000000",
+            shadowColor: colors.shadowColor,
             shadowOffset: { width: 0, height: 8 },
-            shadowOpacity: 0.2,
+            shadowOpacity: 0.1,
             shadowRadius: 14,
-            elevation: 10,
+            elevation: 6,
           }),
     },
     trainerGreeting: { flex: 1, minWidth: 210 },
-    trainerGreetingName: { color: "#FFFFFF", fontSize: 30, lineHeight: 35, fontWeight: "900" },
-    trainerGreetingText: { color: "#8CC7FF", fontSize: 14, lineHeight: 20, fontWeight: "700" },
+    trainerGreetingName: { color: colors.ink, fontSize: 30, lineHeight: 35, fontWeight: "900" },
+    trainerGreetingText: { color: colors.primary, fontSize: 14, lineHeight: 20, fontWeight: "700" },
     trainerHeaderActions: { flexDirection: "row", alignItems: "center", justifyContent: compactHeader ? "flex-start" : "flex-end", flexWrap: "wrap", gap: 12 },
-    trainerSearch: { width: compactHeader ? "100%" : 298, height: 58, flexDirection: "row", alignItems: "center", gap: 11, borderWidth: 1, borderColor: "#263651", borderRadius: 11, paddingHorizontal: 16, backgroundColor: "#111C31" },
-    trainerSearchInput: { flex: 1, height: "100%", color: "#FFFFFF", fontSize: 14, outlineStyle: "none" } as any,
-    trainerDate: { height: 58, flexDirection: "row", alignItems: "center", gap: 11, borderWidth: 1, borderColor: "#263651", borderRadius: 11, paddingHorizontal: 16, backgroundColor: "#111C31" },
-    trainerDateText: { color: "#FFFFFF", fontSize: 14, fontWeight: "900" },
-    trainerHeaderIcon: { width: 58, height: 58, alignItems: "center", justifyContent: "center", borderWidth: 1, borderColor: "#263651", borderRadius: 29, backgroundColor: "#111C31" },
-    trainerProfileButton: { width: 52, height: 52, alignItems: "center", justifyContent: "center", borderWidth: 4, borderColor: "#0A84FF", borderRadius: 26 },
-    trainerProfileInner: { width: 38, height: 38, alignItems: "center", justifyContent: "center", borderRadius: 19, backgroundColor: "#38216E" },
+    trainerSearch: { width: compactHeader ? "100%" : 298, height: 58, flexDirection: "row", alignItems: "center", gap: 11, borderWidth: 1, borderColor: colors.border, borderRadius: 11, paddingHorizontal: 16, backgroundColor: colors.surfaceElevated },
+    trainerSearchInput: { flex: 1, height: "100%", color: colors.ink, fontSize: 14, outlineStyle: "none" } as any,
+    trainerDate: { height: 58, flexDirection: "row", alignItems: "center", gap: 11, borderWidth: 1, borderColor: colors.border, borderRadius: 11, paddingHorizontal: 16, backgroundColor: colors.surfaceElevated },
+    trainerDateText: { color: colors.ink, fontSize: 14, fontWeight: "900" },
+    trainerHeaderIcon: { width: 58, height: 58, alignItems: "center", justifyContent: "center", borderWidth: 1, borderColor: colors.border, borderRadius: 29, backgroundColor: colors.surfaceElevated },
+    trainerProfileButton: { width: 52, height: 52, alignItems: "center", justifyContent: "center", borderWidth: 4, borderColor: "#E91E63", borderRadius: 26 },
+    trainerProfileInner: { width: 38, height: 38, alignItems: "center", justifyContent: "center", borderRadius: 19, backgroundColor: "rgba(0, 122, 255, 0.14)" },
     metricGrid: {
       flexDirection: "row",
       flexWrap: "wrap",
@@ -194,3 +195,4 @@ export const createStyles = (colors: any, compactHeader: boolean) =>
       color: colors.muted
     }
   });
+};

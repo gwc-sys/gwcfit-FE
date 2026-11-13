@@ -133,6 +133,7 @@ export function ScrollListCard({
   actionLabel,
   actionDisabled = false,
   onAction,
+  onPress,
 }: {
   title: string;
   subtitle?: string;
@@ -143,12 +144,13 @@ export function ScrollListCard({
   actionLabel?: string;
   actionDisabled?: boolean;
   onAction?: () => void;
+  onPress?: () => void;
 }) {
   const { colors, styles } = useMemberStyles();
   const { fontScale } = useWindowDimensions();
 
   return (
-    <View style={[styles.listCard, fontScale > 1.3 && { flexDirection: "column", alignItems: "stretch" }]}>
+    <Pressable accessibilityRole={onPress ? "button" : undefined} accessibilityLabel={onPress ? title : undefined} disabled={!onPress} onPress={onPress} style={({ pressed }) => [styles.listCard, fontScale > 1.3 && { flexDirection: "column", alignItems: "stretch" }, pressed && { opacity: 0.72 }]}>
       <View style={styles.listIcon}>
         <Ionicons name={icon} size={19} color={colors.primary} />
       </View>
@@ -185,7 +187,7 @@ export function ScrollListCard({
           </Pressable>
         ) : null}
       </View>
-    </View>
+    </Pressable>
   );
 }
 

@@ -12,6 +12,7 @@ import { SurfacePanel } from "../../components/SurfacePanel";
 import { getApiErrorMessage } from "../../../../services/api/client";
 import { radius, spacing, typography } from "../../theme/theme";
 import { genderExerciseCounts, genderExerciseGroups, genderExerciseLibrary, genderExercisesByGroup } from "../../../../data/genderExerciseLibrary";
+import { DumbbellSvg, QrCodeSvg, SearchSvg, TrashSvg } from "../../../../components/icons/PulseSvgIcons";
 import type { WorkoutGender } from "../../../../types/fitness";
 import type * as React from "react";
 import type { useResourceCrudPanelPresentation, useGenderWorkoutSessionPickerPresentation, useLoadingRowsPresentation } from "../../../../features/operations/ResourceCrudPanel";
@@ -26,6 +27,7 @@ export function ResourceCrudPanelView<TRead extends { id: string }, TCreate, TUp
       const { config, formOnly, showForm, beginCreate, styles, records, formTitle, closeForm, colors, autoAssignCurrentTrainer, currentUser, visibleFields, control, errors, setDietScheduleMode, setValue, dietStartDate, dietScheduleMode, dietEndDate, dietCaloriesByTitle, getRelationState, getRelationIcon, relationOptions, GenderWorkoutSessionPicker, dietTargetCalories, createMutation, updateMutation, isMutating, submit, editingRecord, notice, listQuery, deleteMutation, setSearch, search, setSortDirection, sortDirection, filteredRecords, LoadingRows, beginEdit, confirmDelete, page, setPage } = model.props;
       const diet = config.key === "diet-plans";
       const workout = config.title === "Workout Plans";
+      const attendance = config.key === "attendance";
       const dietLayout = {
         schedule: { padding: 16, borderWidth: 0, borderRadius: 18, gap: 16, backgroundColor: colors.surface },
         notice: { padding: 14, borderWidth: 0, borderRadius: 14, backgroundColor: colors.surface, minHeight: 56 },
@@ -34,21 +36,60 @@ export function ResourceCrudPanelView<TRead extends { id: string }, TCreate, TUp
       };
       return ((
     <SurfacePanel
-      hideHeader={formOnly || workout}
-      style={workout ? { padding: 0, borderWidth: 0, backgroundColor: "transparent", boxShadow: "none" } as any : formOnly ? { padding: 0, borderWidth: 0, backgroundColor: "transparent", boxShadow: "none" } as any : undefined}
+      hideHeader={formOnly || workout || attendance}
+      style={workout ? (showForm ? { padding: 0, borderWidth: 0, backgroundColor: "transparent", boxShadow: "none" } : { borderRadius: 16, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surface, padding: 22, gap: 14 }) as any : formOnly ? { padding: 0, borderWidth: 0, backgroundColor: "transparent", boxShadow: "none" } as any : attendance ? { borderRadius: 16, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surface, padding: 22, gap: 14 } as any : undefined}
       title={config.title}
       kicker={config.subtitle}
       icon={config.icon}
       actionLabel={formOnly || showForm ? undefined : "New"}
       onAction={formOnly || showForm ? undefined : beginCreate}
     >
-      {!formOnly && !workout ? (
+      {!formOnly && !workout && !attendance ? (
         <View style={styles.summaryRow}>
           <StatusBadge label={`${records.length} loaded`} tone="neutral" />
           <StatusBadge
             label={config.permission.replace("manage_", "").replace("_", " ")}
             tone="success"
           />
+        </View>
+      ) : null}
+
+      {attendance && !formOnly ? (
+        <View style={{ gap: 12, marginBottom: 4 }}>
+          <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+            <View style={{ gap: 2 }}>
+              <Text style={{ color: colors.textSecondary, fontSize: 11, fontWeight: "700", letterSpacing: 0.6, textTransform: "uppercase" }}>
+                MANAGE CHECK-INS
+              </Text>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+                <Text style={{ color: colors.ink, fontSize: 20, fontWeight: "800" }}>
+                  Attendance Log
+                </Text>
+                <View style={{ paddingHorizontal: 10, paddingVertical: 3, borderRadius: 9999, backgroundColor: "rgba(52, 199, 89, 0.12)", borderWidth: 1, borderColor: "rgba(52, 199, 89, 0.25)" }}>
+                  <Text style={{ color: "#34C759", fontSize: 11.5, fontWeight: "700" }}>
+                    {records.length} loaded
+                  </Text>
+                </View>
+              </View>
+            </View>
+            <View style={{ height: 38, width: 220, flexDirection: "row", alignItems: "center", gap: 8, borderRadius: 9999, borderWidth: 1, borderColor: colors.border, paddingHorizontal: 12, backgroundColor: colors.surfaceElevated }}>
+              <SearchSvg size={14} color={colors.textSecondary} />
+              <TextInput
+                autoCapitalize="none"
+                onChangeText={setSearch}
+                accessibilityLabel="Search attendance"
+                placeholder="Search attendance..."
+                placeholderTextColor={colors.textPlaceholder}
+                style={{ flex: 1, color: colors.ink, fontSize: 12.5 }}
+                value={search}
+              />
+              {search ? (
+                <Pressable accessibilityRole="button" onPress={() => setSearch("")}>
+                  <Ionicons name="close-circle" size={16} color={colors.textSecondary} />
+                </Pressable>
+              ) : null}
+            </View>
+          </View>
         </View>
       ) : null}
 
@@ -432,52 +473,88 @@ export function ResourceCrudPanelView<TRead extends { id: string }, TCreate, TUp
 
       {!formOnly ? (
         <>
-          {workout ? <Text accessibilityRole="header" style={{ color: colors.muted, fontSize: 13, fontWeight: "600", letterSpacing: 0.5 }}>{listQuery.isLoading ? "LOADING PLANS" : search ? `${filteredRecords.length} MATCHING PLANS` : "SAVED PLANS"}</Text> : null}
-          <View style={[styles.toolbar, workout && { flexDirection: "row", gap: 8 }]} >
-            <View style={[styles.searchWrap, workout && { minWidth: 0, minHeight: 48, borderWidth: 0, borderRadius: 12, backgroundColor: colors.surface }]} >
-              <Ionicons name="search-outline" size={20} color={colors.muted} />
-              <TextInput
-                autoCapitalize="none"
-                onChangeText={setSearch}
-                accessibilityLabel={`Search ${config.title.toLowerCase()}`}
-                placeholder={workout ? "Search plans" : `Search ${config.title.toLowerCase()}`}
-                placeholderTextColor={colors.subtle}
-                style={[styles.searchInput, workout && { minWidth: 0, fontSize: 16 }]}
-                value={search}
-              />
-              {search ? (
-                <Pressable
-                  accessibilityRole="button"
-                  onPress={() => setSearch("")}
-                >
-                  <Ionicons
-                    name="close-circle"
-                    size={20}
-                    color={colors.muted}
+          {workout && !showForm ? (
+            <View style={{ gap: 12, marginBottom: 8 }}>
+              <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+                <View style={{ gap: 2 }}>
+                  <Text style={{ color: colors.textSecondary, fontSize: 11, fontWeight: "700", letterSpacing: 0.6, textTransform: "uppercase" }}>
+                    SAVED PLANS
+                  </Text>
+                  <Text style={{ color: colors.ink, fontSize: 20, fontWeight: "800" }}>
+                    Assigned Workout Routines
+                  </Text>
+                </View>
+                <View style={{ height: 38, width: 240, flexDirection: "row", alignItems: "center", gap: 8, borderRadius: 9999, borderWidth: 1, borderColor: colors.border, paddingHorizontal: 12, backgroundColor: colors.surfaceElevated }}>
+                  <SearchSvg size={14} color={colors.textSecondary} />
+                  <TextInput
+                    autoCapitalize="none"
+                    onChangeText={setSearch}
+                    accessibilityLabel="Search plans"
+                    placeholder="Search plans..."
+                    placeholderTextColor={colors.textPlaceholder}
+                    style={{ flex: 1, color: colors.ink, fontSize: 12.5 }}
+                    value={search}
                   />
-                </Pressable>
-              ) : null}
+                  {search ? (
+                    <Pressable accessibilityRole="button" onPress={() => setSearch("")}>
+                      <Ionicons name="close-circle" size={16} color={colors.textSecondary} />
+                    </Pressable>
+                  ) : null}
+                </View>
+              </View>
             </View>
-            <Pressable
-              accessibilityRole="button"
-              onPress={() =>
-                setSortDirection((value) => (value === "az" ? "za" : "az"))
-              }
-              accessibilityLabel={`Sort plans ${sortDirection === "az" ? "Z to A" : "A to Z"}`}
-              style={[styles.sortButton, workout && { minWidth: 64, minHeight: 48, borderWidth: 0, borderRadius: 12, backgroundColor: colors.surface }]}
-            >
-              <Ionicons
-                name={sortDirection === "az" ? "arrow-down" : "arrow-up"}
-                size={18}
-                color={colors.ink}
-              />
-              <Text style={styles.sortText}>{sortDirection.toUpperCase()}</Text>
-            </Pressable>
-          </View>
+          ) : null}
+          {!attendance && !workout ? (
+            <View style={[styles.toolbar, workout && { flexDirection: "row", gap: 8 }]} >
+              <View style={[styles.searchWrap, workout && { minWidth: 0, minHeight: 48, borderWidth: 0, borderRadius: 12, backgroundColor: colors.surface }]} >
+                <Ionicons name="search-outline" size={20} color={colors.muted} />
+                <TextInput
+                  autoCapitalize="none"
+                  onChangeText={setSearch}
+                  accessibilityLabel={`Search ${config.title.toLowerCase()}`}
+                  placeholder={workout ? "Search plans" : `Search ${config.title.toLowerCase()}`}
+                  placeholderTextColor={colors.subtle}
+                  style={[styles.searchInput, workout && { minWidth: 0, fontSize: 16 }]}
+                  value={search}
+                />
+                {search ? (
+                  <Pressable
+                    accessibilityRole="button"
+                    onPress={() => setSearch("")}
+                  >
+                    <Ionicons
+                      name="close-circle"
+                      size={20}
+                      color={colors.muted}
+                    />
+                  </Pressable>
+                ) : null}
+              </View>
+              <Pressable
+                accessibilityRole="button"
+                onPress={() =>
+                  setSortDirection((value) => (value === "az" ? "za" : "az"))
+                }
+                accessibilityLabel={`Sort plans ${sortDirection === "az" ? "Z to A" : "A to Z"}`}
+                style={[styles.sortButton, workout && { minWidth: 64, minHeight: 48, borderWidth: 0, borderRadius: 12, backgroundColor: colors.surface }]}
+              >
+                <Ionicons
+                  name={sortDirection === "az" ? "arrow-down" : "arrow-up"}
+                  size={18}
+                  color={colors.ink}
+                />
+                <Text style={styles.sortText}>{sortDirection.toUpperCase()}</Text>
+              </Pressable>
+            </View>
+          ) : null}
 
           <FlatList
             data={filteredRecords}
             keyExtractor={(item) => item.id}
+            // On web, a nested FlatList can grow to the available viewport height.
+            // Attendance is a compact log, so let it use only the height of its rows.
+            style={attendance ? { flexGrow: 0, flexShrink: 1 } : undefined}
+            contentContainerStyle={attendance ? { flexGrow: 0 } : undefined}
             ListEmptyComponent={
               listQuery.isLoading ? (
                 <LoadingRows />
@@ -509,12 +586,120 @@ export function ResourceCrudPanelView<TRead extends { id: string }, TCreate, TUp
             refreshControl={
               <RefreshControl
                 refreshing={listQuery.isFetching}
-                onRefresh={() => listQuery.refetch()}
+                onRefresh={() => { void listQuery.refetch(); }}
               />
             }
             renderItem={({ item }) => {
               const details = config.getDetails?.(item).filter(Boolean) ?? [];
               const status = config.getStatus?.(item);
+
+              if (workout) {
+                return (
+                  <View style={{ backgroundColor: colors.surfaceElevated, borderWidth: 1, borderColor: colors.border, borderRadius: 14, paddingHorizontal: 20, paddingVertical: 18, flexDirection: "row", alignItems: "center", gap: 16, marginBottom: 12 }}>
+                    <View style={{ width: 42, height: 42, borderRadius: 12, backgroundColor: "#E91E63", alignItems: "center", justifyContent: "center", shadowColor: "#E91E63", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.35, shadowRadius: 8 }}>
+                      <DumbbellSvg size={20} color="#FFFFFF" />
+                    </View>
+                    <View style={{ flex: 1, minWidth: 0, gap: 3 }}>
+                      <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+                        <Text style={{ color: colors.ink, fontSize: 15, fontWeight: "700" }} numberOfLines={1}>
+                          {config.getTitle(item)}
+                        </Text>
+                        {status ? (
+                          <View style={{ paddingHorizontal: 8, paddingVertical: 2, borderRadius: 9999, backgroundColor: "rgba(52, 199, 89, 0.12)", borderWidth: 1, borderColor: "rgba(52, 199, 89, 0.25)" }}>
+                            <Text style={{ color: "#34C759", fontSize: 11, fontWeight: "600" }}>
+                              {status.label}
+                            </Text>
+                          </View>
+                        ) : null}
+                      </View>
+                      <Text style={{ color: colors.textSecondary, fontSize: 12.5 }} numberOfLines={1}>
+                        {config.getMeta(item)}
+                      </Text>
+                      {details.length > 0 ? (
+                        <View style={{ flexDirection: "row", alignItems: "center", flexWrap: "wrap", gap: 6, marginTop: 1 }}>
+                          {details.map((detail, idx) => {
+                            const [label, ...valParts] = detail.split(":");
+                            const val = valParts.join(":").trim();
+                            return (
+                              <View key={detail} style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+                                {idx > 0 ? <Text style={{ color: colors.textSecondary, fontSize: 11 }}>•</Text> : null}
+                                <Text style={{ color: colors.textSecondary, fontSize: 11.5 }}>{label}:</Text>
+                                <Text style={{ color: colors.ink, fontSize: 11.5, fontWeight: "700" }}>{val}</Text>
+                              </View>
+                            );
+                          })}
+                        </View>
+                      ) : null}
+                    </View>
+                    <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+                      <Pressable
+                        accessibilityRole="button"
+                        onPress={() => beginEdit(item)}
+                        style={{ width: 34, height: 34, borderRadius: 17, backgroundColor: colors.surfaceMuted, borderWidth: 1, borderColor: colors.border, alignItems: "center", justifyContent: "center" }}
+                      >
+                        <Ionicons name="pencil-outline" size={15} color={colors.textSecondary} />
+                      </Pressable>
+                      <Pressable
+                        accessibilityRole="button"
+                        disabled={deleteMutation.isPending}
+                        onPress={() => confirmDelete(item)}
+                        style={{ width: 34, height: 34, borderRadius: 17, backgroundColor: colors.surfaceMuted, borderWidth: 1, borderColor: colors.border, alignItems: "center", justifyContent: "center" }}
+                      >
+                        <TrashSvg size={14} color="#E91E63" />
+                      </Pressable>
+                    </View>
+                  </View>
+                );
+              }
+
+              if (attendance) {
+                return (
+                  <View style={{ backgroundColor: colors.surfaceElevated, borderWidth: 1, borderColor: colors.border, borderRadius: 12, paddingHorizontal: 16, paddingVertical: 14, flexDirection: "row", alignItems: "center", gap: 14, marginBottom: 8 }}>
+                    <View style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: "rgba(233, 30, 99, 0.12)", alignItems: "center", justifyContent: "center" }}>
+                      <QrCodeSvg size={18} color="#E91E63" />
+                    </View>
+                    <View style={{ flex: 1, minWidth: 0, gap: 3 }}>
+                      <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+                        <Text style={{ color: colors.ink, fontSize: 14, fontWeight: "700" }} numberOfLines={1}>
+                          {config.getTitle(item)}
+                        </Text>
+                        {status ? (
+                          <View style={{ paddingHorizontal: 8, paddingVertical: 2, borderRadius: 9999, backgroundColor: "rgba(52, 199, 89, 0.12)", borderWidth: 1, borderColor: "rgba(52, 199, 89, 0.25)" }}>
+                            <Text style={{ color: "#34C759", fontSize: 11, fontWeight: "600" }}>
+                              {status.label}
+                            </Text>
+                          </View>
+                        ) : null}
+                      </View>
+                      <Text style={{ color: colors.textSecondary, fontSize: 11.5 }} numberOfLines={1}>
+                        {config.getMeta(item)}
+                      </Text>
+                      {details.length > 0 ? (
+                        <Text style={{ color: colors.textSecondary, fontSize: 11 }} numberOfLines={1}>
+                          {details.join(" | ")}
+                        </Text>
+                      ) : null}
+                    </View>
+                    <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+                      <Pressable
+                        accessibilityRole="button"
+                        onPress={() => beginEdit(item)}
+                        style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: colors.surfaceMuted, borderWidth: 1, borderColor: colors.border, alignItems: "center", justifyContent: "center" }}
+                      >
+                        <Ionicons name="pencil-outline" size={15} color={colors.textSecondary} />
+                      </Pressable>
+                      <Pressable
+                        accessibilityRole="button"
+                        disabled={deleteMutation.isPending}
+                        onPress={() => confirmDelete(item)}
+                        style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: colors.surfaceMuted, borderWidth: 1, borderColor: colors.border, alignItems: "center", justifyContent: "center" }}
+                      >
+                        <TrashSvg size={14} color="#E91E63" />
+                      </Pressable>
+                    </View>
+                  </View>
+                );
+              }
 
               return (
                 <View style={styles.row}>
@@ -582,23 +767,45 @@ export function ResourceCrudPanelView<TRead extends { id: string }, TCreate, TUp
             scrollEnabled={false}
           />
 
-          {(!workout || page > 0 || records.length >= 50) ? <View style={styles.pagination}>
-            <PrimaryButton
-              disabled={page === 0 || listQuery.isFetching}
-              onPress={() => setPage((value) => Math.max(0, value - 1))}
-              title="Previous"
-              variant="secondary"
-              style={styles.pageButton}
-            />
-            <Text style={styles.pageLabel}>Page {page + 1}</Text>
-            <PrimaryButton
-              disabled={records.length < 50 || listQuery.isFetching}
-              onPress={() => setPage((value) => value + 1)}
-              title="Next"
-              variant="secondary"
-              style={styles.pageButton}
-            />
-          </View> : null}
+          {attendance ? (
+            <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingTop: 12 }}>
+              <Pressable
+                accessibilityRole="button"
+                disabled={page === 0 || listQuery.isFetching}
+                onPress={() => setPage((value) => Math.max(0, value - 1))}
+                style={{ paddingHorizontal: 14, paddingVertical: 6, borderRadius: 9999, backgroundColor: "#1C1C1E", borderWidth: 1, borderColor: "rgba(255, 255, 255, 0.08)", opacity: page === 0 || listQuery.isFetching ? 0.5 : 1 }}
+              >
+                <Text style={{ color: "#F2F2F7", fontSize: 12.5, fontWeight: "600" }}>Previous</Text>
+              </Pressable>
+              <Text style={{ color: "#FFFFFF", fontSize: 13, fontWeight: "600" }}>Page {page + 1}</Text>
+              <Pressable
+                accessibilityRole="button"
+                disabled={records.length < 50 || listQuery.isFetching}
+                onPress={() => setPage((value) => value + 1)}
+                style={{ paddingHorizontal: 14, paddingVertical: 6, borderRadius: 9999, backgroundColor: "#1C1C1E", borderWidth: 1, borderColor: "rgba(255, 255, 255, 0.08)", opacity: records.length < 50 || listQuery.isFetching ? 0.5 : 1 }}
+              >
+                <Text style={{ color: "#F2F2F7", fontSize: 12.5, fontWeight: "600" }}>Next</Text>
+              </Pressable>
+            </View>
+          ) : (!workout || page > 0 || records.length >= 50) ? (
+            <View style={styles.pagination}>
+              <PrimaryButton
+                disabled={page === 0 || listQuery.isFetching}
+                onPress={() => setPage((value) => Math.max(0, value - 1))}
+                title="Previous"
+                variant="secondary"
+                style={styles.pageButton}
+              />
+              <Text style={styles.pageLabel}>Page {page + 1}</Text>
+              <PrimaryButton
+                disabled={records.length < 50 || listQuery.isFetching}
+                onPress={() => setPage((value) => value + 1)}
+                title="Next"
+                variant="secondary"
+                style={styles.pageButton}
+              />
+            </View>
+          ) : null}
         </>
       ) : null}
     </SurfacePanel>
@@ -713,7 +920,7 @@ export function GenderWorkoutSessionPickerView({ model }: { model: ReturnType<ty
             <Text
               style={{
                 ...typography.small,
-                color: category === item ? "#fff" : colors.muted,
+                color: category === item ? "#FFFFFF" : colors.muted,
               }}
             >
               {item} ({genderExercisesByGroup[gender][item].length})

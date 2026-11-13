@@ -53,17 +53,32 @@ type DisplayPlan = {
 };
 const starterPlans: DisplayPlan[] = [
   {
-    id: "basic-template",
-    name: "Basic Plan",
-    description: "Perfect for getting started",
-    duration_days: 30,
-    price_cents: 99900,
+    id: "elite-template",
+    name: "Elite Plan",
+    description: "The ultimate fitness experience",
+    duration_days: 365,
+    price_cents: 1300000,
     currency: "INR",
     features: [
-      "Gym Access",
-      "Basic Gym Equipment",
-      "Locker Room Access",
-      "Diet Plan (Basic)",
+      "All Premium Equipment",
+      "Unlimited Group Classes",
+      "Diet Plan (Elite)",
+      "4 Personal Training Sessions",
+    ],
+  },
+  {
+    id: "premium-template",
+    name: "Premium Plan",
+    description: "For serious fitness lovers",
+    duration_days: 180,
+    price_cents: 700000,
+    currency: "INR",
+    is_popular: true,
+    features: [
+      "Gym Access (24/7)",
+      "Unlimited Group Classes",
+      "Diet Plan (Premium)",
+      "2 Personal Training Sessions",
     ],
   },
   {
@@ -71,7 +86,7 @@ const starterPlans: DisplayPlan[] = [
     name: "Standard Plan",
     description: "Most popular choice",
     duration_days: 90,
-    price_cents: 199900,
+    price_cents: 400000,
     currency: "INR",
     features: [
       "Gym Access",
@@ -81,31 +96,17 @@ const starterPlans: DisplayPlan[] = [
     ],
   },
   {
-    id: "premium-template",
-    name: "Premium Plan",
-    description: "For serious fitness lovers",
-    duration_days: 180,
-    price_cents: 299900,
+    id: "basic-template",
+    name: "Basic Plan",
+    description: "Perfect for getting started",
+    duration_days: 30,
+    price_cents: 99900,
     currency: "INR",
     features: [
-      "Gym Access (24/7)",
-      "Unlimited Group Classes",
-      "Diet Plan (Premium)",
-      "2 Personal Training Sessions",
-    ],
-  },
-  {
-    id: "elite-template",
-    name: "Elite Plan",
-    description: "The ultimate fitness experience",
-    duration_days: 365,
-    price_cents: 499900,
-    currency: "INR",
-    features: [
-      "All Premium Equipment",
-      "Unlimited Group Classes",
-      "Diet Plan (Elite)",
-      "4 Personal Training Sessions",
+      "Gym Access",
+      "Gym Equipment",
+      "Locker Room Access",
+      "Diet Plan (Basic)",
     ],
   },
 ];
@@ -200,12 +201,13 @@ export function usePlanCardPresentation({
   onEdit?: (plan: DisplayPlan) => void;
   onView: (plan: DisplayPlan) => void;
 }) {
-  const accent = ["#2563EB", "#0066CC", "#059669", "#EA580C"][index % 4];
+  const { colors } = useAppTheme();
+  const accent = [colors.primary, colors.link, colors.success, colors.primary][index % 4];
   const icon = (
     [
-      "star-outline",
-      "diamond-outline",
-      "trophy-outline",
+      "shapes-outline",
+      "flash",
+      "shield-outline",
       "rocket-outline",
     ] as const
   )[index % 4];

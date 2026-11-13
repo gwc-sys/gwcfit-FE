@@ -5,7 +5,7 @@ import { radius, shadows, spacing, typography } from "../../../theme/theme";
 import type { ThemeColors } from "../../../theme/theme";
 
 export const stylesStatic = adaptPageStyles(StyleSheet.create({
-  mobileBrandButton: { width: controlMetrics.minimumTouchSize, height: controlMetrics.minimumTouchSize, alignItems: "center", justifyContent: "center", borderRadius: 22, backgroundColor: "rgba(0,122,255,0.14)" },
+  mobileBrandButton: { width: controlMetrics.minimumTouchSize, height: controlMetrics.minimumTouchSize, alignItems: "center", justifyContent: "center", borderRadius: 22, backgroundColor: "rgba(233,30,99,0.14)" },
   pressed: {
     opacity: 0.72,
   },
@@ -16,7 +16,7 @@ export const createStyles = (
   width: number,
   height: number,
   bottomInset: number,
-) => {
+): any => {
   const compact = width < 560;
   const isDesktop = false;
 
@@ -108,7 +108,7 @@ export const createStyles = (
       borderColor: colors.border,
       backgroundColor: colors.surface,
       padding: spacing.md,
-      ...shadows.soft,
+      ...shadows.none,
     },
     sidebarContent: {
       flexGrow: 1,
@@ -260,7 +260,7 @@ export const createStyles = (
       alignItems: "center",
       justifyContent: "center",
       borderRadius: 17,
-      backgroundColor: "#F6B38A",
+      backgroundColor: colors.primary,
     },
     ownerAccountCopy: { flex: 1, minWidth: 0 },
     ownerAccountName: {
@@ -277,37 +277,37 @@ export const createStyles = (
     },
     ownerAccountBackdrop: {
       flex: 1,
-      alignItems: "center",
-      justifyContent: "flex-end",
+      alignItems: "flex-end",
+      justifyContent: "flex-start",
       paddingTop: 40,
       paddingRight: 16,
-      backgroundColor: "rgba(0,0,0,0.45)",
+      backgroundColor: "transparent",
       paddingHorizontal: 16,
       paddingBottom: Math.max(24, bottomInset + 12)
     },
-    ownerAccountMenu: { width: "100%", borderWidth: 0, borderColor: "#26364B", borderRadius: 28, paddingVertical: 12, backgroundColor: colors.surface, ...(Platform.OS === "web"
+    ownerAccountMenu: { width: "100%", borderWidth: 1, borderColor: "transparent", borderRadius: 16, paddingVertical: 0, backgroundColor: colors.surfaceElevated, ...(Platform.OS === "web"
         ? { boxShadow: "0 7px 28px rgba(0,0,0,0.30)" }
         : {
-            shadowColor: "#000",
+            shadowColor: "#000000",
             shadowOpacity: 0.3,
             shadowRadius: 14,
             shadowOffset: { width: 0, height: 7 },
             elevation: 8,
-          }), maxWidth: 520, maxHeight: "90%", minHeight: controlMetrics.minimumTouchSize },
+          }), maxWidth: 356, maxHeight: "90%", minHeight: controlMetrics.minimumTouchSize },
     ownerAccountIdentity: {
       flexDirection: "row",
       alignItems: "center",
-      gap: 11,
-      paddingHorizontal: 15,
-      paddingVertical: 12,
+      gap: 14,
+      paddingHorizontal: 18,
+      paddingVertical: 25,
     },
     ownerAccountAvatar: {
-      width: 42,
-      height: 42,
+      width: 53,
+      height: 53,
       alignItems: "center",
       justifyContent: "center",
-      borderRadius: 21,
-      backgroundColor: "#F6B38A",
+      borderRadius: 27,
+      backgroundColor: colors.primary,
     },
     ownerAccountAvatarText: {
       fontSize: 16,
@@ -316,14 +316,14 @@ export const createStyles = (
     },
     ownerAccountDivider: {
       height: 1,
-      backgroundColor: colors.borderMuted,
-      marginVertical: 6
+      backgroundColor: colors.border,
+      marginVertical: 0
     },
-    ownerAccountItem: { minHeight: controlMetrics.minimumTouchSize, flexDirection: "row", alignItems: "center", gap: 14, paddingHorizontal: 16 },
+    ownerAccountItem: { minHeight: 57, flexDirection: "row", alignItems: "center", gap: 18, paddingHorizontal: 20 },
     ownerAccountItemText: {
-      fontSize: 17,
+      fontSize: 15,
       color: colors.ink,
-      fontWeight: "500"
+      fontWeight: "600"
     },
     trainerAccountBackdrop: {
       alignItems: "center",
@@ -353,7 +353,7 @@ export const createStyles = (
       width: 50,
       height: 50,
       borderRadius: 25,
-      backgroundColor: "#FFAD7F",
+      backgroundColor: "#E91E63",
     },
     trainerAccountName: {
       fontSize: 16,
@@ -387,7 +387,7 @@ export const createStyles = (
       marginBottom: 16,
       backgroundColor: colors.background,
       ...(Platform.OS === "web"
-        ? { boxShadow: "0 8px 28px rgba(2,6,23,0.18)" }
+        ? { boxShadow: "0 8px 28px rgba(0, 0, 0,0.18)" }
         : {
             shadowColor: colors.dark,
             shadowOffset: { width: 0, height: 8 },
@@ -501,33 +501,12 @@ export const createStyles = (
       lineHeight: 41,
       fontWeight: "700",
     },
-    sharedOwnerSubtitle: {
-      color: colors.textSecondary,
-      fontSize: 12,
-      marginTop: 2,
-    },
     sharedOwnerActions: {
       flexDirection: "row",
       flexWrap: "wrap",
       alignItems: "center",
       justifyContent: width < 1250 ? "flex-start" : "flex-end",
       gap: 10,
-    },
-    sharedOwnerDate: {
-      minHeight: 48,
-      flexDirection: "row",
-      alignItems: "center",
-      gap: 8,
-      borderWidth: 1,
-      borderColor: colors.border,
-      borderRadius: 11,
-      paddingHorizontal: 14,
-      backgroundColor: colors.surfaceElevated,
-    },
-    sharedOwnerDateText: {
-      color: colors.ink,
-      fontSize: 12,
-      fontWeight: "700"
     },
     sharedOwnerIcon: {
       width: 48,
@@ -555,17 +534,6 @@ export const createStyles = (
       fontSize: 10,
       fontWeight: "700"
     },
-    sharedOwnerAdd: {
-      minHeight: 48,
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "center",
-      gap: 7,
-      borderRadius: 10,
-      paddingHorizontal: 18,
-      backgroundColor: colors.primary,
-    },
-    sharedOwnerAddText: { color: colors.ink, fontSize: 13, fontWeight: "800" },
     sharedOwnerProfile: {
       minHeight: 48,
       maxWidth: 190,
@@ -580,7 +548,7 @@ export const createStyles = (
       alignItems: "center",
       justifyContent: "center",
       borderRadius: 21,
-      backgroundColor: "#F6B38A",
+      backgroundColor: colors.primary,
     },
     sharedOwnerAvatarText: {
       color: "#FFFFFF",
@@ -598,7 +566,7 @@ export const createStyles = (
       fontSize: 9,
       marginTop: 2,
     },
-    ownerAccountDanger: { color: "#EF4444" },
+    ownerAccountDanger: { color: "#E91E63" },
     ownerAccountDisabled: { opacity: 0.5 },
     ownerQuickActions: {
       gap: 13,
@@ -646,9 +614,9 @@ export const createStyles = (
       height: 46,
       borderRadius: 12,
       ...(Platform.OS === "web"
-        ? { boxShadow: "0 5px 20px rgba(124,58,237,0.30)" }
+        ? { boxShadow: "0 5px 20px rgba(0, 122, 255,0.30)" }
         : {
-            shadowColor: "#0066CC",
+            shadowColor: "#E91E63",
             shadowOffset: { width: 0, height: 5 },
             shadowOpacity: 0.3,
             shadowRadius: 10,
@@ -721,7 +689,7 @@ export const createStyles = (
       borderColor: colors.primary,
       backgroundColor: colors.primary,
       ...(Platform.OS === "web"
-        ? { boxShadow: "0 5px 20px rgba(0,122,255,0.22)" }
+        ? { boxShadow: "0 5px 20px rgba(233,30,99,0.22)" }
         : {
             shadowColor: colors.primary,
             shadowOffset: { width: 0, height: 5 },
@@ -777,9 +745,9 @@ export const createStyles = (
     trainerProfileCard: {
       minHeight: 72,
       marginTop: 18,
-      borderColor: "#263750",
+      borderColor: "transparent",
       borderRadius: 12,
-      backgroundColor: "#101D2E",
+      backgroundColor: "#007AFF",
       paddingHorizontal: 10,
     },
     avatar: {
@@ -791,7 +759,7 @@ export const createStyles = (
     },
     avatarText: {
       ...typography.h3,
-      color: "#0F172A",
+      color: "#007AFF",
       fontWeight: "700"
     },
     profileCopy: {
@@ -815,7 +783,7 @@ export const createStyles = (
       backgroundColor: isDesktop ? colors.surface : "transparent",
       padding: compact ? spacing.md : isDesktop ? spacing.xxl : spacing.lg,
       gap: spacing.lg,
-      ...(!isDesktop ? shadows.none : shadows.soft),
+      ...shadows.none,
     },
     pressed: {
       opacity: 0.78,

@@ -10,7 +10,7 @@ export const stylesShared = StyleSheet.create({
     gap: 9,
   },
   dot: { width: 9, height: 9, borderRadius: 5 },
-  macroLabel: { color: "#8E8E93", fontSize: 13, fontWeight: "700" },
+  macroLabel: { color: "#F2F2F7", fontSize: 13, fontWeight: "700" },
   macroValue: {
     color: "#FFFFFF",
     fontSize: 15,
@@ -82,7 +82,7 @@ export const createStyles = (colors: ThemeColors) =>
       alignItems: "center",
       justifyContent: "center",
       padding: 16,
-      backgroundColor: "rgba(2,6,23,0.78)",
+      backgroundColor: "rgba(0, 0, 0,0.78)",
     },
     categoryPanel: {
       width: "100%",

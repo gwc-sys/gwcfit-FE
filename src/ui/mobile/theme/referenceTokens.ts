@@ -1,34 +1,35 @@
-// Decorative colors match the reference. Text uses the accessible semantic
-// foregrounds in theme.ts rather than low-contrast decorative colors.
+import { BASE_COLORS, ALPHA } from "../../../theme/colors";
+
+// Canonical PulseFit accents strictly derived from approved 8-color palette
 export const pulseAccents = {
-  blue: "#0A84FF",
-  green: "#34C759",
-  purple: "#5856D6",
-  orange: "#FF9500",
-  pink: "#FF453A",
+  blue: BASE_COLORS.link,
+  green: BASE_COLORS.success,
+  purple: BASE_COLORS.link,
+  orange: BASE_COLORS.accent,
+  pink: BASE_COLORS.accent,
 } as const;
 
 export const pulseGradients = {
-  members: ["#007AFF", "#0A84FF"] as const,
-  selection: ["#0A84FF", "#0A84FF"] as const,
+  members: [BASE_COLORS.accent, BASE_COLORS.accent] as const,
+  selection: [BASE_COLORS.accent, BASE_COLORS.accent] as const,
 } as const;
 
 export const pulseEffects = {
-  scrim: "rgba(0,0,0,0.4)",
+  scrim: ALPHA.backdropLight,
   heroIcon: "rgba(255,255,255,0.15)",
 } as const;
 
 export const pulseScreenGradients = {
-  light: ["#F2F2F7", "#F2F2F7"] as const,
-  dark: ["#000000", "#000000"] as const,
+  light: [BASE_COLORS.lightBackground, BASE_COLORS.lightBackground] as const,
+  dark: [BASE_COLORS.darkBackground, BASE_COLORS.darkBackground] as const,
 } as const;
 
 export const pulseDarkAccents = {
-  ...pulseAccents,
-  green: "#30D158",
-  purple: "#5E5CE6",
-  orange: "#FF9F0A",
-  pink: "#FF453A",
+  blue: BASE_COLORS.link,
+  green: BASE_COLORS.success,
+  purple: BASE_COLORS.link,
+  orange: BASE_COLORS.accent,
+  pink: BASE_COLORS.accent,
 } as const;
 
 export const pulseLayout = {

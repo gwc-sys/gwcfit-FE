@@ -4,6 +4,20 @@ import { DataState } from "../../components/DataState";
 import { PrimaryButton } from "../../components/PrimaryButton";
 import { Screen } from "../../components/Screen";
 import { StatusBadge } from "../../components/StatusBadge";
+import {
+  ChevronDownSvg,
+  ClockSvg,
+  DumbbellSvg,
+  EyeSvg,
+  FilterFunnelSvg,
+  MoreVerticalSvg,
+  SearchSvg,
+  StarFilledSvg,
+  StarOutlineSvg,
+  UserCheckSvg,
+  UserPlusSvg,
+} from "../../../../components/icons/PulseSvgIcons";
+import { createStyles } from "../../styles/pages/saas/TrainersScreen.styles";
 import { getApiErrorMessage } from "../../../../services/api/client";
 import type { Trainer } from "../../../../types/saas";
 import { AccessDeniedScreen } from "../../../../screens/saas/AccessDeniedScreen";
@@ -21,7 +35,6 @@ export function TrainersScreenView({ model }: { model: ReturnType<typeof useTrai
     }
     case "view2": {
       const {
-        styles,
         resource,
         colors,
         search,
@@ -56,6 +69,8 @@ export function TrainersScreenView({ model }: { model: ReturnType<typeof useTrai
         newTrainerCount
       } = model.props;
 
+      const styles = createStyles(colors);
+
       /* =========================================================================
        * 1. FULL PAGE: TRAINER DETAILS VIEW (Apple HIG Principle)
        * ========================================================================= */
@@ -76,12 +91,11 @@ export function TrainersScreenView({ model }: { model: ReturnType<typeof useTrai
                   style={styles.backButton}
                   onPress={() => setDetailTrainer(null)}
                 >
-                  <Ionicons name="chevron-back" size={18} color={colors.ink} />
+                  <Ionicons name="chevron-back" size={16} color={colors.ink} />
                   <Text style={styles.backButtonText}>Trainers</Text>
                 </Pressable>
                 <Text style={styles.breadcrumbText}>/  Trainer Details  /  {detailTrainer.full_name}</Text>
               </View>
-
             </View>
 
             {/* Trainer Hero Card */}
@@ -103,27 +117,27 @@ export function TrainersScreenView({ model }: { model: ReturnType<typeof useTrai
 
                 <View style={styles.heroMetaRow}>
                   <View style={styles.heroMetaItem}>
-                    <Ionicons name="finger-print-outline" size={14} color={colors.muted} />
+                    <Ionicons name="finger-print-outline" size={14} color={colors.textSecondary} />
                     <Text style={styles.heroMetaText}>TRN-{detailTrainer.id.slice(0, 8).toUpperCase()}</Text>
                   </View>
 
                   {detailTrainer.email ? (
                     <View style={styles.heroMetaItem}>
-                      <Ionicons name="mail-outline" size={14} color={colors.muted} />
+                      <Ionicons name="mail-outline" size={14} color={colors.textSecondary} />
                       <Text style={styles.heroMetaText}>{detailTrainer.email}</Text>
                     </View>
                   ) : null}
 
                   {detailTrainer.phone ? (
                     <View style={styles.heroMetaItem}>
-                      <Ionicons name="call-outline" size={14} color={colors.muted} />
+                      <Ionicons name="call-outline" size={14} color={colors.textSecondary} />
                       <Text style={styles.heroMetaText}>{detailTrainer.phone}</Text>
                     </View>
                   ) : null}
 
                   {detailTrainer.hourly_rate_cents ? (
                     <View style={styles.heroMetaItem}>
-                      <Ionicons name="cash-outline" size={14} color={colors.muted} />
+                      <Ionicons name="cash-outline" size={14} color={colors.textSecondary} />
                       <Text style={styles.heroMetaText}>₹{(detailTrainer.hourly_rate_cents / 100).toFixed(0)}/hr</Text>
                     </View>
                   ) : null}
@@ -146,7 +160,7 @@ export function TrainersScreenView({ model }: { model: ReturnType<typeof useTrai
             <View style={styles.sectionCard}>
               <View style={styles.sectionHeaderRow}>
                 <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-                  <Ionicons name="star" size={20} color="#F59E0B" />
+                  <StarFilledSvg size={20} color={colors.primary} />
                   <Text style={styles.sectionHeaderTitle}>Ratings & Star Distribution</Text>
                 </View>
                 <Text style={styles.meta}>
@@ -160,12 +174,11 @@ export function TrainersScreenView({ model }: { model: ReturnType<typeof useTrai
                   <Text style={styles.scoreNumber}>{avgRating > 0 ? avgRating.toFixed(1) : "0.0"}</Text>
                   <View style={styles.starsContainer}>
                     {[1, 2, 3, 4, 5].map((star) => (
-                      <Ionicons
-                        key={star}
-                        name={star <= Math.round(avgRating) && totalReviews > 0 ? "star" : "star-outline"}
-                        size={18}
-                        color={totalReviews > 0 ? "#F59E0B" : colors.muted}
-                      />
+                      star <= Math.round(avgRating) && totalReviews > 0 ? (
+                        <StarFilledSvg key={star} size={18} color={colors.primary} />
+                      ) : (
+                        <StarOutlineSvg key={star} size={18} color={colors.primary} />
+                      )
                     ))}
                   </View>
                   <Text style={styles.scoreSub}>
@@ -212,7 +225,7 @@ export function TrainersScreenView({ model }: { model: ReturnType<typeof useTrai
                 </View>
               ) : reviews.length === 0 ? (
                 <View style={styles.emptyFeedbackBox}>
-                  <Ionicons name="chatbubble-ellipses-outline" size={40} color={colors.muted} />
+                  <Ionicons name="chatbubble-ellipses-outline" size={40} color={colors.textSecondary} />
                   <Text style={styles.emptyFeedbackTitle}>No member feedback yet</Text>
                   <Text style={styles.emptyFeedbackSub}>
                     When members submit monthly reviews for this trainer from their mobile fitness app, their ratings, tags, and feedback messages will appear here.
@@ -251,7 +264,7 @@ export function TrainersScreenView({ model }: { model: ReturnType<typeof useTrai
                           </View>
 
                           <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-                            <Ionicons name="calendar-outline" size={14} color={colors.muted} />
+                            <Ionicons name="calendar-outline" size={14} color={colors.textSecondary} />
                             <Text style={styles.reviewDate}>{reviewDateFormatted}</Text>
                           </View>
                         </View>
@@ -259,12 +272,11 @@ export function TrainersScreenView({ model }: { model: ReturnType<typeof useTrai
                         <View style={styles.feedbackStarsRow}>
                           <View style={{ flexDirection: "row", alignItems: "center", gap: 2 }}>
                             {[1, 2, 3, 4, 5].map((star) => (
-                              <Ionicons
-                                key={star}
-                                name={star <= review.rating ? "star" : "star-outline"}
-                                size={15}
-                                color="#F59E0B"
-                              />
+                              star <= review.rating ? (
+                                <StarFilledSvg key={star} size={14} color={colors.primary} />
+                              ) : (
+                                <StarOutlineSvg key={star} size={14} color={colors.primary} />
+                              )
                             ))}
                           </View>
                           <Text style={styles.ratingScoreText}>
@@ -295,10 +307,21 @@ export function TrainersScreenView({ model }: { model: ReturnType<typeof useTrai
       }
 
       /* =========================================================================
-       * 2. FULL PAGE: TRAINERS LIST VIEW (Table & Metrics)
+       * 2. FULL PAGE: TRAINERS LIST VIEW (Matching reference image)
        * ========================================================================= */
       return (
-        <Screen scroll contentContainerStyle={styles.screen} refreshControl={<RefreshControl refreshing={resource.listQuery.isFetching} onRefresh={() => { void resource.listQuery.refetch(); }} />}>
+        <Screen
+          scroll
+          contentContainerStyle={styles.screen}
+          refreshControl={
+            <RefreshControl
+              refreshing={resource.listQuery.isFetching}
+              onRefresh={() => { void resource.listQuery.refetch(); }}
+              tintColor={colors.primary}
+            />
+          }
+        >
+          {/* Header & Right Action Controls */}
           <View style={styles.pageHeader}>
             <View>
               <Text style={styles.title}>Trainers</Text>
@@ -306,44 +329,81 @@ export function TrainersScreenView({ model }: { model: ReturnType<typeof useTrai
             </View>
             <View style={styles.headerActions}>
               <View style={styles.searchBox}>
-                <Ionicons name="search-outline" size={19} color={colors.muted} />
-                <TextInput value={search} onChangeText={(value) => { setSearch(value); setPage(0); }} placeholder="Search trainers..." placeholderTextColor={colors.subtle} style={styles.searchInput} />
+                <SearchSvg size={16} color={colors.iconSecondary} />
+                <TextInput
+                  value={search}
+                  onChangeText={(value) => { setSearch(value); setPage(0); }}
+                  placeholder="Search trainers..."
+                  placeholderTextColor={colors.placeholder}
+                  style={styles.searchInput}
+                />
               </View>
-              <Pressable accessibilityRole="button" style={styles.outlineButton} onPress={() => setFilter((value) => value === "all" ? "active" : value === "active" ? "inactive" : "all")}>
-                <Ionicons name="funnel-outline" size={17} color={colors.ink} />
-                <Text style={styles.buttonText}>Filter{filter !== "all" ? `: ${filter}` : ""}</Text>
+              <Pressable
+                accessibilityRole="button"
+                style={styles.outlineButton}
+                onPress={() => setFilter((value) => value === "all" ? "active" : value === "active" ? "inactive" : "all")}
+              >
+                <FilterFunnelSvg size={14} color={colors.primary} />
+                <Text style={styles.buttonText}>Filter</Text>
               </Pressable>
-              <PrimaryButton title="Add Trainer" onPress={openCreate} style={styles.addButton} />
+              <Pressable
+                accessibilityRole="button"
+                onPress={openCreate}
+                style={styles.addButton}
+              >
+                <Text style={styles.addButtonText}>+ Add Trainer</Text>
+              </Pressable>
             </View>
           </View>
 
+          {/* 4 Stat KPI Cards */}
           <View style={styles.statsGrid}>
-            <Stat icon="people" label="Total Trainers" value={String(trainers.length)} tone="#0A84FF" styles={styles} />
-            <Stat icon="person" label="Active Trainers" value={String(activeTrainerCount)} tone="#16C784" styles={styles} />
-            <Stat icon="person-add" label="New This Month" value={String(newTrainerCount)} tone="#3B82F6" styles={styles} />
-            <Stat icon="time" label="Inactive / Expired" value={String(inactiveTrainerCount)} tone="#F59E0B" styles={styles} />
+            <Stat icon="barbell-outline" label="Total Trainers" value={String(trainers.length)} tone={colors.primary} styles={styles as any} colors={colors} />
+            <Stat icon="checkmark-done-outline" label="Active Trainers" value={String(activeTrainerCount)} tone={colors.success} styles={styles as any} colors={colors} />
+            <Stat icon="person-add-outline" label="New This Month" value={String(newTrainerCount)} tone={colors.primary} styles={styles as any} colors={colors} />
+            <Stat icon="time-outline" label="Inactive / Expired" value={String(inactiveTrainerCount)} tone={colors.iconSecondary} styles={styles as any} colors={colors} />
           </View>
 
-          <View style={styles.tableCard}>
-            <View style={styles.filterBar}>
-              <View style={styles.tabs}>
-                {(["all", "active", "inactive"] as TrainerFilter[]).map((value) => (
-                  <Pressable accessibilityRole="button" key={value} onPress={() => setFilter(value)} style={[styles.tab, filter === value && styles.tabActive]}>
-                    <Text style={[styles.tabText, filter === value && styles.tabTextActive]}>{value === "all" ? `All Trainers  ${trainers.length}` : value[0].toUpperCase() + value.slice(1)}</Text>
+          {/* Filter Bar with Tabs and Sort By */}
+          <View style={styles.filterBarRow}>
+            <View style={styles.tabs}>
+              {(["all", "active", "inactive"] as TrainerFilter[]).map((value) => {
+                const isActive = filter === value;
+                return (
+                  <Pressable
+                    accessibilityRole="button"
+                    key={value}
+                    onPress={() => setFilter(value)}
+                    style={[styles.tab, isActive && styles.tabActive]}
+                  >
+                    <Text style={[styles.tabText, isActive && styles.tabTextActive]}>
+                      {value === "all" ? "All Trainers" : value === "active" ? "Active" : "Inactive"}
+                    </Text>
+                    {value === "all" && (
+                      <View style={styles.countBadge}>
+                        <Text style={styles.countBadgeText}>{trainers.length}</Text>
+                      </View>
+                    )}
                   </Pressable>
-                ))}
-              </View>
-              <View style={styles.sortBox}>
-                <Text style={styles.buttonText}>Sort by: Newest</Text>
-                <Ionicons name="chevron-down" size={14} color={colors.muted} />
-              </View>
+                );
+              })}
             </View>
+            <View style={styles.sortWrapper}>
+              <Text style={styles.sortLabel}>Sort by:</Text>
+              <Pressable accessibilityRole="button" style={styles.sortPill}>
+                <Text style={styles.sortPillText}>Newest</Text>
+                <ChevronDownSvg size={13} color={colors.white} />
+              </Pressable>
+            </View>
+          </View>
 
+          {/* Table Container Card */}
+          <View style={styles.tableCard}>
             <View style={styles.tableHeader}>
-              <Text style={[styles.columnHeader, styles.trainerCol]}>Trainer</Text>
-              <Text style={[styles.columnHeader, styles.specialtyCol]}>Specializations</Text>
-              <Text style={[styles.columnHeader, styles.ratingHeader]}>Rating</Text>
-              <Text style={[styles.columnHeader, styles.actionHeader]}>Action</Text>
+              <Text style={[styles.columnHeader, styles.trainerCol]}>TRAINER</Text>
+              <Text style={[styles.columnHeader, styles.specialtyCol]}>SPECIALIZATIONS</Text>
+              <Text style={[styles.columnHeader, styles.ratingHeader]}>RATING</Text>
+              <Text style={[styles.columnHeader, styles.actionHeader]}>ACTION</Text>
             </View>
 
             <DataState
@@ -365,7 +425,7 @@ export function TrainersScreenView({ model }: { model: ReturnType<typeof useTrai
                 renderItem={({ item }) => (
                   <TrainerRow
                     trainer={item}
-                    styles={styles}
+                    styles={styles as any}
                     colors={colors}
                     onEdit={() => openEdit(item)}
                     onDelete={() => remove(item)}
@@ -374,15 +434,30 @@ export function TrainersScreenView({ model }: { model: ReturnType<typeof useTrai
               />
             ) : null}
 
+            {/* Pagination Footer */}
             <View style={styles.pagination}>
               <Text style={styles.paginationText}>Showing {visible.length} of {trainers.length} trainers</Text>
               <View style={styles.paginationActions}>
-                <Pressable accessibilityRole="button" accessibilityLabel="Previous" disabled={page === 0} onPress={() => setPage((value) => Math.max(0, value - 1))} style={styles.pageButton}>
-                  <Ionicons name="chevron-back" size={16} color={colors.ink} />
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel="Previous page"
+                  disabled={page === 0}
+                  onPress={() => setPage((value) => Math.max(0, value - 1))}
+                  style={styles.paginationCircle}
+                >
+                  <Text style={page === 0 ? styles.paginationCircleTextDisabled : styles.paginationCircleText}>‹</Text>
                 </Pressable>
-                <Text style={styles.pageNumber}>{page + 1}</Text>
-                <Pressable accessibilityRole="button" accessibilityLabel="Next" disabled={trainers.length < 50} onPress={() => setPage((value) => value + 1)} style={styles.pageButton}>
-                  <Ionicons name="chevron-forward" size={16} color={colors.ink} />
+                <View style={[styles.paginationCircle, styles.paginationCircleActive]}>
+                  <Text style={styles.paginationCircleText}>{page + 1}</Text>
+                </View>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel="Next page"
+                  disabled={trainers.length < 50}
+                  onPress={() => setPage((value) => value + 1)}
+                  style={styles.paginationCircle}
+                >
+                  <Text style={trainers.length < 50 ? styles.paginationCircleTextDisabled : styles.paginationCircleText}>›</Text>
                 </Pressable>
               </View>
             </View>
@@ -404,7 +479,7 @@ export function TrainersScreenView({ model }: { model: ReturnType<typeof useTrai
                     value={value as string}
                     onChangeText={setter as (value: string) => void}
                     placeholder={placeholder as string}
-                    placeholderTextColor={colors.subtle}
+                  placeholderTextColor={colors.placeholder}
                     style={styles.input}
                   />
                 ))}
@@ -426,17 +501,40 @@ export function StatView({ model }: { model: ReturnType<typeof useStatPresentati
   if (typeof model !== "object" || !("kind" in model)) return model;
   switch (model.kind) {
     case "view1": {
-      const { styles, tone, icon, label, value } = model.props;
+      const { label, value, tone, colors } = model.props;
+      const styles = model.props.styles as unknown as ReturnType<typeof createStyles>;
+
+      // Render exact matching SVG icon based on label/metric
+      const renderStatIcon = () => {
+        if (label.includes("Total")) {
+          return <DumbbellSvg size={18} color={tone} />;
+        }
+        if (label.includes("Active")) {
+          return <UserCheckSvg size={18} color={tone} />;
+        }
+        if (label.includes("New")) {
+          return <UserPlusSvg size={18} color={tone} />;
+        }
+        return <ClockSvg size={18} color={tone} />;
+      };
+
+      const iconBgColor =
+        label.includes("Total") || label.includes("New")
+          ? colors.primarySoft
+          : label.includes("Active")
+          ? colors.successSoft
+          : colors.surfaceStrong;
+
       return (
         <View style={styles.statCard}>
-          <View style={[styles.statIcon, { backgroundColor: `${tone}33` }]}>
-            <Ionicons name={icon} size={23} color={tone} />
-          </View>
-          <View>
+          <View style={styles.statTopRow}>
             <Text style={styles.statLabel}>{label}</Text>
-            <Text style={styles.statValue}>{value}</Text>
-            <Text style={styles.statTrend}>↑ Live data</Text>
+            <View style={[styles.statIconBox, { backgroundColor: iconBgColor }]}>
+              {renderStatIcon()}
+            </View>
           </View>
+          <Text style={styles.statValue}>{value}</Text>
+          <Text style={styles.statTrend}>↑ Live data</Text>
         </View>
       );
     }
@@ -448,42 +546,84 @@ export function TrainerRowView({ model }: { model: ReturnType<typeof useTrainerR
   if (typeof model !== "object" || !("kind" in model)) return model;
   switch (model.kind) {
     case "view1": {
-      const { styles, trainer, onEdit, colors, onDelete } = model.props;
+      const { trainer, onEdit, onDelete, colors } = model.props;
+      const styles = createStyles(colors);
+      const initials = trainer.full_name
+        .split(" ")
+        .map((part) => part[0])
+        .join("")
+        .slice(0, 2)
+        .toUpperCase() || "TR";
+
+      const ratingScore = trainer.average_rating ?? 0;
+      const reviewCount = trainer.total_reviews ?? 0;
+
       return (
         <View style={styles.row}>
-          <Pressable accessibilityRole="button" onPress={onEdit} accessibilityLabel={`View details for ${trainer.full_name}`} style={[styles.trainerCell, styles.trainerCol]}>
+          {/* TRAINER COLUMN */}
+          <Pressable
+            accessibilityRole="button"
+            onPress={onEdit}
+            accessibilityLabel={`View details for ${trainer.full_name}`}
+            style={[styles.trainerCell, styles.trainerCol]}
+          >
             <View style={styles.avatar}>
-              <Text style={styles.avatarText}>{trainer.full_name.split(" ").map((part) => part[0]).join("").slice(0, 2).toUpperCase()}</Text>
+              <Text style={styles.avatarText}>{initials}</Text>
             </View>
             <View style={styles.identity}>
               <Text style={styles.name} numberOfLines={1}>{trainer.full_name}</Text>
-              <Text style={styles.meta} numberOfLines={1}>TRN-{trainer.id.slice(0, 5).toUpperCase()} · {trainer.specialties.length} specialties</Text>
+              <Text style={styles.meta} numberOfLines={1}>
+                TRN-{trainer.id.slice(0, 5).toUpperCase()} • {trainer.specialties.length} {trainer.specialties.length === 1 ? "specialty" : "specialties"}
+              </Text>
             </View>
           </Pressable>
+
+          {/* SPECIALIZATIONS COLUMN */}
           <View style={styles.specialtyCell}>
-            {(trainer.specialties.length ? trainer.specialties : ["Not assigned"]).slice(0, 2).map((item) => (
+            {(trainer.specialties.length ? trainer.specialties : ["General Trainer"]).map((item) => (
               <Text key={item} style={styles.specialtyTag}>{item}</Text>
             ))}
           </View>
-          <Pressable accessibilityRole="button" onPress={onEdit} accessibilityLabel={`View ratings for ${trainer.full_name}`} style={styles.ratingCell}>
-            <View style={{ flexDirection: "row", alignItems: "center", gap: 2 }}>
+
+          {/* RATING COLUMN */}
+          <Pressable
+            accessibilityRole="button"
+            onPress={onEdit}
+            accessibilityLabel={`View ratings for ${trainer.full_name}`}
+            style={styles.ratingCell}
+          >
+            <View style={styles.starsRow}>
               {[1, 2, 3, 4, 5].map((star) => (
-                <Ionicons
-                  key={star}
-                  name={star <= Math.round(trainer.average_rating || 0) && trainer.total_reviews > 0 ? "star" : "star-outline"}
-                  size={12}
-                  color={trainer.total_reviews > 0 ? "#F59E0B" : colors.muted}
-                />
+                star <= Math.round(ratingScore) ? (
+                  <StarFilledSvg key={star} size={14} color={colors.primary} />
+                ) : (
+                  <StarOutlineSvg key={star} size={14} color={colors.primary} />
+                )
               ))}
             </View>
-            <Text style={styles.cellText}>{trainer.total_reviews ? `${trainer.average_rating.toFixed(1)} (${trainer.total_reviews})` : "No reviews"}</Text>
+            <Text style={styles.ratingScoreText}>
+              {ratingScore.toFixed(1)}
+              <Text style={styles.ratingCountText}> ({reviewCount})</Text>
+            </Text>
           </Pressable>
+
+          {/* ACTION COLUMN */}
           <View style={styles.actions}>
-            <Pressable accessibilityRole="button" style={styles.iconButton} onPress={onEdit} accessibilityLabel={"View trainer details"}>
-              <Ionicons name="eye-outline" size={18} color={colors.ink} />
+            <Pressable
+              accessibilityRole="button"
+              style={styles.actionCircleButton}
+              onPress={onEdit}
+              accessibilityLabel={"View trainer details"}
+            >
+              <EyeSvg size={15} color={colors.iconSecondary} />
             </Pressable>
-            <Pressable accessibilityRole="button" style={styles.iconButton} onPress={onDelete} accessibilityLabel={"Deactivate trainer"}>
-              <Ionicons name="ellipsis-vertical" size={18} color={colors.muted} />
+            <Pressable
+              accessibilityRole="button"
+              style={styles.actionCircleButton}
+              onPress={onDelete}
+              accessibilityLabel={"Trainer options"}
+            >
+              <MoreVerticalSvg size={15} color={colors.iconSecondary} />
             </Pressable>
           </View>
         </View>

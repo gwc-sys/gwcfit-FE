@@ -89,11 +89,27 @@ export function useAttendanceScreenPresentation() {
       queryClient.invalidateQueries({ queryKey: ["reports"] });
     },
   });
+  const attendanceListQuery = useQuery({
+    queryKey: ["attendance", "list"],
+    queryFn: () => attendanceApi.list({ limit: 50 }),
+    enabled: hasPermission("manage_attendance"),
+    retry: false,
+  });
+
+  const deleteAttendanceMutation = useMutation({
+    mutationFn: (id: string) => attendanceApi.remove(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["operations", "attendance"] });
+      queryClient.invalidateQueries({ queryKey: ["attendance"] });
+      queryClient.invalidateQueries({ queryKey: ["reports"] });
+    },
+  });
+
   if (!hasPermission("manage_attendance")) {
     return { kind: "view1" as const, props: {  } };
   }
 
-  return { kind: "view2" as const, props: { styles, ReceptionStatCard, statsQuery, queryClient, ActivityItem, colors, memberSearch, setMemberSearch, memberOptions, selectedMemberId, setSelectedMemberId, checkInMutation, membersQuery, setNotes, notes, notice, isTrainer, ptMembersQuery } };
+  return { kind: "view2" as const, props: { styles, ReceptionStatCard, statsQuery, queryClient, ActivityItem, colors, memberSearch, setMemberSearch, memberOptions, selectedMemberId, setSelectedMemberId, checkInMutation, membersQuery, setNotes, notes, notice, isTrainer, ptMembersQuery, attendanceListQuery, deleteAttendanceMutation } };
 }
 
 export function AttendanceScreen(...args: Parameters<typeof useAttendanceScreenPresentation>): React.JSX.Element {

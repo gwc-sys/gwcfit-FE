@@ -38,9 +38,9 @@ export function PrimaryButton({
   const styles = useMemo(() => createStyles(colors), [colors]);
   const text = label ?? title ?? "";
   const compact = width < 390;
-  const buttonHeight = 44;
+  const buttonHeight = 48;
   const buttonPadding = 18;
-  const labelSize = 14;
+  const labelSize = compact ? 14 : 15;
   const iconColor = disabled ? colors.muted : foregroundColor ?? (variant === "ghost" ? colors.primaryDark : variant === "secondary" ? colors.ink : colors.white);
   const iconNode =
     typeof icon === "string" ? (
@@ -117,8 +117,7 @@ const createStyles = (colors: ThemeColors) =>
   },
   primary: {
     backgroundColor: colors.primaryButton,
-    borderColor: colors.primaryButton,
-    ...shadows.button
+    borderColor: colors.primaryButton
   },
   secondary: {
     backgroundColor: colors.surfaceElevated,
@@ -142,14 +141,14 @@ const createStyles = (colors: ThemeColors) =>
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    gap: spacing.md
+    gap: spacing.sm
   },
   label: {
     flexShrink: 1,
     textAlign: "center",
     color: colors.white,
     ...typography.body,
-    fontWeight: "700"
+    fontWeight: "600"
   },
   primaryLabel: {
     color: colors.white

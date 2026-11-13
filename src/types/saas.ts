@@ -41,6 +41,63 @@ export type AuthUser = {
   full_name: string;
   role: RoleName;
   permissions: PermissionCode[];
+  phone?: string | null;
+  is_email_verified?: boolean;
+  profile?: Record<string, any>;
+};
+
+export type SecurityEvent = {
+  id: string;
+  action: string;
+  created_at: string;
+  ip_address?: string | null;
+  user_agent?: string | null;
+  device_name?: string | null;
+  is_current: boolean;
+  status: string;
+};
+
+export type NotificationPreferenceItem = {
+  category: string;
+  channel: string;
+  enabled: boolean;
+  consent_at?: string | null;
+  consent_version?: string | null;
+  quiet_start?: string | null;
+  quiet_end?: string | null;
+  timezone?: string | null;
+};
+
+export type GymSoftwareInvoice = {
+  invoice_number: string;
+  period: string;
+  issued_at: string;
+  amount_cents: number;
+  currency: string;
+  pdf_url?: string | null;
+};
+
+export type GymSoftwareSubscription = {
+  id?: string | null;
+  plan_name: string;
+  tier_slug: string;
+  status: string;
+  amount_cents: number;
+  currency: string;
+  billing_period?: string | null;
+  trial_started_at?: string | null;
+  current_period_ends_at?: string | null;
+  dues_cents: number;
+  invoices: GymSoftwareInvoice[];
+};
+
+export type GymSupportTicket = {
+  id: string;
+  category: string;
+  summary: string;
+  description: string;
+  status: string;
+  created_at: string;
 };
 
 export type AuthResponse = {
@@ -119,9 +176,11 @@ export type GymUserRegistrationPayload = {
   gym_name?: string;
   full_name: string;
   email: string;
+  phone?: string | null;
   password: string;
   role?: JoinableRoleName;
   invitation_token?: string | null;
+  membership_plan_id?: string | null;
 };
 
 export type InvitationStatus = "active" | "used" | "revoked" | "expired";
@@ -145,13 +204,26 @@ export type Invitation = {
 
 export type InvitationCreated = Invitation & { token: string };
 
+export type InvitationPlanItem = {
+  id: string;
+  name: string;
+  description: string | null;
+  price_cents: number;
+  currency: string;
+  duration_days: number;
+};
+
 export type InvitationValidation = {
   valid: true;
   role: Exclude<RoleName, "super_admin">;
   gym_id: string | null;
   gym_name: string | null;
   email: string | null;
+  phone?: string | null;
+  invited_name?: string | null;
+  invitation_type?: string;
   expires_at: string;
+  plans?: InvitationPlanItem[];
 };
 
 export type InvitationCreatePayload = {
@@ -425,6 +497,21 @@ export type GymFeedbackSummary = {
   reviews: Array<{ id: string; member_id: string; member_name: string; review_month: string; rating: number; feedback_text?: string | null; created_at: string; updated_at: string }>;
 };
 
+export type ManagedReview = {
+  id: string; review_type: "gym" | "trainer"; member_id: string; member_name: string;
+  trainer_id?: string | null; trainer_name?: string | null; review_month: string; rating: number;
+  feedback?: string | null; owner_reply?: string | null; replied_at?: string | null;
+  created_at: string; updated_at: string;
+};
+
+export type RatingsDashboard = {
+  gym_average_rating: number; gym_total_reviews: number; combined_average_rating: number;
+  total_reviews: number; response_rate: number; gym_distribution: Record<number, number>;
+  trends: Array<{ period: string; gym_rating: number; trainer_rating: number; review_count: number }>;
+  trainers: Array<{ trainer_id: string; trainer_name: string; average_rating: number; total_reviews: number }>;
+  reviews: ManagedReview[];
+};
+
 export type TrainerCreatePayload = {
   full_name: string;
   email?: string | null;
@@ -629,3 +716,41 @@ export type DietPlanUpdatePayload = {
   ends_at?: string | null;
   meals?: JsonObject[] | null;
 };
+
+export type ExistingMemberClaimStatus = "pending_review" | "clarification_requested" | "approved" | "rejected";
+
+export type ExistingMemberClaim = {
+  id: string;
+  gym_id: string;
+  gym_name?: string | null;
+  invitation_id: string;
+  user_id: string | null;
+  member_id: string | null;
+  claimed_name: string;
+  claimed_phone: string;
+  claimed_email: string | null;
+  membership_plan_id: string | null;
+  membership_plan_name?: string | null;
+  original_join_date: string;
+  claimed_expiry_date: string;
+  amount_paid_cents: number;
+  currency: string;
+  has_receipt: boolean;
+  receipt_url: string | null;
+  extracted_data: Record<string, unknown>;
+  member_notes: string | null;
+  status: ExistingMemberClaimStatus;
+  clarification_notes: string | null;
+  rejection_reason: string | null;
+  verified_plan_id: string | null;
+  verified_plan_name?: string | null;
+  verified_join_date: string | null;
+  verified_expiry_date: string | null;
+  verified_amount_cents: number | null;
+  reviewed_by: string | null;
+  reviewer_name?: string | null;
+  reviewed_at: string | null;
+  created_at: string;
+  updated_at: string;
+};
+

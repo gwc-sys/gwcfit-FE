@@ -227,7 +227,7 @@ export function useGymOwnerDashboardContentPresentation({
         alignItems: "center" as const,
         justifyContent: "center" as const,
         borderRadius: 18,
-        backgroundColor: "#F6B38A",
+        backgroundColor: colors.primary,
       },
       profileAvatarText: {
         fontSize: 11,

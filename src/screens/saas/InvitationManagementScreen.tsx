@@ -15,6 +15,10 @@ import { PulseDashboardHeader } from "../../components/dashboard/PulseDashboardL
 import { getApiErrorMessage } from "../../services/api/client";
 import type { GymRegistrationRequest } from "../../services/api/invitations";
 import { invitationApi } from "../../services/api/invitations";
+import {
+  existingMemberOnboardingApi,
+  type ExistingMemberInviteResponse,
+} from "../../services/api/existingMemberOnboarding";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useAppTheme } from "../../theme/AppThemeProvider";
 import { radius, spacing, typography } from "../../theme/theme";
@@ -30,7 +34,7 @@ export function useInvitationManagementScreenPresentation() {
   const { colors } = useAppTheme();
   const navigation = useNavigation<any>();
   const route = useRoute<any>();
-  const historyInputRef = useRef<TextInput>(null);
+  const historyInputRef = useRef<any>(null);
   const styles = useMemo(() => createStyles(colors), [colors]);
   const queryClient = useQueryClient();
   const user = useAuthStore((state) => state.user);
@@ -44,8 +48,39 @@ export function useInvitationManagementScreenPresentation() {
   const [historySearch, setHistorySearch] = useState("");
   const [historyFilter, setHistoryFilter] = useState<"all" | "active" | "used" | "revoked" | "expired">("all");
 
+  // Existing member onboarding state
+  const [existingPhone, setExistingPhone] = useState("");
+  const [existingName, setExistingName] = useState("");
+  const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null);
+  const [bulkMode, setBulkMode] = useState(false);
+  const [bulkPhones, setBulkPhones] = useState("");
+  const [bulkResults, setBulkResults] = useState<ExistingMemberInviteResponse[] | null>(null);
+
   const invitations = useQuery({ queryKey: ["invitations"], queryFn: invitationApi.list });
   const registrations = useQuery({ queryKey: ["gym-registration-requests"], queryFn: invitationApi.registrationRequests, enabled: user?.role === "super_admin" });
+
+  const createExistingMember = useMutation({
+    mutationFn: existingMemberOnboardingApi.createInvite,
+    onSuccess: (created) => {
+      setCreatedToken(created.token);
+      setExistingPhone("");
+      setExistingName("");
+      void queryClient.invalidateQueries({ queryKey: ["invitations"] });
+    },
+  });
+
+  const bulkCreateExistingMembers = useMutation({
+    mutationFn: (phones: string[]) =>
+      existingMemberOnboardingApi.bulkCreateInvites({
+        invites: phones.map((p) => ({ phone: p.trim() })),
+        expires_in_hours: Number(hours) || 168,
+      }),
+    onSuccess: (list) => {
+      setBulkResults(list);
+      setBulkPhones("");
+      void queryClient.invalidateQueries({ queryKey: ["invitations"] });
+    },
+  });
   useEffect(() => {
     const enquiryId = route.params?.enquiryId;
     const request = registrations.data?.find((item) => item.id === enquiryId);
@@ -78,6 +113,26 @@ export function useInvitationManagementScreenPresentation() {
     const expires = Number(hours);
     if (!Number.isInteger(expires) || expires < 1 || expires > 720) return;
     setCreatedToken(null);
+    setBulkResults(null);
+
+    if (role === "member" && user?.role === "gym_owner") {
+      if (bulkMode) {
+        const list = bulkPhones.split(/[\n,]+/).map((s) => s.trim()).filter(Boolean);
+        if (list.length > 0) {
+          bulkCreateExistingMembers.mutate(list);
+        }
+        return;
+      }
+      if (!existingPhone.trim()) return;
+      createExistingMember.mutate({
+        phone: existingPhone.trim(),
+        invited_name: existingName.trim() || undefined,
+        existing_member_id: selectedMemberId || undefined,
+        expires_in_hours: expires,
+      });
+      return;
+    }
+
     createInvitation.mutate({ role, email: email || undefined, expires_in_hours: expires });
   };
   const newEnquiries = (registrations.data ?? []).filter((request) => request.status === "new").sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
@@ -86,7 +141,59 @@ export function useInvitationManagementScreenPresentation() {
   const revokedCount = (invitations.data ?? []).filter((invite) => invite.status === "revoked").length;
   const usedCount = (invitations.data ?? []).filter((invite) => invite.status === "used").length;
 
-  return { kind: "view1" as const, props: { styles, section, setSection, newEnquiries, selectedEnquiry, setSelectedEnquiry, registrations, inviteRegistration, user, historyInputRef, navigation, InviteStat, invitations, colors, historyFilter, setHistoryFilter, activeCount, usedCount, revokedCount, hours, roles, setRole, role, labels, email, setEmail, setHours, createInvitation, issue, createdToken, historySearch, setHistorySearch, revokeInvitation, history, InvitationRow } };
+  return {
+    kind: "view1" as const,
+    props: {
+      styles,
+      section,
+      setSection,
+      newEnquiries,
+      selectedEnquiry,
+      setSelectedEnquiry,
+      registrations,
+      inviteRegistration,
+      user,
+      historyInputRef,
+      navigation,
+      InviteStat,
+      invitations,
+      colors,
+      historyFilter,
+      setHistoryFilter,
+      activeCount,
+      usedCount,
+      revokedCount,
+      hours,
+      roles,
+      setRole,
+      role,
+      labels,
+      email,
+      setEmail,
+      setHours,
+      createInvitation,
+      issue,
+      createdToken,
+      historySearch,
+      setHistorySearch,
+      revokeInvitation,
+      history,
+      InvitationRow,
+      existingPhone,
+      setExistingPhone,
+      existingName,
+      setExistingName,
+      selectedMemberId,
+      setSelectedMemberId,
+      bulkMode,
+      setBulkMode,
+      bulkPhones,
+      setBulkPhones,
+      bulkResults,
+      createExistingMember,
+      bulkCreateExistingMembers,
+    },
+  };
 }
 
 export function InvitationManagementScreen(...args: Parameters<typeof useInvitationManagementScreenPresentation>): React.JSX.Element {

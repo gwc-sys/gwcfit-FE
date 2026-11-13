@@ -35,9 +35,9 @@ export function MemberReferenceHeader({ gym, name, unread, onNotifications, onPr
 }
 
 export function MemberReferenceHero({ loading, unavailable, onWorkout }: { loading: boolean; unavailable: boolean; onWorkout: () => void }) {
-  return <LinearGradient colors={["#087AFF", "#0753C7", "#061C45"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={s.hero}>
+  return <LinearGradient colors={["#E91E63", "#E91E63", "#E91E63"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={s.hero}>
     <Image source={require("../../../../../assets/images/workout-upper.jpg")} style={s.heroImage} accessibilityElementsHidden importantForAccessibility="no-hide-descendants" />
-    <LinearGradient colors={["rgba(5,68,168,0)", "#0648AE"]} start={{ x: 1, y: 0 }} end={{ x: 0, y: 0 }} style={StyleSheet.absoluteFill} />
+    <LinearGradient colors={["rgba(0, 122, 255,0)", "#007AFF"]} start={{ x: 1, y: 0 }} end={{ x: 0, y: 0 }} style={StyleSheet.absoluteFill} />
     <Text style={s.eyebrow}>YOUR NEXT MOVE</Text>
     <Text accessibilityRole="header" style={s.heroTitle}>{loading ? "Getting you ready…" : "Build your\nmomentum"}</Text>
     <Text style={s.heroDescription}>{unavailable ? "Your workouts are one tap away." : "Consistent effort creates\nreal change."}</Text>
@@ -69,7 +69,7 @@ export function MemberProgressOverview({ logs, loading, failed }: { logs: Member
       <View style={s.chartHeader}><Ionicons name="scale-outline" size={23} color={c.blue} /><Text style={[s.cardTitle, { color: c.text, flex: 1 }]}>Weight</Text><View style={{ alignItems: "flex-end", gap: 4 }}><Text style={[s.weight, { color: c.text }]}>{!loading && !failed && latest ? `${latest.weight} kg` : "—"}</Text><Text style={{ color: c.muted, fontSize: 12 }}>Last {days} days</Text></View></View>
       {loading || failed || !points.length ? <View style={s.chartEmpty}><Ionicons name="analytics-outline" size={32} color={c.blue} /><Text style={{ color: c.muted, textAlign: "center", lineHeight: 22 }}>{loading ? "Loading your progress…" : failed ? "Progress is unavailable. Use retry below." : "No weight recorded in this period.\nAdd your first log below."}</Text></View> : <View accessible accessibilityLabel={`Weight over the last ${days} days. ${points.map(log => `${dateLabel(Date.parse(log.logged_at))}: ${log.weight} kilograms`).join(". ")}`}>
         <Svg width="100%" height={200} viewBox="0 0 320 190" accessibilityElementsHidden>
-          <Defs><SvgGradient id="memberWeightFill" x1="0" y1="0" x2="0" y2="1"><Stop offset="0" stopColor="#1677FF" stopOpacity={0.25} /><Stop offset="1" stopColor="#1677FF" stopOpacity={0} /></SvgGradient></Defs>
+          <Defs><SvgGradient id="memberWeightFill" x1="0" y1="0" x2="0" y2="1"><Stop offset="0" stopColor="#007AFF" stopOpacity={0.25} /><Stop offset="1" stopColor="#007AFF" stopOpacity={0} /></SvgGradient></Defs>
           {[0, 1, 2, 3].map(i => { const value = low + (high - low) * i / 3; return <G key={i}><Line x1={34} x2={304} y1={y(value)} y2={y(value)} stroke={c.border} strokeDasharray="3 4" /><SvgText x={2} y={y(value) + 4} fontSize={10} fill={c.muted}>{value.toFixed(0)}</SvgText></G>; })}
           {points.length > 1 ? <><Path d={`${path} L${x(latest!)} 150 L${x(points[0])} 150 Z`} fill="url(#memberWeightFill)" /><Path d={path} fill="none" stroke={c.blue} strokeWidth={2.5} strokeLinejoin="round" /></> : null}
           {points.map(log => <Circle key={log.progress_uuid} cx={x(log)} cy={y(log.weight!)} r={3.5} fill="#FFFFFF" stroke={c.blue} strokeWidth={2} />)}
@@ -97,15 +97,15 @@ const s = StyleSheet.create({
   memberBadge: { paddingHorizontal: 8, paddingVertical: 5, borderRadius: 7 },
   iconButton: { minHeight: 48, minWidth: 44, alignItems: "center", justifyContent: "center" },
   avatar: { width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center" },
-  dot: { width: 7, height: 7, borderRadius: 4, backgroundColor: "#FF5B61", position: "absolute", top: 8, right: 8 },
+  dot: { width: 7, height: 7, borderRadius: 4, backgroundColor: "#E91E63", position: "absolute", top: 8, right: 8 },
   greeting: { fontSize: 28, lineHeight: 35, fontWeight: "700", letterSpacing: -0.7 },
   subtitle: { fontSize: 15, lineHeight: 23 },
-  hero: { borderRadius: 18, padding: 20, gap: 12, overflow: "hidden", minHeight: 238, borderWidth: 1, borderColor: "#237EFF" },
+  hero: { borderRadius: 18, padding: 20, gap: 12, overflow: "hidden", minHeight: 238, borderWidth: 1, borderColor: "#007AFF" },
   heroImage: { position: "absolute", right: 0, top: 0, width: "56%", height: "100%", opacity: 0.35 },
-  eyebrow: { color: "#E6F0FF", fontSize: 11, fontWeight: "500", letterSpacing: 1 },
+  eyebrow: { color: "#FFFFFF", fontSize: 11, fontWeight: "500", letterSpacing: 1 },
   heroTitle: { color: "#FFFFFF", fontSize: 28, lineHeight: 33, fontWeight: "700", letterSpacing: -0.6 },
-  heroDescription: { color: "#E6EFFF", fontSize: 15, lineHeight: 22, maxWidth: "80%" },
-  primary: { minHeight: 48, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 12, paddingHorizontal: 20, borderRadius: 12, backgroundColor: "#0066E5" },
+  heroDescription: { color: "#FFFFFF", fontSize: 15, lineHeight: 22, maxWidth: "80%" },
+  primary: { minHeight: 48, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 12, paddingHorizontal: 20, borderRadius: 12, backgroundColor: "#007AFF" },
   heroButton: { alignSelf: "flex-start", marginTop: 4 },
   primaryText: { color: "#FFFFFF", fontSize: 15, fontWeight: "600" },
   segmented: { flexDirection: "row", padding: 3, borderWidth: StyleSheet.hairlineWidth, borderRadius: 13, gap: 3 },

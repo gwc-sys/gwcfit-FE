@@ -4,7 +4,7 @@ import { createPlatformDirectoryStyles, createStyles } from "./MemberListScreen.
 import { showAlert } from "../../utils/appAlert";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
-import { useMutation, useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { useDeferredValue, useMemo, useState } from "react";
 import {
   FlatList,
@@ -26,6 +26,7 @@ import { StatusBadge } from "../../components/StatusBadge";
 import { useDeleteMember, useMembers } from "../../hooks/useRbac";
 import { useGyms } from "../../hooks/useOperations";
 import { usersApi } from "../../services/api/operations";
+import { existingMemberOnboardingApi } from "../../services/api/existingMemberOnboarding";
 import { getApiErrorMessage } from "../../services/api/client";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useAppTheme } from "../../theme/AppThemeProvider";
@@ -71,6 +72,12 @@ export function useMemberListScreenPresentation() {
     canViewMembers && !isSuperAdmin,
   );
   const deleteMember = useDeleteMember();
+  const pendingClaimsQuery = useQuery({
+    queryKey: ["existing-member-claims", "pending_review"],
+    queryFn: () => existingMemberOnboardingApi.listClaims("pending_review"),
+    enabled: canManageMembers && !isSuperAdmin,
+  });
+  const pendingClaimsCount = (pendingClaimsQuery.data ?? []).length;
 
   const members = useMemo(() => {
     const list = membersQuery.data ?? [];
@@ -131,7 +138,7 @@ export function useMemberListScreenPresentation() {
     );
   };
 
-  return { kind: "view3" as const, props: { styles, compact, membersQuery, isTrainer, colors, setSearch, setPage, search, setMemberFilter, memberFilter, canManageMembers, navigation, MemberStat, activeCount, newThisMonthCount, expiredCount, setSortDirection, sortDirection, notice, deleteMember, visibleMembers, MemberRow, confirmDelete, page } };
+  return { kind: "view3" as const, props: { styles, compact, membersQuery, isTrainer, colors, setSearch, setPage, search, setMemberFilter, memberFilter, canManageMembers, navigation, MemberStat, activeCount, newThisMonthCount, expiredCount, setSortDirection, sortDirection, notice, deleteMember, visibleMembers, MemberRow, confirmDelete, page, pendingClaimsCount } };
 }
 
 export function MemberListScreen(...args: Parameters<typeof useMemberListScreenPresentation>): React.JSX.Element {
@@ -223,13 +230,13 @@ function PlatformDetail(...args: Parameters<typeof usePlatformDetailPresentation
   return <PlatformDetailView model={usePlatformDetailPresentation(...args)} />;
 }
 
-export function useMemberRowPresentation({ member, isDeleting, onView, onEdit, onDelete }: MemberRowProps) {
+export function useMemberRowPresentation({ member, compact = false, isDeleting, onView, onEdit, onDelete }: MemberRowProps) {
   const { colors } = useAppTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const fullName = `${member.first_name} ${member.last_name}`;
   const membership = getMembershipState(member.membership_ends_at);
 
-  return { kind: "view1" as const, props: { styles, fullName, onView, member, membership, colors, onEdit, onDelete, isDeleting } };
+  return { kind: "view1" as const, props: { styles, fullName, onView, member, membership, colors, onEdit, onDelete, isDeleting, compact } };
 }
 
 function MemberRow(...args: Parameters<typeof useMemberRowPresentation>): React.JSX.Element {

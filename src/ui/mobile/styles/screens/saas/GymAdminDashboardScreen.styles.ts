@@ -1,113 +1,165 @@
 import { controlMetrics } from "../../../theme/theme";
 import { adaptPageStyles } from "../../adaptPageStyles";
 import { Platform, StyleSheet } from "react-native";
-import { radius, spacing, typography } from "../../../theme/theme";
+import { darkThemeColors, radius, spacing, typography } from "../../../theme/theme";
 import type { ThemeColors } from "../../../theme/theme";
 
-export const ownerProfileStyles = adaptPageStyles(StyleSheet.create({
-  backdrop: {
-    flex: 1,
-    alignItems: "flex-end",
-    justifyContent: "flex-start",
-    paddingTop: 70,
-    paddingRight: 24,
-    backgroundColor: "rgba(2,6,23,0.2)",
-  },
-  menu: {
-    width: 315,
-    borderWidth: 1,
-    borderColor: "#26364B",
-    borderRadius: 12,
-    paddingVertical: 9,
-    backgroundColor: "#111D2D",
-    ...(Platform.OS === "web"
-      ? { boxShadow: "0 8px 30px rgba(0,0,0,0.30)" }
-      : {
-          shadowColor: "#000",
-          shadowOpacity: 0.3,
-          shadowRadius: 15,
-          shadowOffset: { width: 0, height: 8 },
-          elevation: 8,
-        }),
-  },
-  identity: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 13,
-    paddingHorizontal: 16,
-    paddingVertical: 15,
-  },
-  avatar: {
-    width: 50,
-    height: 50,
-    alignItems: "center",
-    justifyContent: "center",
-    borderRadius: 25,
-    backgroundColor: "#F6B38A",
-  },
-  avatarText: {
-      fontSize: 16,
-      color: "#FFFFFF",
-      fontWeight: "700"
-    },
-  identityCopy: { flex: 1, minWidth: 0 },
-  name: {
-      fontSize: 14,
-      color: "#FFFFFF",
-      fontWeight: "700"
-    },
-  email: { fontSize: 13, color: "#A9C9E9", marginTop: 4 },
-  divider: { height: 1, backgroundColor: "#26364B", marginVertical: 6 },
-  item: {
-    minHeight: 54,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 15,
-    paddingHorizontal: 18,
-  },
-  itemText: {
-      fontSize: 14,
-      color: "#FFFFFF",
-      fontWeight: "700"
-    },
-  danger: { color: "#EF4444" },
-  disabled: { opacity: 0.5 },
-  pressed: { backgroundColor: "#1B2A3E" },
-}));
+export const createOwnerProfileStyles = (c: ThemeColors = darkThemeColors) =>
+  adaptPageStyles(
+    StyleSheet.create({
+      backdrop: {
+        flex: 1,
+        alignItems: "flex-end",
+        justifyContent: "flex-start",
+        paddingTop: 40,
+        paddingRight: 16,
+        backgroundColor: "transparent",
+      },
+      menu: {
+        width: "92%",
+        maxWidth: 356,
+        borderWidth: 1,
+        borderColor: c.border,
+        borderRadius: 16,
+        paddingVertical: 0,
+        backgroundColor: c.surface,
+        ...(Platform.OS === "web"
+          ? { boxShadow: "0 8px 30px rgba(0,0,0,0.15)" }
+          : {
+              shadowColor: c.shadowColor,
+              shadowOpacity: 0.15,
+              shadowRadius: 15,
+              shadowOffset: { width: 0, height: 8 },
+              elevation: 8,
+            }),
+      },
+      identity: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 13,
+        paddingHorizontal: 18,
+        paddingVertical: 25,
+      },
+      avatar: {
+        width: 53,
+        height: 53,
+        alignItems: "center",
+        justifyContent: "center",
+        borderRadius: 27,
+        backgroundColor: "#E91E63",
+      },
+      avatarText: {
+        fontSize: 16,
+        color: "#FFFFFF",
+        fontWeight: "700",
+      },
+      identityCopy: { flex: 1, minWidth: 0 },
+      name: {
+        fontSize: 14,
+        color: c.ink,
+        fontWeight: "700",
+      },
+      email: { fontSize: 12, color: c.textSecondary, marginTop: 4 },
+      divider: { height: 1, backgroundColor: c.border, marginVertical: 0 },
+      item: {
+        minHeight: 57,
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 18,
+        paddingHorizontal: 20,
+      },
+      itemText: {
+        fontSize: 15,
+        color: c.ink,
+        fontWeight: "700",
+      },
+      danger: { color: c.danger },
+      disabled: { opacity: 0.5 },
+      pressed: { backgroundColor: c.surfaceElevated },
+    }),
+  );
 
-export const ownerCalendarStyles = adaptPageStyles(StyleSheet.create({
-  backdrop: { flex: 1, alignItems: "flex-end", justifyContent: "flex-start", paddingTop: 75, paddingRight: 20, backgroundColor: "rgba(2,6,23,0.2)" },
-  menu: {
-    width: 320,
-    borderWidth: 1,
-    borderColor: "#26364B",
-    borderRadius: 10,
-    padding: 14,
-    backgroundColor: "#111D2D",
-    ...(Platform.OS === "web"
-      ? { boxShadow: "0 7px 28px rgba(0,0,0,0.30)" }
-      : { shadowColor: "#000", shadowOpacity: 0.3, shadowRadius: 14, shadowOffset: { width: 0, height: 7 }, elevation: 8 }),
-  },
-  monthHeader: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 9 },
-  monthTitle: {
-      fontSize: 20,
-      color: "#FFFFFF",
-      fontWeight: "700"
-    },
-  arrowButton: { width: controlMetrics.minimumTouchSize, height: controlMetrics.minimumTouchSize, alignItems: "center", justifyContent: "center", borderRadius: 15, backgroundColor: "#334155" },
-  weekRow: { flexDirection: "row", marginBottom: 4 },
-  weekday: { width: "14.2857%", textAlign: "center", fontSize: 13, color: "#D7E3F0", fontWeight: "700" },
-  daysGrid: { flexDirection: "row", flexWrap: "wrap" },
-  dayCell: { width: "14.2857%", height: 36, alignItems: "center", justifyContent: "center", borderRadius: 18 },
-  dayText: { fontSize: 14, color: "#FFFFFF", fontWeight: "600" },
-  selectedDay: { backgroundColor: "#7A8794" },
-  selectedDayText: {
-      color: "#FFFFFF",
-      fontWeight: "700"
-    },
-  todayButton: { alignItems: "center", paddingTop: 8, minHeight: controlMetrics.minimumTouchSize },
-  today: { fontSize: 13, color: "#0A84FF", fontWeight: "800" },
-}));
+export const ownerProfileStyles = createOwnerProfileStyles();
+
+export const createOwnerCalendarStyles = (c: ThemeColors = darkThemeColors) =>
+  adaptPageStyles(
+    StyleSheet.create({
+      backdrop: {
+        flex: 1,
+        alignItems: "flex-end",
+        justifyContent: "flex-start",
+        paddingTop: 75,
+        paddingRight: 20,
+        backgroundColor: "rgba(0, 0, 0,0.2)",
+      },
+      menu: {
+        width: 320,
+        borderWidth: 1,
+        borderColor: c.border,
+        borderRadius: 10,
+        padding: 14,
+        backgroundColor: c.surface,
+        ...(Platform.OS === "web"
+          ? { boxShadow: "0 7px 28px rgba(0,0,0,0.15)" }
+          : {
+              shadowColor: c.shadowColor,
+              shadowOpacity: 0.15,
+              shadowRadius: 14,
+              shadowOffset: { width: 0, height: 7 },
+              elevation: 8,
+            }),
+      },
+      monthHeader: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+        marginBottom: 9,
+      },
+      monthTitle: {
+        fontSize: 20,
+        color: c.ink,
+        fontWeight: "700",
+      },
+      arrowButton: {
+        width: controlMetrics.minimumTouchSize,
+        height: controlMetrics.minimumTouchSize,
+        alignItems: "center",
+        justifyContent: "center",
+        borderRadius: 15,
+        backgroundColor: c.surfaceElevated,
+      },
+      weekRow: { flexDirection: "row", marginBottom: 4 },
+      weekday: {
+        width: "14.2857%",
+        textAlign: "center",
+        fontSize: 13,
+        color: c.textSecondary,
+        fontWeight: "700",
+      },
+      daysGrid: { flexDirection: "row", flexWrap: "wrap" },
+      dayCell: {
+        width: "14.2857%",
+        height: 36,
+        alignItems: "center",
+        justifyContent: "center",
+        borderRadius: 18,
+      },
+      dayText: { fontSize: 14, color: c.ink, fontWeight: "600" },
+      selectedDay: { backgroundColor: c.primary },
+      selectedDayText: {
+        color: "#FFFFFF",
+        fontWeight: "700",
+      },
+      todayButton: {
+        alignItems: "center",
+        paddingTop: 8,
+        minHeight: controlMetrics.minimumTouchSize,
+      },
+      today: { fontSize: 13, color: "#E91E63", fontWeight: "800" },
+    }),
+  );
+
+export const ownerCalendarStyles = createOwnerCalendarStyles();
 
 export const createOwnerDashboardStyles = (c: ThemeColors) =>
   adaptPageStyles(StyleSheet.create({
@@ -140,14 +192,14 @@ export const createOwnerDashboardStyles = (c: ThemeColors) =>
       borderRadius: 9,
       alignItems: "center",
       justifyContent: "center",
-      backgroundColor: c.primary,
+      backgroundColor: "#E91E63",
     },
     headerBadgeText: {
       fontSize: 13,
       color: c.white,
       fontWeight: "700"
     },
-    addButton: { height: undefined, flexDirection: "row", alignItems: "center", gap: 7, paddingHorizontal: 17, borderRadius: 9, backgroundColor: c.primary, minHeight: controlMetrics.minimumTouchSize },
+    addButton: { height: undefined, flexDirection: "row", alignItems: "center", gap: 7, paddingHorizontal: 17, borderRadius: 9, backgroundColor: "#E91E63", minHeight: controlMetrics.minimumTouchSize },
     addButtonText: {
       fontSize: 12,
       color: c.white,
@@ -254,7 +306,7 @@ export const createOwnerDashboardStyles = (c: ThemeColors) =>
     },
     viewAll: {
       fontSize: 14,
-      color: "#0A84FF",
+      color: "#E91E63",
       fontWeight: "800",
       lineHeight: 20
     },
@@ -280,13 +332,28 @@ export const createOwnerDashboardStyles = (c: ThemeColors) =>
       flexWrap: "wrap"
     },
     legendDot: { width: 8, height: 8, borderRadius: 4, marginLeft: 10 },
+    periodPill: { minHeight: 32, flexDirection: "row", alignItems: "center", gap: 6, borderRadius: 16, paddingHorizontal: 11, backgroundColor: c.surfaceMuted },
+    periodPillText: { fontSize: 11, color: c.ink, fontWeight: "600" },
+    overviewStats: { flexDirection: "row", gap: 12, marginTop: 18 },
+    overviewStat: { flex: 1, minHeight: 64, flexDirection: "row", alignItems: "center", gap: 10, borderRadius: 16, paddingHorizontal: 12, backgroundColor: c.surfaceMuted },
+    overviewStatIcon: { width: 38, height: 38, alignItems: "center", justifyContent: "center", borderRadius: 19 },
+    overviewStatValue: { fontSize: 20, color: c.ink, fontWeight: "700" },
+    circularOverview: { flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "space-evenly", gap: 12, paddingVertical: 20 },
+    circularMetricWrap: { alignItems: "center", gap: 10 },
+    circularMetric: { width: 88, height: 88, alignItems: "center", justifyContent: "center", gap: 3, borderRadius: 44, borderWidth: 2, backgroundColor: c.surfaceMuted },
+    circularMetricActive: { borderColor: "#34C759", backgroundColor: "rgba(52, 199, 89, 0.14)" },
+    circularMetricNew: { borderColor: "#E91E63", backgroundColor: "rgba(233, 30, 99, 0.14)" },
+    circularMetricPeriod: { borderColor: "#E91E63", borderStyle: "dashed", backgroundColor: "rgba(233, 30, 99, 0.14)" },
+    circularMetricValue: { fontSize: 22, color: c.ink, fontWeight: "700" },
+    circularMetricPeriodValue: { fontSize: 28, color: c.ink, fontWeight: "700" },
+    circularMetricLabel: { fontSize: 11, lineHeight: 15, color: c.textSecondary, textAlign: "center" },
     chart: { height: 185, marginTop: 8, position: "relative" },
     chartRangeWrap: { position: "absolute", top: -44, right: 0, zIndex: 4 },
     chartRangeButton: { minWidth: 86, height: undefined, flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 6, borderWidth: 1, borderColor: c.border, borderRadius: 7, paddingHorizontal: 9, backgroundColor: c.card, minHeight: controlMetrics.minimumTouchSize },
     chartRangeMenu: { position: "absolute", top: 40, right: 0, width: 100, borderWidth: 1, borderColor: c.border, borderRadius: 7, paddingVertical: 4, backgroundColor: c.card },
     chartRangeOption: { paddingHorizontal: 10, paddingVertical: 8, minHeight: controlMetrics.minimumTouchSize },
     chartRangeSelected: {
-      color: c.primary,
+      color: "#E91E63",
       fontWeight: "700"
     },
     chartGrid: {
@@ -337,9 +404,9 @@ export const createOwnerDashboardStyles = (c: ThemeColors) =>
       justifyContent: "center",
       borderRadius: 72,
       borderWidth: 25,
-      borderColor: "#18C77A",
-      borderRightColor: "#1685F8",
-      borderTopColor: "#0A84FF",
+      borderColor: "#34C759",
+      borderRightColor: "#E91E63",
+      borderTopColor: "#E91E63",
     },
     donutHole: {
       width: 94,
@@ -409,11 +476,11 @@ export const createOwnerDashboardStyles = (c: ThemeColors) =>
       height: 144,
       alignItems: "center",
       justifyContent: "center",
+      gap: 4,
       borderRadius: 72,
-      borderWidth: 20,
-      borderColor: "#18C77A",
-      borderRightColor: "#EF476F",
-      borderTopColor: "#F59E0B",
+      borderWidth: 2,
+      borderColor: "#34C759",
+      backgroundColor: "rgba(52, 199, 89, 0.14)",
     },
     statusRingValue: {
       fontSize: 26,
@@ -459,7 +526,7 @@ export const createOwnerDashboardStyles = (c: ThemeColors) =>
       width: 22,
       minHeight: 18,
       borderRadius: 5,
-      backgroundColor: "#0A84FF",
+      backgroundColor: "#E91E63",
     },
     recentRow: {
       minHeight: 42,
@@ -474,7 +541,7 @@ export const createOwnerDashboardStyles = (c: ThemeColors) =>
       alignItems: "center",
       justifyContent: "center",
       borderRadius: 16,
-      backgroundColor: "#F6B38A",
+      backgroundColor: "#E91E63",
     },
     recentAvatarText: { fontSize: 12, color: c.white, fontWeight: "800" },
     recentName: { fontSize: 13, color: c.ink, fontWeight: "800" },
@@ -498,6 +565,8 @@ export const createOwnerDashboardStyles = (c: ThemeColors) =>
     quickTitle: { fontSize: 15, color: c.ink, fontWeight: "800" },
     quickSubtitle: { fontSize: 12, color: c.textSecondary, marginTop: 3 },
   }));
+
+export { referenceDashboardStyles } from "./GymOwnerDashboardScreen.styles";
 
 export const createStyles = (colors: ThemeColors) =>
   adaptPageStyles(StyleSheet.create({

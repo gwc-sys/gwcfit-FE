@@ -16,7 +16,7 @@ export function ExerciseDetailScreenView({ model }: { model: ReturnType<typeof u
       return ((
     <View style={styles.root}>
       <ImageBackground source={exercise.image} style={styles.hero} resizeMode="cover">
-        <LinearGradient colors={["rgba(5,7,10,0.15)", "rgba(5,7,10,0.82)"]} style={styles.heroOverlay}>
+        <LinearGradient colors={["rgba(0, 0, 0,0.15)", "rgba(0, 0, 0,0.82)"]} style={styles.heroOverlay}>
           <Header transparent right={<MoreVertical color={palette.white} size={30} />} />
           <View style={styles.heroCopy}>
             <Text style={styles.kicker}>{exercise.focus}</Text>

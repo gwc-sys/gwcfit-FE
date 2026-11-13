@@ -8,7 +8,6 @@ import { useQuery } from "@tanstack/react-query";
 import type { ReactElement, ReactNode } from "react";
 import { useEffect, useMemo, useState } from "react";
 import {
-  Platform,
   Modal,
   Pressable,
   RefreshControlProps,
@@ -34,6 +33,10 @@ import { useNotificationDelivery } from "../../services/notificationDelivery";
 import { notificationsApi } from "../../services/api/notifications";
 import { Screen } from "../Screen";
 import { useMyGym } from "../../hooks/useOperations";
+import { showAlert } from "../../utils/appAlert";
+import { usersApi } from "../../services/api/operations";
+
+const shownPlatformPaymentAlerts = new Set<string>();
 
 export type PulseNavItem = {
   label: string;
@@ -52,6 +55,7 @@ type PulseDashboardLayoutProps = {
   accountMenuRequest?: number;
   trainerSearchValue?: string;
   onTrainerSearchChange?: (value: string) => void;
+  hideDefaultHeader?: boolean;
 };
 
 type PulseDashboardHeaderProps = {
@@ -87,22 +91,23 @@ const baseNavItems: PulseNavItem[] = [
 const ownerNavItems: PulseNavItem[] = [
   {
     label: "Dashboard",
-    icon: "grid-outline",
+    icon: "stats-chart-outline",
     route: "AppTabs",
     params: { screen: "Dashboard" },
   },
   { label: "Members", icon: "people-outline", route: "MemberList" },
   { label: "Trainers", icon: "barbell-outline", route: "Trainers" },
-  { label: "Receptionists", icon: "person-outline", route: "Staff" },
-  { label: "Invitations", icon: "ticket-outline", route: "Invitations" },
+  { label: "Receptionists", icon: "shield-outline", route: "Staff" },
+  { label: "Invitations", icon: "person-add-outline", route: "Invitations" },
   { label: "Attendance", icon: "calendar-outline", route: "Attendance" },
-  { label: "Workouts", icon: "barbell-outline", route: "WorkoutPlans" },
+  { label: "Workouts", icon: "pulse-outline", route: "WorkoutPlans" },
   { label: "Nutrition", icon: "restaurant-outline", route: "DietPlans" },
   { label: "Payments", icon: "card-outline", route: "Payments" },
+  { label: "Membership Plans", icon: "layers-outline", route: "MembershipPlans" },
   { label: "Reports", icon: "document-text-outline", route: "Reports" },
+  { label: "Ratings & Feedback", icon: "star-outline", route: "RatingsFeedback" },
   { label: "Messages", icon: "mail-outline", route: "Notifications" },
-  { label: "Plans", icon: "pricetag-outline", route: "MembershipPlans" },
-  { label: "Settings", icon: "settings-outline", route: "Settings" },
+  { label: "Account", icon: "person-circle-outline", route: "Profile" },
 ];
 
 // Receptionists share the owner-panel layout, but should only see the modules
@@ -134,7 +139,7 @@ const platformNavItems: PulseNavItem[] = [
   { label: "Payments", icon: "card-outline", route: "Payments" },
   { label: "Reports", icon: "analytics-outline", route: "Reports" },
   { label: "Settings", icon: "settings-outline", route: "Settings" },
-  { label: "Profile", icon: "person-circle-outline", route: "Profile" },
+  { label: "Account", icon: "person-circle-outline", route: "Profile" },
 ];
 
 function getNavItems(role?: string) {
@@ -176,6 +181,7 @@ export function usePulseDashboardLayoutPresentation({
   accountMenuRequest = 0,
   trainerSearchValue,
   onTrainerSearchChange,
+  hideDefaultHeader = false,
 }: PulseDashboardLayoutProps) {
   const navigation = useNavigation<any>();
   const { colors, isDark, toggleColorScheme } = useAppTheme();
@@ -197,11 +203,12 @@ export function usePulseDashboardLayoutPresentation({
     }
   }, [myGymQuery.data, user]);
   const savedGymName = myGymQuery.data?.name?.trim() || user?.gym_name?.trim() || "your gym";
+  const paymentGraceEndsAt = myGymQuery.data?.settings?.payment_grace_ends_at;
   const isTrainer = user?.role === "trainer";
   const userName = user?.full_name ?? "John Trainer";
   const notificationQuery = useQuery({
-    queryKey: ["notifications", "unread-count", user?.id],
-    queryFn: () => notificationsApi.unreadCount(),
+    queryKey: ["notifications", "unread-count", user?.id, user?.gym_id, user?.role],
+    queryFn: ({ signal }) => notificationsApi.unreadCount(signal),
     enabled: Boolean(user),
     refetchInterval: 60000,
     refetchIntervalInBackground: true,
@@ -211,6 +218,7 @@ export function usePulseDashboardLayoutPresentation({
   useNotificationDelivery(navigation, user?.id, unreadNotificationCount);
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
   const [localTrainerSearch, setLocalTrainerSearch] = useState("");
+  const [webMenuVisible, setWebMenuVisible] = useState(true);
   const logout = useLogout();
   const styles = useMemo(
     () => createStyles(colors, width, height, insets.bottom),
@@ -242,7 +250,25 @@ export function usePulseDashboardLayoutPresentation({
     if (accountMenuRequest > 0) setAccountMenuOpen(true);
   }, [accountMenuRequest]);
 
-  return { kind: "view1" as const, props: { paymentGraceEndsAt: myGymQuery.data?.settings?.payment_grace_ends_at, savedGymName, styles, contentStyle, refreshControl, isDesktop, isTrainer, isGymOwner, GymOwnerSidebar, activeLabel, navigation, isPlatformAdmin, colors, resolvedRoleLabel, sidebarItems, setAccountMenuOpen, userName, MobileBrandButton, firstName, ownerDate, unreadNotificationCount, resolvedTrainerSearch, setResolvedTrainerSearch, trainerDate, children, accountMenuOpen, user, OwnerAccountItem, isDark, toggleColorScheme, logout } };
+  useEffect(() => {
+    if (!isGymOwner || !user?.id || !paymentGraceEndsAt) return;
+    const deadline = Date.parse(String(paymentGraceEndsAt));
+    if (!Number.isFinite(deadline)) return;
+    const daysLeft = Math.max(0, Math.ceil((deadline - Date.now()) / 86400000));
+    const alertKey = `${user.id}:${paymentGraceEndsAt}`;
+    let alreadyShown = shownPlatformPaymentAlerts.has(alertKey);
+    try { alreadyShown ||= globalThis.sessionStorage?.getItem(`pulsefit:payment-alert:${alertKey}`) === "shown"; } catch { /* Storage can be unavailable in private browsing. */ }
+    if (alreadyShown) return;
+    shownPlatformPaymentAlerts.add(alertKey);
+    try { globalThis.sessionStorage?.setItem(`pulsefit:payment-alert:${alertKey}`, "shown"); } catch { /* The in-memory guard still prevents duplicates. */ }
+    const dayLabel = daysLeft === 1 ? "day" : "days";
+    showAlert(
+      "Platform payment due soon",
+      `Your PulseFit platform payment is due in ${daysLeft} ${dayLabel}. Contact the developer to renew your plan and avoid interruption.`,
+    );
+  }, [isGymOwner, paymentGraceEndsAt, user?.id]);
+
+  return { kind: "view1" as const, props: { hideDefaultHeader, paymentGraceEndsAt, savedGymName, styles, contentStyle, refreshControl, isDesktop, isTrainer, isGymOwner, GymOwnerSidebar, activeLabel, navigation, isPlatformAdmin, colors, resolvedRoleLabel, sidebarItems, setAccountMenuOpen, userName, MobileBrandButton, firstName, ownerDate, unreadNotificationCount, resolvedTrainerSearch, setResolvedTrainerSearch, trainerDate, children, accountMenuOpen, user, OwnerAccountItem, isDark, toggleColorScheme, logout, webMenuVisible, setWebMenuVisible } };
 }
 
 export function PulseDashboardLayout(...args: Parameters<typeof usePulseDashboardLayoutPresentation>): React.JSX.Element {
@@ -253,13 +279,41 @@ export function useGymOwnerSidebarPresentation({
   activeLabel,
   onNavigate,
   styles,
+  onCollapse,
 }: {
   activeLabel: string;
   onNavigate: (route: string, params?: Record<string, unknown>) => void;
   styles: any;
+  onCollapse?: () => void;
 }) {
   const { colors } = useAppTheme();
-  return { kind: "view1" as const, props: { styles, colors, ownerNavItems, activeLabel, onNavigate } };
+  const user = useAuthStore((state) => state.user);
+  const userCountsQuery = useQuery({
+    queryKey: ["users", "counts", "gym-admin-dashboard"],
+    queryFn: () => usersApi.counts(),
+    enabled: user?.role === "gym_owner",
+    retry: false,
+    staleTime: 60000,
+  });
+  const userCounts = userCountsQuery.data ?? {
+    total: 4,
+    member: 2,
+    trainer: 1,
+    receptionist: 1,
+    sub_admin: 0,
+  };
+  return {
+    kind: "view1" as const,
+    props: {
+      styles,
+      colors,
+      ownerNavItems,
+      activeLabel,
+      onNavigate,
+      userCounts,
+      onCollapse,
+    },
+  };
 }
 
 function GymOwnerSidebar(...args: Parameters<typeof useGymOwnerSidebarPresentation>): React.JSX.Element {
@@ -326,7 +380,7 @@ export function usePulseDashboardHeaderPresentation({
     [colors, width],
   );
   const headerUser = useAuthStore((state) => state.user);
-  const unread = useQuery({ queryKey: ["notifications", "unread-count", headerUser?.id], queryFn: notificationsApi.unreadCount, enabled: Boolean(headerUser) && Boolean(onNotifications), refetchInterval: 60000, refetchIntervalInBackground: true });
+  const unread = useQuery({ queryKey: ["notifications", "unread-count", headerUser?.id, headerUser?.gym_id, headerUser?.role], queryFn: ({ signal }) => notificationsApi.unreadCount(signal), enabled: Boolean(headerUser) && Boolean(onNotifications), refetchInterval: 60000, refetchIntervalInBackground: true });
   const resolvedBadge = notificationBadge ?? (unread.data ? (unread.data >= 10 ? "10+" : String(unread.data)) : undefined);
   const resolvedDate =
     dateLabel ??

@@ -3,7 +3,7 @@ import { adaptPageStyles } from "../../adaptPageStyles";
 import { StyleSheet } from "react-native";
 import { radius, spacing, typography } from "../../../theme/theme";
 
-export const createFeatureStyles = (colors: ThemeColors) => adaptPageStyles(StyleSheet.create({
+export const createFeatureStyles = (colors: ThemeColors): any => adaptPageStyles(StyleSheet.create({
   screen: {
       gap: spacing.lg,
       paddingTop: spacing.md,
@@ -14,13 +14,19 @@ export const createFeatureStyles = (colors: ThemeColors) => adaptPageStyles(Styl
   },
   panel: {
     gap: spacing.md,
-    borderRadius: radius.md,
+    borderRadius: radius.sm,
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: colors.border,
     backgroundColor: colors.card,
     padding: spacing.md
   },
-  feedbackPanel: { gap: spacing.lg, borderRadius: radius.md, borderWidth: StyleSheet.hairlineWidth, borderColor: colors.border, backgroundColor: colors.card, padding: spacing.md },
+  feedbackPanel: { gap: spacing.lg, borderRadius: radius.sm, borderWidth: StyleSheet.hairlineWidth, borderColor: colors.border, backgroundColor: colors.card, padding: spacing.md },
+  trainerDetails: { gap: 0, borderTopWidth: 1, borderTopColor: colors.border },
+  trainerDetailRow: { minHeight: 64, flexDirection: "row", alignItems: "center", gap: spacing.md, borderBottomWidth: 1, borderBottomColor: colors.border, paddingVertical: spacing.sm },
+  trainerDetailIcon: { width: 40, height: 40, alignItems: "center", justifyContent: "center", borderRadius: 20, backgroundColor: colors.primarySoft },
+  trainerDetailCopy: { flex: 1, minWidth: 0 },
+  trainerDetailLabel: { ...typography.body, color: colors.ink, fontWeight: "700" },
+  trainerDetailValue: { ...typography.small, color: colors.muted, marginTop: 2 },
   feedbackHeader: { gap: 4 },
   feedbackTitle: { ...typography.h2, color: colors.ink },
   feedbackScoreRow: { flexDirection: "row", alignItems: "center", gap: spacing.sm },
@@ -30,7 +36,7 @@ export const createFeatureStyles = (colors: ThemeColors) => adaptPageStyles(Styl
   feedbackStarButtonActive: { backgroundColor: colors.primarySoft },
   feedbackStar: { fontSize: 23, lineHeight: 28 },
   feedbackOptions: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
-  feedbackOption: { borderWidth: 1, borderColor: colors.border, borderRadius: 16, paddingHorizontal: 12, paddingVertical: 8, backgroundColor: colors.surface },
+  feedbackOption: { borderWidth: 1, borderColor: colors.border, borderRadius: radius.sm, paddingHorizontal: 12, paddingVertical: 8, backgroundColor: colors.surface },
   feedbackOptionActive: { borderColor: colors.primary, backgroundColor: colors.primarySoft },
   feedbackOptionText: { ...typography.small, color: colors.ink },
   panelHeader: {
@@ -76,7 +82,7 @@ export const createFeatureStyles = (colors: ThemeColors) => adaptPageStyles(Styl
     flexDirection: "row",
     alignItems: "center",
     gap: spacing.md,
-    borderRadius: 18,
+    borderRadius: radius.md,
     backgroundColor: colors.surface,
     padding: spacing.md
   },

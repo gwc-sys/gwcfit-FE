@@ -7,31 +7,71 @@ import { getApiErrorMessage, getApiStatus } from "../services/api/client";
 import { memberApi } from "../services/api/member";
 import type { MemberActivitySync } from "../types/member";
 
+async function getStoredItem(key: string): Promise<string | null> {
+  if (Platform.OS === "web") {
+    try {
+      return globalThis.localStorage?.getItem(key) ?? null;
+    } catch {
+      return null;
+    }
+  }
+  try {
+    return await SecureStore.getItemAsync(key);
+  } catch {
+    return null;
+  }
+}
+
+async function setStoredItem(key: string, value: string): Promise<void> {
+  if (Platform.OS === "web") {
+    try {
+      globalThis.localStorage?.setItem(key, value);
+    } catch {
+      // Ignore storage errors
+    }
+    return;
+  }
+  try {
+    await SecureStore.setItemAsync(key, value);
+  } catch {
+    // Ignore storage errors
+  }
+}
+
 type Snapshot = { date: string; hours: number[]; status: string; calories: number; target: number };
+
 export function useActivitySync(snapshot: Snapshot) {
-  const userId = useAuthStore(s => s.user?.id);
+  const userId = useAuthStore((s) => s.user?.id);
   const queryClient = useQueryClient();
   const [syncStatus, setSyncStatus] = useState("pending");
   const [error, setError] = useState<string | null>(null);
   const flush = useRef<(() => Promise<void>) | null>(null);
   const capture = useRef<((s: Snapshot) => void) | null>(null);
-  const latest = useRef(snapshot); latest.current = snapshot;
+  const latest = useRef(snapshot);
+  latest.current = snapshot;
   const signature = JSON.stringify(snapshot);
+
   useEffect(() => {
     if (!userId) return;
-    let disposed = false, busy = false;
+    let disposed = false,
+      busy = false;
     let lastAttempt = 0;
     let pending: Record<string, MemberActivitySync> = {};
     let device = "";
     let writes = Promise.resolve();
     const key = `activity-queue-${userId}`;
+
     const persist = () => {
       const data = JSON.stringify(pending);
-      writes = writes.then(() => SecureStore.setItemAsync(key, data)).catch(() => { if (!disposed) setSyncStatus("local-error"); });
+      writes = writes.then(() => setStoredItem(key, data)).catch(() => {
+        if (!disposed) setSyncStatus("local-error");
+      });
     };
+
     const drain = async () => {
       if (disposed || busy || !device || useAuthStore.getState().user?.id !== userId) return;
-      busy = true; lastAttempt = Date.now();
+      busy = true;
+      lastAttempt = Date.now();
       try {
         for (const [date, data] of Object.entries(pending).sort()) {
           if (disposed) break;
@@ -44,44 +84,87 @@ export function useActivitySync(snapshot: Snapshot) {
           setError(null);
           setSyncStatus(Object.keys(pending).length ? "pending" : "saved");
           void queryClient.invalidateQueries({ queryKey: ["member", "activity"] });
+          void queryClient.invalidateQueries({ queryKey: ["member", "dashboard"] });
         }
       } catch (failure) {
         if (!disposed) {
           const status = getApiStatus(failure);
           setSyncStatus(status ? "server-error" : "offline");
-          setError(status === 404 ? "Activity saving is unavailable on the backend. Update or restart the backend, then retry." : getApiErrorMessage(failure));
+          setError(
+            status === 404
+              ? "Activity saving is unavailable on the backend. Update or restart the backend, then retry."
+              : getApiErrorMessage(failure)
+          );
         }
+      } finally {
+        busy = false;
       }
-      finally { busy = false; }
     };
+
     const save = (s: Snapshot) => {
       const date = new Date(s.date);
       if (!Number.isFinite(date.getTime())) return;
       const dateKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
       const previous = pending[dateKey];
+      const hasSteps = Array.isArray(s.hours) && s.hours.length === 24 && s.hours.some((h) => h > 0);
+      const isTracking = s.status === "tracking" || hasSteps;
+      const resolvedSource: MemberActivitySync["source"] = isTracking
+        ? Platform.OS === "ios"
+          ? "ios_pedometer"
+          : "android_foreground"
+        : "dashboard";
       pending[dateKey] = {
-        activity_date: dateKey, utc_offset_minutes: -date.getTimezoneOffset(), device_id: device,
-        source: s.status === "tracking" ? Platform.OS === "ios" ? "ios_pedometer" : "android_foreground" : "dashboard",
-        ...(s.status === "tracking" ? { hourly_steps: s.hours } : previous?.hourly_steps ? { hourly_steps: previous.hourly_steps, source: previous.source } : {}),
+        activity_date: dateKey,
+        utc_offset_minutes: -date.getTimezoneOffset(),
+        device_id: device,
+        source: resolvedSource,
+        ...(isTracking && Array.isArray(s.hours) && s.hours.length === 24
+          ? { hourly_steps: s.hours }
+          : previous?.hourly_steps
+          ? { hourly_steps: previous.hourly_steps, source: previous.source }
+          : {}),
       };
-      setSyncStatus("pending"); persist();
-      // Send new readings immediately; the interval also retries failed requests.
-      if (Date.now() - lastAttempt >= 3000) void drain();
+      setSyncStatus("pending");
+      persist();
+      if (Date.now() - lastAttempt >= 2000) void drain();
     };
+
     void (async () => {
       try {
-        device = await SecureStore.getItemAsync("activity-device-id") ?? `phone-${Date.now()}-${Math.random().toString(36).slice(2)}`;
-        await SecureStore.setItemAsync("activity-device-id", device);
-        const stored = JSON.parse(await SecureStore.getItemAsync(key) ?? "{}");
+        device =
+          (await getStoredItem("activity-device-id")) ??
+          `${Platform.OS}-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+        await setStoredItem("activity-device-id", device);
+        const stored = JSON.parse((await getStoredItem(key)) ?? "{}");
         if (stored && typeof stored === "object" && !Array.isArray(stored)) pending = stored;
         if (disposed) return;
-        flush.current = drain; capture.current = save; save(latest.current); void drain();
-      } catch { if (!disposed) setSyncStatus("local-error"); }
+        flush.current = drain;
+        capture.current = save;
+        save(latest.current);
+        void drain();
+      } catch {
+        if (!disposed) setSyncStatus("local-error");
+      }
     })();
-    const interval = setInterval(() => { if (AppState.currentState === "active" && Object.keys(pending).length) void drain(); }, 15000);
-    const listener = AppState.addEventListener("change", state => { if (state === "active" || state === "background") void drain(); });
-    return () => { disposed = true; capture.current = null; flush.current = null; clearInterval(interval); listener.remove(); };
+
+    const interval = setInterval(() => {
+      if (AppState.currentState === "active" && Object.keys(pending).length) void drain();
+    }, 15000);
+    const listener = AppState.addEventListener("change", (state) => {
+      if (state === "active" || state === "background") void drain();
+    });
+    return () => {
+      disposed = true;
+      capture.current = null;
+      flush.current = null;
+      clearInterval(interval);
+      listener.remove();
+    };
   }, [userId, queryClient]);
-  useEffect(() => { capture.current?.(latest.current); }, [signature]);
+
+  useEffect(() => {
+    capture.current?.(latest.current);
+  }, [signature]);
+
   return { status: syncStatus, error, retry: () => flush.current?.() };
 }

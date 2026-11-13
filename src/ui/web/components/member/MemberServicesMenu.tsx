@@ -6,9 +6,9 @@ import { useAppTheme } from "../../../../theme/AppThemeProvider";
 export function MemberServicesMenu({ onNavigate }: { onNavigate: (route: MemberServiceRoute) => void }) {
   const { colors } = useAppTheme();
   const groups = [
-    { title: "Your gym", items: memberServices.slice(0, 2) },
-    { title: "Training & activity", items: memberServices.slice(2, 7) },
-    { title: "Account & help", items: memberServices.slice(7) },
+    { title: "Your gym", items: memberServices.slice(0, 1) },
+    { title: "Training & activity", items: memberServices.slice(1, 6) },
+    { title: "Account & help", items: memberServices.slice(6) },
   ];
   return <View style={{ gap: 16 }}>
     <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>

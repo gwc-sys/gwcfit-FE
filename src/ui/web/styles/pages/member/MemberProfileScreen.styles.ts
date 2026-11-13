@@ -10,7 +10,7 @@ export const createStyles = (colors: ThemeColors) =>
     paddingBottom: 112
   },
   hero: {
-    minHeight: 138,
+    minHeight: 148,
     flexDirection: "row",
     alignItems: "center",
     gap: spacing.md,
@@ -18,7 +18,7 @@ export const createStyles = (colors: ThemeColors) =>
     borderWidth: 1,
     borderColor: colors.border,
     backgroundColor: colors.surface,
-    padding: spacing.lg
+    padding: spacing.xxl
   },
   avatar: {
     width: 72,
@@ -58,7 +58,7 @@ export const createStyles = (colors: ThemeColors) =>
     borderWidth: 1,
     borderColor: colors.border,
     backgroundColor: colors.surface,
-    padding: spacing.md
+    padding: spacing.xxl
   },
   formTitle: {
     ...typography.h3,

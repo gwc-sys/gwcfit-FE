@@ -1,9 +1,11 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Modal, Pressable, Text, View } from "react-native";
+import { useReducedMotion } from "react-native-reanimated";
 import type * as React from "react";
 import type { useDatePickerFieldPresentation } from "../../../components/DatePickerField";
 
 export function DatePickerFieldView({ model }: { model: ReturnType<typeof useDatePickerFieldPresentation> }): React.ReactNode {
+  const reduceMotion = useReducedMotion();
   if (model == null) return null;
   if (typeof model !== "object" || !("kind" in model)) return model;
   switch (model.kind) {
@@ -40,7 +42,7 @@ export function DatePickerFieldView({ model }: { model: ReturnType<typeof useDat
       ) : null}
 
       <Modal
-        animationType="fade"
+        animationType={reduceMotion ? "none" : "fade"}
         transparent
         visible={open}
         onRequestClose={() => setOpen(false)}

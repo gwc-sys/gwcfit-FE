@@ -29,15 +29,20 @@ import {
   useMemberDashboard,
   useMemberGoals,
   useMemberNotifications,
+  useMemberProfile,
   useMemberProgress,
   useMemberRewards,
+  useMemberTrainer,
+  useMemberMeals,
   useMemberWorkouts
 } from "../../hooks/useMember";
 import { memberApi } from "../../services/api/member";
+import { useDailySteps } from "../../hooks/useDailySteps";
+import { useActivitySync } from "../../hooks/useActivitySync";
 import { getApiErrorMessage } from "../../services/api/client";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useAppTheme } from "../../theme/AppThemeProvider";
-import type { MemberAttendance, MemberClass, MemberProgressLog, MemberWorkout } from "../../types/member";
+import type { MemberClass, MemberProgressLog, MemberWorkout } from "../../types/member";
 import { formatDate } from "../../utils/formatters";
 
 type IconName = keyof typeof Ionicons.glyphMap;
@@ -46,7 +51,7 @@ type MemberRoute =
   | "MemberHome"
   | "MemberProfileHome"
   | "MemberMembership"
-  | "MemberPayments"
+
   | "MemberAttendance"
   | "MemberWorkout"
   | "MemberMealPlan"
@@ -194,47 +199,13 @@ function createQuickActions(ui: DashboardPalette): ActionConfig[] {
       softColor: ui.softBlue
     },
     {
-      title: "Record Measurement",
-      subtitle: "Update your stats",
-      icon: "create-outline",
-      route: "MemberProgress",
-      color: ui.cyan,
-      softColor: ui.softCyan
-    },
-    {
       title: "Book Session",
       subtitle: "Schedule appointment",
       icon: "calendar-outline",
       route: "MemberClasses",
       color: ui.pink,
       softColor: ui.softPink
-    },
-    {
-      title: "Ask AI Coach",
-      subtitle: "Get AI-powered guidance",
-      icon: "sparkles-outline",
-      route: "MemberSupport",
-      color: ui.warning,
-      softColor: ui.softOrange
-    },
-    ...(Platform.OS === "web" ? [
-      {
-        title: "Membership",
-        subtitle: "Plan, status and renewal dates",
-        icon: "ribbon-outline" as const,
-        route: "MemberMembership" as const,
-        color: ui.blue,
-        softColor: ui.softBlue
-      },
-      {
-        title: "Payments",
-        subtitle: "Recorded payments and balances",
-        icon: "card-outline" as const,
-        route: "MemberPayments" as const,
-        color: ui.blue,
-        softColor: ui.softBlue
-      }
-    ] : [])
+    }
   ];
 }
 
@@ -281,32 +252,8 @@ function getMonthlyCalories(logs: MemberProgressLog[]) {
   }, 0);
 }
 
-function latestWeight(logs: MemberProgressLog[]) {
-  return logs.find((log) => typeof log.weight === "number")?.weight ?? null;
-}
-
 function latestGoalProgress(logs: MemberProgressLog[]) {
   return logs.find((log) => typeof log.goal_progress_percentage === "number")?.goal_progress_percentage ?? null;
-}
-
-function startOfDay(date: Date) {
-  const next = new Date(date);
-  next.setHours(0, 0, 0, 0);
-  return next;
-}
-
-function getActiveDays(history: MemberAttendance[] = []) {
-  const seen = new Set<string>();
-  const currentMonth = monthKey(new Date());
-
-  history.forEach((item) => {
-    const checkedInAt = new Date(item.check_in_at);
-    if (!Number.isNaN(checkedInAt.getTime()) && monthKey(checkedInAt) === currentMonth) {
-      seen.add(startOfDay(checkedInAt).toISOString());
-    }
-  });
-
-  return seen.size;
 }
 
 function workoutSubtitle(workout?: MemberWorkout | null) {
@@ -456,10 +403,13 @@ export function useMemberDashboardScreenPresentation() {
   const attendanceQuery = useMemberAttendance();
   const workoutsQuery = useMemberWorkouts();
   const progressQuery = useMemberProgress();
+  const profileQuery = useMemberProfile();
   const classesQuery = useMemberClasses();
   const rewardsQuery = useMemberRewards();
   const goalsQuery = useMemberGoals();
   const notificationsQuery = useMemberNotifications(true);
+  const trainerQuery = useMemberTrainer();
+  const mealsQuery = useMemberMeals();
 
   const dashboard = dashboardQuery.data;
   const attendance = attendanceQuery.data;
@@ -469,6 +419,8 @@ export function useMemberDashboardScreenPresentation() {
   const rewards = rewardsQuery.data ?? [];
   const goals = goalsQuery.data ?? [];
   const unreadNotifications = notificationsQuery.data ?? [];
+  const trainer = trainerQuery.data ?? null;
+  const meals = mealsQuery.data ?? [];
 
   const ui = useMemo(() => (isDark ? DARK_UI : LIGHT_UI), [isDark]);
   const styles = useMemo(() => createStyles(ui), [ui]);
@@ -478,18 +430,18 @@ export function useMemberDashboardScreenPresentation() {
   const isTablet = width >= 760;
   const isNarrow = width < 520;
   const memberName = dashboard?.member_name ?? user?.full_name ?? "Member";
-  const latestLoggedWeight = latestWeight(progressLogs);
   const monthlyCalories = getMonthlyCalories(progressLogs);
   const completedWorkouts = workouts.reduce((total, workout) => total + Math.round(workout.completed_workouts ?? 0), 0);
   const missedWorkouts = workouts.reduce((total, workout) => total + Math.round(workout.missed_workouts ?? 0), 0);
   const workoutsTarget = completedWorkouts + missedWorkouts;
   const visitsThisMonth = attendance?.monthly_attendance_count ?? 0;
-  const activeDays = getActiveDays(attendance?.history ?? []);
   const goalProgress = clamp(Math.round(dashboard?.fitness_goal_progress ?? latestGoalProgress(progressLogs) ?? 0));
   const caloriesTarget = activityQuery.data?.today.calories_target ?? goals.find((goal) => goal.status === "active" && (goal.calories_goal ?? 0) > 0)?.calories_goal ?? 0;
   const todayCalories = activityQuery.data?.today.calories_completed ?? 0;
   const activityLoading = activityQuery.isLoading;
   const activityUnavailable = Boolean(activityQuery.error);
+  const { steps: sensorSteps, hours: sensorHours, date: sensorDate, status: sensorStatus, enable: enableSensor, addSteps: addSensorSteps } = useDailySteps();
+  const activitySync = useActivitySync({ date: sensorDate, hours: sensorHours, status: sensorStatus, calories: todayCalories, target: caloriesTarget || 250 });
   useEffect(() => {
     if (Platform.OS !== "web" || !activityQuery.isSuccess || !user?.id) return;
     const now = new Date();
@@ -508,6 +460,7 @@ export function useMemberDashboardScreenPresentation() {
     attendanceQuery.isRefetching ||
     workoutsQuery.isRefetching ||
     progressQuery.isRefetching ||
+    profileQuery.isRefetching ||
     classesQuery.isRefetching ||
     rewardsQuery.isRefetching ||
     goalsQuery.isRefetching ||
@@ -519,15 +472,19 @@ export function useMemberDashboardScreenPresentation() {
     attendanceQuery.refetch();
     workoutsQuery.refetch();
     progressQuery.refetch();
+    profileQuery.refetch();
     classesQuery.refetch();
     rewardsQuery.refetch();
     goalsQuery.refetch();
     notificationsQuery.refetch();
+    trainerQuery.refetch();
+    mealsQuery.refetch();
+    void activitySync.retry();
   };
 
-  const navigateTo = (route?: MemberRoute) => {
+  const navigateTo = (route?: MemberRoute, params?: Record<string, unknown>) => {
     if (route) {
-      navigation.navigate(route);
+      navigation.navigate(route, params);
     }
   };
 
@@ -556,49 +513,7 @@ export function useMemberDashboardScreenPresentation() {
       label: "Calories Burned",
       subtitle: "This Month"
     },
-    {
-      icon: "scale-outline",
-      color: ui.blue,
-      softColor: ui.softBlue,
-      value: latestLoggedWeight === null ? "--" : Number(latestLoggedWeight).toFixed(1),
-      label: "Weight (kg)",
-      subtitle: "Current",
-    },
-    {
-      icon: "trophy-outline",
-      color: ui.pink,
-      softColor: ui.softPink,
-      value: String(rewards.length),
-      label: "Achievements",
-      subtitle: "Unlocked",
-    },
-    {
-      icon: "time-outline",
-      color: ui.success,
-      softColor: ui.softGreen,
-      value: String(activeDays),
-      label: "Active Days",
-      subtitle: "This Month",
-    }
   ];
-
-  useEffect(() => {
-    if (isTablet) {
-      activeStatIndexRef.current = 0;
-      return;
-    }
-
-    const timer = setInterval(() => {
-      const nextIndex = (activeStatIndexRef.current + 1) % statTiles.length;
-      activeStatIndexRef.current = nextIndex;
-      statsScrollRef.current?.scrollTo({
-        x: nextIndex * MOBILE_STAT_SNAP_INTERVAL,
-        animated: true
-      });
-    }, 2_000);
-
-    return () => clearInterval(timer);
-  }, [isTablet, statTiles.length]);
 
   const workoutDone = todayWorkout?.completion_status === "completed" || dashboard?.today_attendance_status === "checked_in";
   const scheduleItems: ScheduleItem[] = [
@@ -632,7 +547,75 @@ export function useMemberDashboardScreenPresentation() {
     } : null
   ].filter((item): item is ScheduleItem => item !== null);
 
-  return { kind: "view1" as const, props: { dailyActivity: activityQuery.data?.today, todayCalories, activityLoading, activityUnavailable, DashboardThemeContext, dashboardTheme, styles, isRefreshing, refreshAll, ui, isDesktop, memberName, navigateTo, unreadNotifications, isNarrow, dashboardQuery, DashboardState, dashboard, isTablet, statTiles, StatTile, statsScrollRef, MOBILE_STAT_SNAP_INTERVAL, activeStatIndexRef, Panel, quickActions, QuickActionTile, scheduleItems, ScheduleRow, ProgressCircle, goalProgress, completedWorkouts, workoutsTarget, clamp, caloriesTarget, formatNumber, monthlyCalories, caloriesProgress, upcomingWorkouts, achievements } };
+  return {
+    kind: "view1" as const,
+    props: {
+      dailyActivity: activityQuery.data?.today,
+      todayCalories,
+      activityLoading,
+      activityUnavailable,
+      DashboardThemeContext,
+      dashboardTheme,
+      styles,
+      isRefreshing,
+      refreshAll,
+      ui,
+      isDesktop,
+      memberName,
+      navigateTo,
+      unreadNotifications,
+      isNarrow,
+      dashboardQuery,
+      DashboardState,
+      dashboard,
+      isTablet,
+      statTiles,
+      StatTile,
+      statsScrollRef,
+      MOBILE_STAT_SNAP_INTERVAL,
+      activeStatIndexRef,
+      Panel,
+      quickActions,
+      QuickActionTile,
+      scheduleItems,
+      ScheduleRow,
+      ProgressCircle,
+      goalProgress,
+      completedWorkouts,
+      workoutsTarget,
+      clamp,
+      caloriesTarget,
+      formatNumber,
+      monthlyCalories,
+      caloriesProgress,
+      upcomingWorkouts,
+      achievements,
+      workouts,
+      attendance,
+      rewards,
+      profile: profileQuery.data,
+      classes,
+      goals,
+      trainer,
+      meals,
+      progressLogs,
+      user,
+      authUid: user?.id ?? null,
+      todayWorkout,
+      todayMeal,
+      upcomingClass,
+      workoutDone,
+      activityHistory: activityQuery.data?.items,
+      sensorSteps,
+      sensorHours,
+      sensorStatus,
+      enableSensor,
+      addSensorSteps,
+      syncStatus: activitySync.status,
+      syncError: activitySync.error,
+      retrySync: activitySync.retry
+    }
+  };
 }
 
 export function MemberDashboardScreen(...args: Parameters<typeof useMemberDashboardScreenPresentation>): React.JSX.Element {

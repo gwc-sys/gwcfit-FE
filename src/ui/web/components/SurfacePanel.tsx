@@ -2,7 +2,6 @@ import { Ionicons } from "@expo/vector-icons";
 import type { ReactNode } from "react";
 import { useMemo } from "react";
 import { Pressable, StyleProp, StyleSheet, Text, useWindowDimensions, View, ViewStyle } from "react-native";
-import Animated, { FadeInUp, useReducedMotion } from "react-native-reanimated";
 import { useAppTheme } from "../../../theme/AppThemeProvider";
 import { radius, shadows, spacing, typography } from "../theme/theme";
 import type { ThemeColors } from "../theme/theme";
@@ -30,11 +29,10 @@ export function SurfacePanel({
 }: SurfacePanelProps) {
   const { colors } = useAppTheme();
   const { width } = useWindowDimensions();
-  const reduceMotion = useReducedMotion();
   const styles = useMemo(() => createStyles(colors, width), [colors, width]);
 
   return (
-    <Animated.View entering={reduceMotion ? undefined : FadeInUp.duration(240)} style={[styles.panel, style]}>
+    <View style={[styles.panel, style]}>
       {!hideHeader ? <View style={styles.header}>
         <View style={styles.titleWrap}>
           {kicker ? (
@@ -59,7 +57,7 @@ export function SurfacePanel({
         ) : null}
       </View> : null}
       {children}
-    </Animated.View>
+    </View>
   );
 }
 
@@ -69,17 +67,17 @@ const createStyles = (colors: ThemeColors, width: number) => {
   return StyleSheet.create({
     panel: {
       gap: compact ? spacing.sm : spacing.md,
-      borderRadius: radius.lg,
+      borderRadius: radius.md,
       borderWidth: 1,
       borderColor: colors.border,
       backgroundColor: colors.card,
-      padding: compact ? 20 : 28,
-      ...shadows.subtle
+      padding: compact ? spacing.md : spacing.xl,
+      ...shadows.none
     },
     header: {
       minHeight: 44,
-      flexDirection: compact ? "column" : "row",
-      alignItems: compact ? "stretch" : "center",
+      flexDirection: "row",
+      alignItems: "center",
       justifyContent: "space-between",
       gap: compact ? spacing.sm : spacing.md
     },
@@ -109,12 +107,11 @@ const createStyles = (colors: ThemeColors, width: number) => {
       minHeight: 44,
       alignItems: "center",
       justifyContent: "center",
-      alignSelf: compact ? "flex-start" : "auto",
+      alignSelf: "center",
       borderRadius: radius.sm,
-      borderWidth: 1,
-      borderColor: colors.border,
-      backgroundColor: colors.surfaceElevated,
-      paddingHorizontal: spacing.md
+      borderWidth: 0,
+      backgroundColor: "transparent",
+      paddingHorizontal: spacing.sm
     },
     actionText: {
       ...typography.small,

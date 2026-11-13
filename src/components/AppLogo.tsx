@@ -1,41 +1,46 @@
-import { StyleSheet, Text, View } from "react-native";
-
-import { palette } from "../theme/theme";
+import { Image, Platform, StyleSheet, View } from "react-native";
+import { ALPHA, BASE_COLORS } from "../theme/colors";
 
 type AppLogoProps = {
   size?: number;
   inverted?: boolean;
+  framed?: boolean;
+  chromeless?: boolean;
 };
 
-export function AppLogo({ size = 78, inverted = false }: AppLogoProps) {
-  const barColor = inverted ? palette.white : palette.green;
+/**
+ * The official PulseFit ribbon "P" app mark from the brand reference logo,
+ * shared across all web and mobile product surfaces.
+ */
+export function AppLogo({
+  size = 78,
+  inverted = false,
+  framed = false,
+  chromeless = false,
+}: AppLogoProps) {
+  const markSize = chromeless ? size : Math.round(size * 0.74);
 
   return (
-    <View style={[styles.wrap, { width: size, height: size }]}>
-      <View style={[styles.vertical, { backgroundColor: barColor, height: size * 0.92 }]} />
-      <View
-        style={[
-          styles.loop,
-          {
-            borderColor: barColor,
-            width: size * 0.8,
-            height: size * 0.34,
-            top: size * 0.22
-          }
-        ]}
+    <View
+      accessibilityElementsHidden
+      importantForAccessibility="no-hide-descendants"
+      style={[
+        styles.wrap,
+        !chromeless && styles.badge,
+        !chromeless && inverted && styles.badgeInverted,
+        framed && styles.frame,
+        {
+          width: size,
+          height: size,
+          borderRadius: chromeless ? 0 : Math.round(size * 0.26),
+        },
+      ]}
+    >
+      <Image
+        source={require("../../assets/images/pulsefit-logo.png")}
+        style={{ width: markSize, height: markSize }}
+        resizeMode="contain"
       />
-      <View
-        style={[
-          styles.loop,
-          {
-            borderColor: barColor,
-            width: size * 0.8,
-            height: size * 0.34,
-            bottom: size * 0.18
-          }
-        ]}
-      />
-      <Text style={[styles.cut, { color: inverted ? palette.green : palette.white }]}>S</Text>
     </View>
   );
 }
@@ -43,19 +48,24 @@ export function AppLogo({ size = 78, inverted = false }: AppLogoProps) {
 const styles = StyleSheet.create({
   wrap: {
     alignItems: "center",
-    justifyContent: "center"
+    justifyContent: "center",
+    overflow: "hidden",
   },
-  vertical: {
-    position: "absolute",
-    width: 12
+  badge: {
+    backgroundColor: ALPHA.accent10,
+    borderWidth: 1,
+    borderColor: "rgba(233, 30, 99, 0.24)",
+    ...(Platform.OS === "web"
+      ? { boxShadow: "0 4px 14px rgba(233, 30, 99, 0.18)" }
+      : {}),
   },
-  loop: {
-    position: "absolute",
-    borderWidth: 10,
-    borderRadius: 999
+  badgeInverted: {
+    backgroundColor: BASE_COLORS.lightSurface,
+    borderWidth: 1,
+    borderColor: ALPHA.black08,
   },
-  cut: {
-    fontSize: 0,
-    lineHeight: 0
-  }
+  frame: {
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: "rgba(255, 255, 255, 0.32)",
+  },
 });

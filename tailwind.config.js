@@ -5,16 +5,24 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        navy: "#0A0F1A",
-        card: "#101826",
-        surface: "#172033",
-        divider: "#253247",
-        primary: "#2563EB",
-        primaryDark: "#1D4ED8",
-        success: "#16A34A",
-        warning: "#D97706",
-        danger: "#DC2626",
-        info: "#0D9488"
+        // Official PulseFit Design System (8 approved base colors)
+        backgroundLight: "#F2F2F7",
+        surfaceLight: "#FFFFFF",
+        backgroundDark: "#000000",
+        surfaceDark: "#1C1C1E",
+        primary: "#E91E63",
+        link: "#007AFF",
+        success: "#34C759",
+        danger: "#FF3B30",
+        destructive: "#FF3B30",
+
+        // Semantic aliases
+        background: "#000000",
+        surface: "#1C1C1E",
+        card: "#1C1C1E",
+        navy: "#000000",
+        info: "#007AFF",
+        warning: "#F2F2F7"
       }
     }
   },

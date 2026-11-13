@@ -39,7 +39,7 @@ export const createStyles = (colors: ThemeColors) =>
       alignItems: "center",
       justifyContent: "center",
       padding: spacing.lg,
-      backgroundColor: "rgba(2,6,23,0.76)",
+      backgroundColor: "rgba(0, 0, 0,0.76)",
     },
     calendar: {
       borderRadius: radius.xl,

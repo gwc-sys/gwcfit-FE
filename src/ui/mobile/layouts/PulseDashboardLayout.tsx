@@ -8,6 +8,7 @@ import { initials } from "../../../utils/formatters";
 import { requestLogoutConfirmation } from "../../../utils/logoutConfirmation";
 import { Screen, EmbeddedScreenContext } from "../components/Screen";
 import { createWorkspaceChromeStyles } from "./WorkspaceChrome.styles";
+import { AppLogo } from "../../../components/AppLogo";
 import type * as React from "react";
 import type { usePulseDashboardLayoutPresentation, useGymOwnerSidebarPresentation, useOwnerAccountItemPresentation, useMobileBrandButtonPresentation, usePulseDashboardHeaderPresentation, useHeaderCircleButtonPresentation } from "../../../components/dashboard/PulseDashboardLayout";
 
@@ -18,17 +19,17 @@ export function PulseDashboardLayoutView({ model }: { model: ReturnType<typeof u
   if (typeof model !== "object" || !("kind" in model)) return model;
   switch (model.kind) {
     case "view1": {
-      const { styles, contentStyle, refreshControl, isDesktop: _isDesktop, isTrainer, isGymOwner, GymOwnerSidebar, activeLabel, navigation, isPlatformAdmin, colors, resolvedRoleLabel, sidebarItems, setAccountMenuOpen, userName, MobileBrandButton, firstName, ownerDate, unreadNotificationCount, resolvedTrainerSearch, setResolvedTrainerSearch, trainerDate, children, accountMenuOpen, user, OwnerAccountItem, isDark, toggleColorScheme, logout } = model.props;
+      const { hideDefaultHeader, styles, contentStyle, refreshControl, isDesktop: _isDesktop, isTrainer, isGymOwner, GymOwnerSidebar, activeLabel, navigation, isPlatformAdmin, colors, resolvedRoleLabel, sidebarItems, setAccountMenuOpen, userName, MobileBrandButton, firstName, ownerDate, unreadNotificationCount, resolvedTrainerSearch, setResolvedTrainerSearch, trainerDate, children, accountMenuOpen, user, OwnerAccountItem, isDark, toggleColorScheme, logout } = model.props;
       const chrome = createWorkspaceChromeStyles(colors, width);
       const isDashboard = activeLabel === "Dashboard" || activeLabel === "Overview";
       const workspaceScrolls = isDashboard || Boolean(contentStyle);
       const showBack = navigation.getState?.().type === "stack" && navigation.canGoBack?.();
       return (
-    <Screen reference scroll={workspaceScrolls} noPadding style={chrome.root} contentContainerStyle={[workspaceScrolls ? chrome.dashboardContent : chrome.pageContent, contentStyle]} refreshControl={refreshControl}>
-      {isDashboard || isTrainer ? <View style={chrome.navigationBar}>
+    <Screen reference scroll={workspaceScrolls} noPadding style={[chrome.root, { backgroundColor: colors.background }]} contentContainerStyle={[workspaceScrolls ? chrome.dashboardContent : chrome.pageContent, contentStyle]} refreshControl={refreshControl}>
+      {!hideDefaultHeader && (isDashboard || isTrainer || isGymOwner) ? <View style={chrome.navigationBar}>
         {showBack ? <Pressable accessibilityRole="button" accessibilityLabel="Go back" onPress={() => navigation.goBack()} style={chrome.iconButton}><Ionicons name="chevron-back" size={24} color={colors.primary} /></Pressable> : null}
         <View style={chrome.brand}>
-          <View style={chrome.brandMark}><Ionicons name="pulse" size={22} color={colors.primary} /></View>
+          <View style={chrome.brandMark}><AppLogo size={22} /></View>
           <View style={chrome.identity}>
             <Text numberOfLines={2} style={chrome.brandName}>{user?.gym_name?.trim() || (user?.gym_id ? "Your gym" : "PulseFit")}</Text>
             <Text numberOfLines={1} style={chrome.role}>{resolvedRoleLabel}</Text>
@@ -36,30 +37,30 @@ export function PulseDashboardLayoutView({ model }: { model: ReturnType<typeof u
         </View>
         <Pressable accessibilityRole="button" accessibilityLabel={`Notifications${unreadNotificationCount ? `, ${unreadNotificationCount} unread` : ""}`} onPress={() => navigation.navigate("Notifications")} style={({ pressed }) => [chrome.iconButton, pressed && chrome.pressed]}>
           <Ionicons name="notifications-outline" size={22} color={colors.ink} />
-          {unreadNotificationCount > 0 ? <View style={[chrome.notificationDot, { minWidth: 18, height: 18, width: undefined, borderRadius: 9, top: 2, right: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: 3 }]}><Text style={{ color: "#fff", fontSize: 10, fontWeight: "700" }}>{unreadNotificationCount >= 10 ? "10+" : unreadNotificationCount}</Text></View> : null}
+          {unreadNotificationCount > 0 ? <View style={[chrome.notificationDot, { minWidth: 18, height: 18, width: undefined, borderRadius: 9, top: 2, right: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: 3 }]}><Text style={{ color: "#FFFFFF", fontSize: 10, fontWeight: "700" }}>{unreadNotificationCount >= 10 ? "10+" : unreadNotificationCount}</Text></View> : null}
         </Pressable>
-        <Pressable accessibilityRole="button" accessibilityLabel="Open account menu" onPress={() => setAccountMenuOpen(true)} style={({ pressed }) => [chrome.accountButton, pressed && chrome.pressed]}>
-          <Text style={chrome.accountInitials}>{initials(userName) || "U"}</Text>
+        <Pressable accessibilityRole="button" accessibilityLabel="Open account menu" onPress={() => setAccountMenuOpen(true)} style={({ pressed }) => [chrome.accountButton, isGymOwner && chrome.ownerAccountTrigger, pressed && chrome.pressed]}>
+          {isGymOwner ? <Ionicons name="person-circle-outline" size={30} color={colors.primary} /> : <Text style={chrome.accountInitials}>{initials(userName) || "U"}</Text>}
         </Pressable>
       </View> : null}
-      {isTrainer && activeLabel !== "Members" && activeLabel !== "Attendance" && activeLabel !== "Diets" && activeLabel !== "Profile" ? <View style={chrome.searchBar}>
+      {!hideDefaultHeader && isTrainer && activeLabel !== "Members" && activeLabel !== "Attendance" && activeLabel !== "Diets" && activeLabel !== "Profile" ? <View style={chrome.searchBar}>
         <Ionicons name="search-outline" size={20} color={colors.muted} />
         <TextInput accessibilityLabel="Search workspace" value={resolvedTrainerSearch} onChangeText={setResolvedTrainerSearch} placeholder="Search workspace" placeholderTextColor={colors.subtle} style={chrome.searchInput} />
         {resolvedTrainerSearch ? <Pressable accessibilityRole="button" accessibilityLabel="Clear search" onPress={() => setResolvedTrainerSearch("")} style={chrome.clearButton}><Ionicons name="close-circle" size={20} color={colors.muted} /></Pressable> : null}
       </View> : null}
-      {isDashboard && isGymOwner ? <View style={[chrome.overview, { paddingTop: 12, paddingBottom: 16 }]}>
+      {!hideDefaultHeader && isDashboard && isGymOwner ? <View style={[chrome.overview, { paddingTop: 12, paddingBottom: 16 }]}>
         <Text style={chrome.subtitle}>{new Date().getHours() < 12 ? "Good morning," : new Date().getHours() < 18 ? "Good afternoon," : "Good evening,"}</Text>
         <Text accessibilityRole="header" style={chrome.title}>{userName}</Text>
         <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
           <Pressable accessibilityRole="button" accessibilityLabel="Open attendance calendar" onPress={() => navigation.navigate("Attendance")} style={{ minHeight: 44, justifyContent: "center" }}><Text style={chrome.role}>{ownerDate}</Text></Pressable>
-          <Pressable accessibilityRole="button" accessibilityLabel="Add member" onPress={() => navigation.navigate("AddMember")} style={chrome.iconButton}><Ionicons name="person-add-outline" size={20} color={colors.primary} /></Pressable>
+          <Pressable accessibilityRole="button" accessibilityLabel="Add member" onPress={() => navigation.navigate("Invitations")} style={chrome.iconButton}><Ionicons name="person-add-outline" size={20} color={colors.primary} /></Pressable>
         </View>
       </View> : null}
-      {isDashboard && isTrainer ? <Pressable accessibilityRole="button" accessibilityLabel="Open attendance calendar" onPress={() => navigation.navigate("Attendance")} style={chrome.trainerDate}><Ionicons name="calendar-outline" size={18} color={colors.primary} /><Text style={chrome.dateText}>{trainerDate}</Text></Pressable> : null}
+      {!hideDefaultHeader && isDashboard && isTrainer ? <Pressable accessibilityRole="button" accessibilityLabel="Open attendance calendar" onPress={() => navigation.navigate("Attendance")} style={chrome.trainerDate}><Ionicons name="calendar-outline" size={18} color={colors.primary} /><Text style={chrome.dateText}>{trainerDate}</Text></Pressable> : null}
       <EmbeddedScreenContext.Provider value={!workspaceScrolls}>
-        <View style={[workspaceScrolls ? chrome.dashboardBody : chrome.screenBody, isTrainer && isDashboard && { gap: 16 }]}>{children}</View>
+        <View style={[workspaceScrolls ? chrome.dashboardBody : chrome.screenBody, hideDefaultHeader && { paddingHorizontal: 0, gap: 0 }, isTrainer && isDashboard && { gap: 16 }]}>{children}</View>
       </EmbeddedScreenContext.Provider>
-      {accountMenuOpen ? (
+      {accountMenuOpen && !isGymOwner ? (
         <Modal
           visible
           transparent
@@ -94,7 +95,7 @@ export function PulseDashboardLayoutView({ model }: { model: ReturnType<typeof u
                   ]}
                 >
                   <Text style={styles.ownerAccountAvatarText}>
-                    {initials(userName) || "U"}
+                    {initials(isGymOwner ? (user?.gym_name || userName) : userName) || "U"}
                   </Text>
                 </View>
                 <View style={styles.ownerAccountCopy}>
@@ -102,15 +103,17 @@ export function PulseDashboardLayoutView({ model }: { model: ReturnType<typeof u
                     numberOfLines={1}
                     style={[
                       styles.ownerAccountName,
+                      !isTrainer && { color: colors.ink },
                       isTrainer && styles.trainerAccountName,
                     ]}
                   >
-                    {userName}
+                    {isGymOwner ? (user?.gym_name || userName) : userName}
                   </Text>
                   <Text
                     numberOfLines={1}
                     style={[
                       styles.ownerAccountEmail,
+                      !isTrainer && { color: colors.textSecondary },
                       isTrainer && styles.trainerAccountEmail,
                     ]}
                   >
@@ -230,7 +233,7 @@ export function GymOwnerSidebarView({ model }: { model: ReturnType<typeof useGym
     <>
       <View style={styles.ownerBrandRow}>
         <View style={styles.ownerBrandMark}>
-          <Ionicons name="pulse" size={25} color={colors.white} />
+          <AppLogo size={32} />
         </View>
         <View>
           <Text style={styles.ownerBrandName}>
@@ -240,7 +243,7 @@ export function GymOwnerSidebarView({ model }: { model: ReturnType<typeof useGym
         </View>
       </View>
       <View style={styles.ownerNavList}>
-        {ownerNavItems.slice(0, 10).map((item) => {
+        {ownerNavItems.filter((item) => item.label !== "Messages" && item.label !== "Settings").map((item) => {
           const active = item.label === activeLabel;
           return (
             <Pressable
@@ -306,7 +309,7 @@ export function GymOwnerSidebarView({ model }: { model: ReturnType<typeof useGym
       <View style={styles.ownerQuickActions}>
         <Text style={styles.ownerQuickTitle}>Quick Actions</Text>
         {[
-          ["Add Member", "person-add-outline", "AddMember"],
+          ["Add Member", "person-add-outline", "Invitations"],
           ["Add Trainer", "person-add-outline", "Trainers"],
           ["Mark Attendance", "checkmark-circle-outline", "Attendance"],
           ["Create Plan", "document-outline", "MembershipPlans"],
@@ -351,7 +354,7 @@ export function OwnerAccountItemView({ model }: { model: ReturnType<typeof useOw
       <Ionicons
         name={icon}
         size={trainer ? 20 : 19}
-        color={danger ? "#EF4444" : "#A9C9E9"}
+        color={danger ? "#FF3B30" : trainer ? "#E91E63" : "#E91E63"}
       />
       <Text
         style={[

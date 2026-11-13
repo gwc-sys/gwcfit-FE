@@ -1,9 +1,9 @@
 import { MemberMoveScreen } from "../../components/member/MemberMoveScreen";
 import type * as React from "react";
-import { QueryRefreshView, QueryStateView, ListSectionView, DetailGridView, SectionTitleView, MemberMembershipScreenView, MemberPaymentsScreenView, MemberAttendanceScreenView, MemberWorkoutScreenView, MemberMealPlanScreenView, MemberProgressScreenView, MemberTrainerScreenView, MemberClassesScreenView, MemberNotificationsScreenView, MemberGoalsScreenView, MemberRewardsScreenView, MemberSupportScreenView, MemberSettingsScreenView } from "./MemberFeatureScreens.presentation";
+import { QueryRefreshView, QueryStateView, ListSectionView, DetailGridView, SectionTitleView, MemberMembershipScreenView, MemberAttendanceScreenView, MemberWorkoutScreenView, MemberMealPlanScreenView, MemberProgressScreenView, MemberTrainerScreenView, MemberClassesScreenView, MemberNotificationsScreenView, MemberGoalsScreenView, MemberRewardsScreenView, MemberSupportScreenView, MemberSettingsScreenView } from "./MemberFeatureScreens.presentation";
 import { createFeatureStyles } from "./MemberFeatureScreens.styles";
 import { Ionicons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import { FlatList, RefreshControl, StyleSheet, Switch, Text, View } from "react-native";
 import { useEffect, useMemo, useState } from "react";
 import type { ReactElement, ReactNode } from "react";
@@ -34,28 +34,40 @@ import {
   useCheckInMember,
   useCheckOutMember,
   useCompleteMeal,
+  useCreateMemberMealPlan,
   useCompleteWorkout,
   useCreateGoal,
   useCreateProgressLog,
+  useDeleteProgressLog,
   useCreateSupportTicket,
+  useClearAllNotifications,
+  useDismissNotification,
+  useMarkAllNotificationsRead,
   useMarkNotificationRead,
   useMemberAttendance,
   useMemberClasses,
+  useMemberDashboard,
   useMemberGoals,
   useMemberMeals,
   useMemberMembership,
   useMemberNotifications,
   useMemberPayments,
+  useMemberProfile,
   useMemberProgress,
   useMemberRewards,
+  useMemberGamification,
+  useRedeemMemberPerk,
+  useMemberActivity,
   useMemberTrainer,
   useTrainerFeedback,
   useSaveTrainerFeedback,
   useGymFeedback,
   useSaveGymFeedback,
   useMemberWorkouts,
-  useUpdateGoal
+  useUpdateGoal,
+  useUpdateMemberProfile
 } from "../../hooks/useMember";
+import { useAuthStore } from "../../store/useAuthStore";
 import { getApiErrorMessage } from "../../services/api/client";
 import { useAppTheme } from "../../theme/AppThemeProvider";
 import { colors, radius, spacing, typography } from "../../theme/theme";
@@ -64,6 +76,7 @@ import type {
   MemberClass,
   MemberGoal,
   MemberMealPlan,
+  MemberMealPlanCreate,
   MemberNotification,
   MemberPayment,
   MemberProgressLog,
@@ -118,6 +131,28 @@ function displayValue(value: unknown, fallback = "Not set"): string {
   return fallback;
 }
 
+function mealSummary(meal: MemberMealPlan): string {
+  const foods = meal.meals
+    .map((item) => displayValue(item.food_name ?? item.name ?? item.meal_name ?? item.title ?? item.food, ""))
+    .filter(Boolean);
+  return foods.length ? foods.join(" • ") : meal.trainer_notes ?? displayValue(meal.today_meal_plan?.title ?? meal.today_meal_plan?.name, "No foods listed");
+}
+
+function mealDetails(meal: MemberMealPlan): string {
+  const details = meal.meals.map((item) => {
+    const food = displayValue(item.food_name ?? item.name ?? item.meal_name ?? item.title ?? item.food, "");
+    const serving = displayValue(item.quantity ?? item.serving_size ?? item.portion, "");
+    const macros = [
+      typeof item.calories === "number" ? `${item.calories} kcal` : "",
+      typeof item.protein === "number" ? `${item.protein}g protein` : "",
+      typeof item.carbs === "number" ? `${item.carbs}g carbs` : "",
+      typeof item.fat === "number" ? `${item.fat}g fat` : "",
+    ].filter(Boolean).join(" · ");
+    return [food, serving, macros].filter(Boolean).join(" · ");
+  }).filter(Boolean);
+  return details.length ? details.join("\n") : mealSummary(meal);
+}
+
 export function useQueryRefreshPresentation(refreshing: boolean, onRefresh: () => void) {
   return { kind: "view1" as const, props: { refreshing, onRefresh } };
 }
@@ -128,7 +163,7 @@ function queryRefresh(refreshing: boolean, onRefresh: () => void) {
 
 export function useQueryStatePresentation<T>({ loading, error, empty, emptyTitle, emptyMessage, data, onRetry, children }: QueryStateProps<T>) {
   if (loading) {
-    return { kind: "view1" as const, props: {  } };
+    return { kind: "view1" as const, props: {} };
   }
 
   if (error) {
@@ -200,28 +235,20 @@ export function MemberMembershipScreen(...args: Parameters<typeof useMemberMembe
   return <MemberMembershipScreenView model={useMemberMembershipScreenPresentation(...args)} />;
 }
 
-export function useMemberPaymentsScreenPresentation() {
-  const { colors: featureColors } = useAppTheme();
-  const styles = useMemo(() => createFeatureStyles(featureColors), [featureColors]);
-
-  const query = useMemberPayments();
-
-  return { kind: "view1" as const, props: { styles, queryRefresh, query, QueryState, DetailGrid, ListSection, toneForStatus } };
-}
-
-export function MemberPaymentsScreen(...args: Parameters<typeof useMemberPaymentsScreenPresentation>): React.JSX.Element {
-  return <MemberPaymentsScreenView model={useMemberPaymentsScreenPresentation(...args)} />;
-}
-
 export function useMemberAttendanceScreenPresentation() {
+  const navigation = useNavigation<any>();
+  const user = useAuthStore((state) => state.user);
   const { colors: featureColors } = useAppTheme();
   const styles = useMemo(() => createFeatureStyles(featureColors), [featureColors]);
 
   const query = useMemberAttendance();
+  const profileQuery = useMemberProfile();
+  const membershipQuery = useMemberMembership();
+  const notificationsQuery = useMemberNotifications(true);
   const checkIn = useCheckInMember();
   const checkOut = useCheckOutMember();
 
-  return { kind: "view1" as const, props: { styles, queryRefresh, query, QueryState, DetailGrid, checkIn, checkOut, SectionTitle, ListSection, toneForStatus } };
+  return { kind: "view1" as const, props: { styles, queryRefresh, query, data: query.data, profile: profileQuery.data, membership: membershipQuery.data, unreadNotifications: notificationsQuery.data ?? [], user, navigation, QueryState, DetailGrid, checkIn, checkOut, SectionTitle, ListSection, toneForStatus } };
 }
 
 export function MemberAttendanceScreen(...args: Parameters<typeof useMemberAttendanceScreenPresentation>): React.JSX.Element {
@@ -229,13 +256,24 @@ export function MemberAttendanceScreen(...args: Parameters<typeof useMemberAtten
 }
 
 export function useMemberWorkoutScreenPresentation() {
+  const navigation = useNavigation<any>();
+  const route = useRoute<any>();
+  const user = useAuthStore((state) => state.user);
   const { colors: featureColors } = useAppTheme();
   const styles = useMemo(() => createFeatureStyles(featureColors), [featureColors]);
 
   const query = useMemberWorkouts();
+  const classesQuery = useMemberClasses();
+  const profileQuery = useMemberProfile();
+  const notificationsQuery = useMemberNotifications(true);
+  const trainerQuery = useMemberTrainer();
+  const bookClass = useBookClass();
+  const cancelClass = useCancelClass();
   const completeWorkout = useCompleteWorkout();
+  const workouts = query.data ?? [];
+  const classes = classesQuery.data ?? [];
 
-  return { kind: "view1" as const, props: { styles, queryRefresh, query, QueryState, DetailGrid, ListSection, displayValue, toneForStatus, completeWorkout } };
+  return { kind: "view1" as const, props: { styles, queryRefresh, query, classesQuery, workouts, classes, bookClass, cancelClass, profile: profileQuery.data, unreadNotifications: notificationsQuery.data ?? [], trainer: trainerQuery.data, user, authUid: user?.id ?? null, routeParams: route?.params, navigation, QueryState, DetailGrid, ListSection, displayValue, toneForStatus, completeWorkout } };
 }
 
 export function MemberWorkoutScreen(...args: Parameters<typeof useMemberWorkoutScreenPresentation>): React.JSX.Element {
@@ -243,14 +281,46 @@ export function MemberWorkoutScreen(...args: Parameters<typeof useMemberWorkoutS
 }
 
 export function useMemberMealPlanScreenPresentation() {
+  const navigation = useNavigation<any>();
+  const user = useAuthStore((state) => state.user);
   const { colors: featureColors } = useAppTheme();
   const styles = useMemo(() => createFeatureStyles(featureColors), [featureColors]);
 
   const query = useMemberMeals();
+  const profileQuery = useMemberProfile();
+  const notificationsQuery = useMemberNotifications(true);
   const completeMeal = useCompleteMeal();
+  const createMeal = useCreateMemberMealPlan();
   const [waterMl, setWaterMl] = useState("500");
+  const [mealPlanTitle, setMealPlanTitle] = useState("");
+  const [mealPlanCalories, setMealPlanCalories] = useState("");
+  const [mealPlanFoods, setMealPlanFoods] = useState("");
+  const [mealPlanValidation, setMealPlanValidation] = useState<string | null>(null);
+  const [expandedMealPlanId, setExpandedMealPlanId] = useState<string | null>(null);
+  const [isComposerOpen, setComposerOpen] = useState(false);
 
-  return { kind: "view1" as const, props: { styles, queryRefresh, query, waterMl, setWaterMl, QueryState, DetailGrid, ListSection, displayValue, toneForStatus, completeMeal } };
+  const submitMealPlan = () => {
+    const title = mealPlanTitle.trim();
+    const calories = Number(mealPlanCalories);
+    let meals: MemberMealPlanCreate["meals"] = [];
+    try {
+      const parsed: unknown = JSON.parse(mealPlanFoods || "[]");
+      meals = Array.isArray(parsed) ? parsed.filter((item): item is MemberMealPlanCreate["meals"][number] => Boolean(item) && typeof item === "object") : [];
+    } catch {
+      meals = [];
+    }
+    if (title.length < 2) return setMealPlanValidation("Enter a meal-plan name with at least 2 characters.");
+    if (!/^\d+$/.test(mealPlanCalories) || calories < 1 || calories > 100000) return setMealPlanValidation("Enter daily calories from 1 to 100000.");
+    if (!meals.length) return setMealPlanValidation("Choose at least one food for this meal plan.");
+    setMealPlanValidation(null);
+    createMeal.mutate({
+      title,
+      calories_per_day: calories,
+      meals,
+    }, { onSuccess: (plan) => { setMealPlanTitle(""); setMealPlanCalories(""); setMealPlanFoods(""); setComposerOpen(false); setExpandedMealPlanId(plan.meal_plan_uuid); } });
+  };
+
+  return { kind: "view1" as const, props: { styles, queryRefresh, query, profile: profileQuery.data, unreadNotifications: notificationsQuery.data ?? [], user, navigation, waterMl, setWaterMl, mealPlanTitle, setMealPlanTitle, mealPlanCalories, setMealPlanCalories, mealPlanFoods, setMealPlanFoods, mealPlanValidation, submitMealPlan, createMeal, expandedMealPlanId, setExpandedMealPlanId, isComposerOpen, setComposerOpen, QueryState, DetailGrid, ListSection, mealDetails, toneForStatus, completeMeal } };
 }
 
 export function MemberMealPlanScreen(...args: Parameters<typeof useMemberMealPlanScreenPresentation>): React.JSX.Element {
@@ -261,8 +331,15 @@ export function useMemberProgressScreenPresentation() {
   const { colors: featureColors } = useAppTheme();
   const styles = useMemo(() => createFeatureStyles(featureColors), [featureColors]);
 
+  const user = useAuthStore((s) => s.user);
   const query = useMemberProgress();
+  const profileQuery = useMemberProfile();
+  const goalsQuery = useMemberGoals();
   const createLog = useCreateProgressLog();
+  const deleteLog = useDeleteProgressLog();
+  const createGoal = useCreateGoal();
+  const updateGoal = useUpdateGoal();
+  const updateProfile = useUpdateMemberProfile();
   const [weight, setWeight] = useState("");
   const [bodyFat, setBodyFat] = useState("");
   const [activeCalories, setActiveCalories] = useState("");
@@ -283,7 +360,7 @@ export function useMemberProgressScreenPresentation() {
     });
   };
 
-  return { kind: "view1" as const, props: { styles, queryRefresh, query, SectionTitle, weight, setWeight, bodyFat, setBodyFat, activeCalories, setActiveCalories, progressValidation, notes, setNotes, createLog, submit, QueryState, DetailGrid, ListSection } };
+  return { kind: "view1" as const, props: { styles, queryRefresh, query, profileQuery, goalsQuery, createLog, deleteLog, createGoal, updateGoal, updateProfile, user, SectionTitle, weight, setWeight, bodyFat, setBodyFat, activeCalories, setActiveCalories, progressValidation, setProgressValidation, notes, setNotes, submit, QueryState, DetailGrid, ListSection } };
 }
 
 export function MemberProgressScreen(...args: Parameters<typeof useMemberProgressScreenPresentation>): React.JSX.Element {
@@ -293,8 +370,15 @@ export function MemberProgressScreen(...args: Parameters<typeof useMemberProgres
 export function useMemberTrainerScreenPresentation() {
   const { colors: featureColors } = useAppTheme();
   const styles = useMemo(() => createFeatureStyles(featureColors), [featureColors]);
+  const user = useAuthStore((s) => s.user);
 
   const query = useMemberTrainer();
+  const workoutsQuery = useMemberWorkouts();
+  const mealsQuery = useMemberMeals();
+  const dashboardQuery = useMemberDashboard();
+  const profileQuery = useMemberProfile();
+  const notificationsQuery = useMemberNotifications(true);
+  const attendanceQuery = useMemberAttendance();
   const feedbackQuery = useTrainerFeedback();
   const saveFeedback = useSaveTrainerFeedback();
   const [rating, setRating] = useState(5);
@@ -310,9 +394,39 @@ export function useMemberTrainerScreenPresentation() {
     }
   }, [feedbackQuery.data]);
 
-  const submitFeedback = () => saveFeedback.mutate({ rating, feedback_option: feedbackOption, feedback_text: feedbackOption === "Other" ? customFeedback.trim() : null });
+  const submitFeedback = () =>
+    saveFeedback.mutate({
+      rating,
+      feedback_option: feedbackOption,
+      feedback_text: customFeedback.trim() ? customFeedback.trim() : null,
+    });
 
-  return { kind: "view1" as const, props: { styles, queryRefresh, query, feedbackQuery, saveFeedback, rating, setRating, feedbackOption, setFeedbackOption, customFeedback, setCustomFeedback, submitFeedback, SectionTitle, navigation } };
+  return {
+    kind: "view1" as const,
+    props: {
+      styles,
+      queryRefresh,
+      query,
+      workoutsQuery,
+      mealsQuery,
+      dashboardQuery,
+      profileQuery,
+      notificationsQuery,
+      attendanceQuery,
+      user,
+      feedbackQuery,
+      saveFeedback,
+      rating,
+      setRating,
+      feedbackOption,
+      setFeedbackOption,
+      customFeedback,
+      setCustomFeedback,
+      submitFeedback,
+      SectionTitle,
+      navigation,
+    },
+  };
 }
 
 export function MemberTrainerScreen(...args: Parameters<typeof useMemberTrainerScreenPresentation>): React.JSX.Element {
@@ -320,14 +434,26 @@ export function MemberTrainerScreen(...args: Parameters<typeof useMemberTrainerS
 }
 
 export function useMemberClassesScreenPresentation() {
+  const navigation = useNavigation<any>();
+  const route = useRoute<any>();
+  const user = useAuthStore((state) => state.user);
   const { colors: featureColors } = useAppTheme();
   const styles = useMemo(() => createFeatureStyles(featureColors), [featureColors]);
 
   const query = useMemberClasses();
+  const workoutsQuery = useMemberWorkouts();
+  const profileQuery = useMemberProfile();
+  const notificationsQuery = useMemberNotifications(true);
+  const trainerQuery = useMemberTrainer();
+  const completeWorkout = useCompleteWorkout();
   const bookClass = useBookClass();
   const cancelClass = useCancelClass();
+  const workouts = workoutsQuery.data ?? [];
+  const classes = query.data ?? [];
+  const upcomingWorkouts = workouts.filter((workout) => workout.completion_status !== "completed");
+  const completedWorkouts = workouts.filter((workout) => workout.completion_status === "completed");
 
-  return { kind: "view1" as const, props: { styles, queryRefresh, query, QueryState, ListSection, toneForStatus, cancelClass, bookClass } };
+  return { kind: "view1" as const, props: { styles, queryRefresh, query, classesQuery: query, workoutsQuery, workouts, classes, upcomingWorkouts, completedWorkouts, profile: profileQuery.data, unreadNotifications: notificationsQuery.data ?? [], trainer: trainerQuery.data, user, authUid: user?.id ?? null, routeParams: route?.params, navigation, QueryState, SectionTitle, ListSection, toneForStatus, cancelClass, bookClass, completeWorkout } };
 }
 
 export function MemberClassesScreen(...args: Parameters<typeof useMemberClassesScreenPresentation>): React.JSX.Element {
@@ -339,10 +465,13 @@ export function useMemberNotificationsScreenPresentation() {
   const styles = useMemo(() => createFeatureStyles(featureColors), [featureColors]);
 
   const [unreadOnly, setUnreadOnly] = useState(false);
-  const query = useMemberNotifications(unreadOnly);
+  const query = useMemberNotifications(false);
   const markRead = useMarkNotificationRead();
+  const markAllRead = useMarkAllNotificationsRead();
+  const dismissNotification = useDismissNotification();
+  const clearAll = useClearAllNotifications();
 
-  return { kind: "view1" as const, props: { styles, queryRefresh, query, unreadOnly, setUnreadOnly, QueryState, ListSection, markRead } };
+  return { kind: "view1" as const, props: { styles, queryRefresh, query, unreadOnly, setUnreadOnly, QueryState, ListSection, markRead, markAllRead, dismissNotification, clearAll } };
 }
 
 export function MemberNotificationsScreen(...args: Parameters<typeof useMemberNotificationsScreenPresentation>): React.JSX.Element {
@@ -381,16 +510,44 @@ export function useMemberGoalsScreenPresentation() {
 }
 
 export function MemberGoalsScreen(...args: Parameters<typeof useMemberGoalsScreenPresentation>): React.JSX.Element {
-  return <MemberMoveScreen />;
+  return <MemberGoalsScreenView model={useMemberGoalsScreenPresentation(...args)} />;
 }
 
 export function useMemberRewardsScreenPresentation() {
   const { colors: featureColors } = useAppTheme();
   const styles = useMemo(() => createFeatureStyles(featureColors), [featureColors]);
+  const navigation = useNavigation<any>();
+  const user = useAuthStore((state) => state.user);
 
   const query = useMemberRewards();
+  const gamificationQuery = useMemberGamification();
+  const attendanceQuery = useMemberAttendance();
+  const workoutsQuery = useMemberWorkouts();
+  const mealsQuery = useMemberMeals();
+  const activityQuery = useMemberActivity(30);
+  const profileQuery = useMemberProfile();
+  const redeemPerk = useRedeemMemberPerk();
 
-  return { kind: "view1" as const, props: { styles, queryRefresh, query, QueryState, DetailGrid, ListSection } };
+  return {
+    kind: "view1" as const,
+    props: {
+      styles,
+      queryRefresh,
+      query,
+      gamificationQuery,
+      attendanceQuery,
+      workoutsQuery,
+      mealsQuery,
+      activityQuery,
+      profileQuery,
+      redeemPerk,
+      navigation,
+      user,
+      QueryState,
+      DetailGrid,
+      ListSection,
+    },
+  };
 }
 
 export function MemberRewardsScreen(...args: Parameters<typeof useMemberRewardsScreenPresentation>): React.JSX.Element {
@@ -400,6 +557,7 @@ export function MemberRewardsScreen(...args: Parameters<typeof useMemberRewardsS
 export function useMemberSupportScreenPresentation() {
   const { colors: featureColors } = useAppTheme();
   const styles = useMemo(() => createFeatureStyles(featureColors), [featureColors]);
+  const navigation = useNavigation<any>();
 
   const createTicket = useCreateSupportTicket();
   const gymFeedbackQuery = useGymFeedback();
@@ -424,7 +582,7 @@ export function useMemberSupportScreenPresentation() {
 
   const submitGymFeedback = () => saveGymFeedback.mutate({ rating: gymRating, feedback_text: gymFeedbackText.trim() || null });
 
-  return { kind: "view1" as const, props: { styles, SectionTitle, category, setCategory, subject, setSubject, message, setMessage, createTicket, submit, gymFeedbackQuery, saveGymFeedback, gymRating, setGymRating, gymFeedbackText, setGymFeedbackText, gymFeedbackOption, setGymFeedbackOption, submitGymFeedback } };
+  return { kind: "view1" as const, props: { styles, SectionTitle, navigation, category, setCategory, subject, setSubject, message, setMessage, createTicket, submit, gymFeedbackQuery, saveGymFeedback, gymRating, setGymRating, gymFeedbackText, setGymFeedbackText, gymFeedbackOption, setGymFeedbackOption, submitGymFeedback } };
 }
 
 export function MemberSupportScreen(...args: Parameters<typeof useMemberSupportScreenPresentation>): React.JSX.Element {
@@ -437,12 +595,17 @@ export function useMemberSettingsScreenPresentation() {
 
   const navigation = useNavigation<any>();
   const { isDark, colors: themeColors, setColorScheme } = useAppTheme();
+  const user = useAuthStore((s) => s.user);
+  const profileQuery = useMemberProfile();
+  const profile = profileQuery.data;
   const changePassword = useChangePassword();
   const logout = useLogout();
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [notifications, setNotifications] = useState(true);
   const [privacy, setPrivacy] = useState(true);
+  const [appleWatchSync, setAppleWatchSync] = useState(true);
+  const [faceIdAuth, setFaceIdAuth] = useState(true);
 
   const submitPassword = () => {
     const parsed = changePasswordSchema.safeParse({ old_password: oldPassword, new_password: newPassword });
@@ -452,7 +615,7 @@ export function useMemberSettingsScreenPresentation() {
     changePassword.mutate(parsed.data);
   };
 
-  return { kind: "view1" as const, props: { styles, themeColors, oldPassword, setOldPassword, newPassword, setNewPassword, changePassword, submitPassword, notifications, setNotifications, privacy, setPrivacy, isDark, setColorScheme, navigation, logout } };
+  return { kind: "view1" as const, props: { styles, themeColors, user, profile, profileQuery, oldPassword, setOldPassword, newPassword, setNewPassword, changePassword, submitPassword, notifications, setNotifications, privacy, setPrivacy, appleWatchSync, setAppleWatchSync, faceIdAuth, setFaceIdAuth, isDark, setColorScheme, navigation, logout } };
 }
 
 export function MemberSettingsScreen(...args: Parameters<typeof useMemberSettingsScreenPresentation>): React.JSX.Element {

@@ -162,3 +162,20 @@ export function getMembershipState(endDate?: string | null) {
 
   return { label: "Active", tone: "success" as const };
 }
+
+export function formatRelativeTime(value?: string | null) {
+  if (!value) return "Recently";
+  const date = new Date(value);
+  const time = date.getTime();
+  if (Number.isNaN(time) || time <= 0) return "Recently";
+  const diffSec = Math.floor((Date.now() - time) / 1000);
+  if (diffSec < 60) return "Just now";
+  const diffMin = Math.floor(diffSec / 60);
+  if (diffMin < 60) return `${diffMin}m ago`;
+  const diffHours = Math.floor(diffMin / 60);
+  if (diffHours < 24) return `${diffHours}h ago`;
+  const diffDays = Math.floor(diffHours / 24);
+  if (diffDays === 1) return "Yesterday";
+  if (diffDays < 30) return `${diffDays}d ago`;
+  return formatDate(value);
+}

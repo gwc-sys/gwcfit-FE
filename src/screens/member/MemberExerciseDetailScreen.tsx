@@ -1,6 +1,7 @@
 import type * as React from "react";
 import { MemberExerciseDetailScreenView, ButtonView, PanelView, TagView, MetricView, LegendView, SummaryView, TrainerTipsView, TipView } from "./MemberExerciseDetailScreen.presentation";
-import { s } from "./MemberExerciseDetailScreen.styles";
+import { s, createStyles } from "./MemberExerciseDetailScreen.styles";
+import { useAppTheme } from "../../theme/AppThemeProvider";
 import { showAlert } from "../../utils/appAlert";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation, useRoute } from "@react-navigation/native";
@@ -30,6 +31,8 @@ function exerciseSteps(exercise: ExerciseData) { return [
 ]; }
 
 export function useMemberExerciseDetailScreenPresentation() {
+  const { colors } = useAppTheme();
+  const s = useMemo(() => createStyles(colors), [colors]);
   const route = useRoute<any>();
   const navigation = useNavigation<any>();
   const query = useMemberWorkouts();

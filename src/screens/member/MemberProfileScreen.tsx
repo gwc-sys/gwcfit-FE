@@ -11,8 +11,20 @@ import { PrimaryButton } from "../../components/PrimaryButton";
 import { EmptyState, ErrorState, LoadingSkeleton, ScrollListCard, StatusBadge } from "../../components/member";
 import { Screen } from "../../components/Screen";
 import { ScreenHeader } from "../../components/ScreenHeader";
-import { useMemberMembership, useMemberProfile, useUpdateMemberProfile } from "../../hooks/useMember";
+import {
+  useMemberGoals,
+  useMemberMembership,
+  useMemberNotifications,
+  useMemberProfile,
+  useMemberProgress,
+  useMemberRewards,
+  useMemberTrainer,
+  useTrainerFeedback,
+  useUpdateMemberProfile
+} from "../../hooks/useMember";
+import { useLogout } from "../../hooks/useAuthActions";
 import { getApiErrorMessage } from "../../services/api/client";
+import { useAuthStore } from "../../store/useAuthStore";
 import { useAppTheme } from "../../theme/AppThemeProvider";
 import { radius, spacing, typography } from "../../theme/theme";
 import type { ThemeColors } from "../../theme/theme";
@@ -61,7 +73,15 @@ export function useMemberProfileScreenPresentation() {
   const styles = useMemo(() => createStyles(colors), [colors]);
   const profileQuery = useMemberProfile();
   const membershipQuery = useMemberMembership();
+  const progressQuery = useMemberProgress();
+  const goalsQuery = useMemberGoals();
+  const rewardsQuery = useMemberRewards();
+  const trainerQuery = useMemberTrainer();
+  const trainerFeedbackQuery = useTrainerFeedback();
+  const notificationsQuery = useMemberNotifications(true);
+  const user = useAuthStore((state) => state.user);
   const updateProfile = useUpdateMemberProfile();
+  const logout = useLogout();
   const profile = profileQuery.data;
   const [form, setForm] = useState<ProfileForm>(blankForm);
 
@@ -97,8 +117,8 @@ export function useMemberProfileScreenPresentation() {
     }, { onSuccess: () => resolve(true), onError: () => resolve(false) }));
   };
 
-  const refreshProfile = () => Promise.all([profileQuery.refetch(), membershipQuery.refetch()]);
-  return { kind: "view1" as const, props: { styles, profileQuery, membershipQuery, refreshProfile, colors, profile, form, setForm, updateProfile, submit, navigation } };
+  const refreshProfile = () => Promise.all([profileQuery.refetch(), membershipQuery.refetch(), progressQuery.refetch(), goalsQuery.refetch(), rewardsQuery.refetch(), trainerQuery.refetch(), trainerFeedbackQuery.refetch()]);
+  return { kind: "view1" as const, props: { styles, profileQuery, membershipQuery, membership: membershipQuery.data, progressLogs: progressQuery.data ?? [], goals: goalsQuery.data ?? [], rewards: rewardsQuery.data ?? [], trainer: trainerQuery.data ?? null, trainerFeedback: trainerFeedbackQuery.data ?? null, unreadNotifications: notificationsQuery.data ?? [], user, refreshProfile, colors, profile, form, setForm, updateProfile, submit, navigation, logout } };
 }
 
 export function MemberProfileScreen(...args: Parameters<typeof useMemberProfileScreenPresentation>): React.JSX.Element {

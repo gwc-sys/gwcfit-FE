@@ -1,6 +1,7 @@
 import { Pressable } from "../../components/NativePressable";
 import { Ionicons } from "@expo/vector-icons";
 import { ActivityIndicator, Modal, ScrollView, Text, View } from "react-native";
+import { useReducedMotion } from "react-native-reanimated";
 import { DataState } from "../../components/DataState";
 import { PrimaryButton } from "../../components/PrimaryButton";
 import { Screen } from "../../components/Screen";
@@ -53,6 +54,7 @@ export function MemberProfileScreenView({ model }: { model: ReturnType<typeof us
 }
 
 export function MemberProfileBodyView({ model }: { model: ReturnType<typeof useMemberProfileBodyPresentation> }): React.ReactNode {
+  const reduceMotion = useReducedMotion();
   if (model == null) return null;
   if (typeof model !== "object" || !("kind" in model)) return model;
   switch (model.kind) {
@@ -92,7 +94,7 @@ export function MemberProfileBodyView({ model }: { model: ReturnType<typeof useM
       <NoticeBanner message={notice} />
       <NoticeBanner message={updateMember.error ? getApiErrorMessage(updateMember.error) : null} tone="error" />
 
-      <Modal animationType="fade" transparent visible={pickerVisible} onRequestClose={() => setPickerVisible(false)}>
+      <Modal animationType={reduceMotion ? "none" : "fade"} transparent visible={pickerVisible} onRequestClose={() => setPickerVisible(false)}>
         <View style={styles.modalBackdrop}>
           <View style={styles.modalCard}>
             <View style={styles.modalHeader}>

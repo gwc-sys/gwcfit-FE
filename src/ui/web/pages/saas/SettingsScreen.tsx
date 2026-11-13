@@ -1,7 +1,9 @@
 import { Ionicons } from "@expo/vector-icons";
 import type { ReactNode } from "react";
+import { useState, useEffect } from "react";
 import { Controller } from "react-hook-form";
 import { Modal, Pressable, ScrollView, Switch, Text, TextInput, View } from "react-native";
+import Svg, { Path, Rect, Circle, Polygon, Polyline, Line } from "react-native-svg";
 import { FormTextField } from "../../components/FormTextField";
 import { NoticeBanner } from "../../components/NoticeBanner";
 import { PrimaryButton } from "../../components/PrimaryButton";
@@ -9,11 +11,108 @@ import { Screen } from "../../components/Screen";
 import { ScreenHeader } from "../../components/ScreenHeader";
 import { SurfacePanel } from "../../components/SurfacePanel";
 import { PulseDashboardLayout } from "../../../../components/dashboard/PulseDashboardLayout";
+import { AppLogo } from "../../../../components/AppLogo";
 import { MyGymPanel } from "../../../../features/operations/GymPanels";
 import { getApiErrorMessage } from "../../../../services/api/client";
 import { requestLogoutConfirmation } from "../../../../utils/logoutConfirmation";
 import type * as React from "react";
 import type { useSettingsScreenPresentation, useGymOwnerSettingsScreenPresentation, useOwnerSettingsHubPresentation, useSuperAdminSettingsHubPresentation, useSettingsOptionGridPresentation, useSettingsOptionPresentation, useSettingsLinkPresentation, useGymOwnerSettingsDashboardPresentation, useLegacySuperAdminSettingsHubPresentation, useSidePanelPresentation, useOverviewRowPresentation, useHealthRowPresentation } from "../../../../screens/saas/SettingsScreen";
+import { createClubSettingsStyles } from "../../styles/pages/saas/SettingsScreen.styles";
+import { OwnerSettingsWebHub } from "./OwnerSettingsWebHub";
+
+// --- Vector SVGs exactly matching the reference screenshots ---
+
+function SettingsGearIcon({ size = 26, color = "#FFFFFF" }: { size?: number; color?: string }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
+      <Circle cx="12" cy="12" r="3" />
+      <Path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+    </Svg>
+  );
+}
+
+function UserIcon({ size = 20, color = "#FFFFFF" }: { size?: number; color?: string }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
+      <Path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+      <Circle cx="12" cy="7" r="4" />
+    </Svg>
+  );
+}
+
+function MapPinIcon({ size = 20, color = "#FFFFFF" }: { size?: number; color?: string }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
+      <Path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+      <Circle cx="12" cy="10" r="3" />
+    </Svg>
+  );
+}
+
+function CreditCardIcon({ size = 20, color = "#FFFFFF" }: { size?: number; color?: string }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
+      <Rect x="2" y="5" width="20" height="14" rx="3" />
+      <Line x1="2" y1="10" x2="22" y2="10" />
+    </Svg>
+  );
+}
+
+function KeyIcon({ size = 20, color = "#FFFFFF" }: { size?: number; color?: string }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
+      <Circle cx="7.5" cy="15.5" r="4.5" />
+      <Path d="M10.7 12.3 20 3" />
+      <Path d="m15.5 4.5 2 2" />
+      <Path d="m18 7 2 2" />
+    </Svg>
+  );
+}
+
+function CheckmarkIcon({ size = 16, color = "#FFFFFF" }: { size?: number; color?: string }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={3} strokeLinecap="round" strokeLinejoin="round">
+      <Polyline points="20 6 9 17 4 12" />
+    </Svg>
+  );
+}
+
+function LocationNavIcon({ size = 14, color = "#E91E63" }: { size?: number; color?: string }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
+      <Polygon points="3 11 22 2 13 21 11 13 3 11" fill="none" />
+    </Svg>
+  );
+}
+
+function BellIcon({ size = 18, color = "#E91E63" }: { size?: number; color?: string }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
+      <Path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+      <Path d="M13.73 21a2 2 0 0 1-3.46 0" />
+    </Svg>
+  );
+}
+
+function TerminalChipIcon({ size = 18, color = "#E91E63" }: { size?: number; color?: string }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
+      <Rect x="4" y="4" width="16" height="16" rx="2" />
+      <Rect x="9" y="9" width="6" height="6" />
+      <Path d="M9 1v3M15 1v3M9 20v3M15 20v3M20 9h3M20 14h3M1 9h3M1 14h3" />
+    </Svg>
+  );
+}
+
+function SignOutIcon({ size = 16, color = "#E91E63" }: { size?: number; color?: string }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
+      <Path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+      <Polyline points="16 17 21 12 16 7" />
+      <Line x1="21" y1="12" x2="9" y2="12" />
+    </Svg>
+  );
+}
 
 export function SettingsScreenView({ model }: { model: ReturnType<typeof useSettingsScreenPresentation> }): React.ReactNode {
   if (model == null) return null;
@@ -37,7 +136,7 @@ export function GymOwnerSettingsScreenView({ model }: { model: ReturnType<typeof
     case "view1": {
       const { OwnerSettingsHub } = model.props;
       return ((
-    <PulseDashboardLayout activeLabel="Settings" roleLabel="Gym Owner">
+    <PulseDashboardLayout activeLabel="Account" roleLabel="Gym Owner" hideDefaultHeader={true}>
       <OwnerSettingsHub />
     </PulseDashboardLayout>
   ));
@@ -46,37 +145,7 @@ export function GymOwnerSettingsScreenView({ model }: { model: ReturnType<typeof
 }
 
 export function OwnerSettingsHubView({ model }: { model: ReturnType<typeof useOwnerSettingsHubPresentation> }): React.ReactNode {
-  if (model == null) return null;
-  if (typeof model !== "object" || !("kind" in model)) return model;
-  switch (model.kind) {
-    case "view1": {
-      const { styles, navigation, SettingsOptionGrid, isDark, setColorScheme, colors, control, errors, changePassword, submitPasswordChange, logout } = model.props;
-      return ((
-    <Screen scroll keyboard contentContainerStyle={styles.screen}>
-      <ScreenHeader title="Settings" subtitle="Account preferences and security" onBack={() => navigation.goBack()} />
-      <SettingsOptionGrid onNavigate={(route) => navigation.navigate(route)} isDark={isDark} onToggleTheme={(enabled) => setColorScheme(enabled ? "dark" : "light")} subscriptionRoute="MembershipPlans" />
-      <SurfacePanel title="Appearance" kicker="Preferences" icon="options-outline">
-        <View style={styles.settingRow}>
-          <View style={styles.settingCopy}><Text style={styles.settingTitle}>Theme</Text><Text style={styles.settingText}>{isDark ? "Dark theme is enabled." : "Light theme is enabled."}</Text></View>
-          <Switch value={isDark} onValueChange={(enabled) => setColorScheme(enabled ? "dark" : "light")} trackColor={{ true: colors.primary, false: colors.surfaceStrong }} thumbColor={colors.white} ios_backgroundColor={colors.surfaceStrong} />
-        </View>
-      </SurfacePanel>
-      <MyGymPanel />
-      <SurfacePanel title="Change password" kicker="Security" icon="lock-closed-outline">
-        <Controller control={control} name="old_password" render={({ field: { onBlur, onChange, value } }) => <FormTextField error={errors.old_password?.message} label="Old password" leftIcon="lock-open-outline" maxLength={72} onBlur={onBlur} onChangeText={onChange} placeholder="Enter your old password" autoComplete="new-password" autoCorrect={false} autoCapitalize="none" importantForAutofill="no" secureTextEntry value={value} />} />
-        <Controller control={control} name="new_password" render={({ field: { onBlur, onChange, value } }) => <FormTextField error={errors.new_password?.message} label="New password" leftIcon="lock-closed-outline" maxLength={72} onBlur={onBlur} onChangeText={onChange} placeholder="Use at least 8 characters" autoComplete="new-password" autoCorrect={false} autoCapitalize="none" importantForAutofill="no" secureTextEntry value={value} />} />
-        <NoticeBanner message={changePassword.error ? getApiErrorMessage(changePassword.error) : null} tone="error" />
-        <NoticeBanner message={changePassword.data?.message ?? null} />
-        <PrimaryButton title="Update password" icon="key-outline" loading={changePassword.isPending} onPress={submitPasswordChange} />
-      </SurfacePanel>
-      <SurfacePanel title="Session" kicker="Account security" icon="shield-checkmark-outline">
-        <Text style={styles.bodyText}>Sign out of this device when you finish managing your gym.</Text>
-        <PrimaryButton title="Sign out" icon="log-out-outline" variant="danger" loading={logout.isPending} onPress={() => requestLogoutConfirmation(() => logout.mutate())} />
-      </SurfacePanel>
-    </Screen>
-  ));
-    }
-  }
+  return <OwnerSettingsWebHub model={model} />;
 }
 
 export function SuperAdminSettingsHubView({ model }: { model: ReturnType<typeof useSuperAdminSettingsHubPresentation> }): React.ReactNode {
@@ -195,7 +264,7 @@ export function GymOwnerSettingsDashboardView({ model }: { model: ReturnType<typ
     case "view1": {
       const { styles, gymQuery, colors, ownerDashboardNav, onNavigate, tabs, setActiveTab, activeTab, user, ownerDashboardCards, openCard, selectedCard, setSelectedCard, draft, setDraft, updateGym, save } = model.props;
       return (<View style={styles.page}><View style={styles.shell}>
-    <ScrollView style={styles.sidebar} contentContainerStyle={styles.sidebarContent}><View style={styles.brandRow}><View style={styles.brandMark}><Ionicons name="pulse" size={24} color="#FFF" /></View><View><Text style={styles.brandName}>Pulse<Text style={styles.brandAccent}>Fit</Text></Text><Text style={styles.brandRole}>Gym Owner Panel</Text></View></View><View style={styles.gymSwitcher}><View style={styles.gymLogo}><Ionicons name="barbell" size={18} color="#FFF" /></View><View style={styles.gymCopy}><Text style={styles.gymName}>{gymQuery.data?.name ?? "FitZone Gym"}</Text><Text style={styles.gymMeta}>Change Gym</Text></View><Ionicons name="chevron-down" size={16} color={colors.ink} /></View><View style={styles.navList}>{ownerDashboardNav.map(([label, icon, route]) => <Pressable accessibilityRole="button" key={label} style={styles.navItem} onPress={() => onNavigate(route, route === "AppTabs" ? { screen: "Dashboard" } : undefined)}><Ionicons name={icon} size={17} color={colors.textSecondary} /><Text style={styles.navLabel}>{label}</Text></Pressable>)}</View><View style={styles.settingsNav}><View style={styles.settingsHeader}><Ionicons name="settings-outline" size={17} color={colors.primary} /><Text style={styles.settingsTitle}>Settings</Text><Ionicons name="chevron-up" size={15} color={colors.primary} /></View>{tabs.map((tab) => <Pressable accessibilityRole="button" key={tab} onPress={() => setActiveTab(tab)} style={[styles.subNav, activeTab === tab && styles.subNavActive]}><View style={[styles.subDot, activeTab === tab && styles.subDotActive]} /><Text style={[styles.subText, activeTab === tab && styles.subTextActive]}>{tab}</Text></Pressable>)}</View><Pressable accessibilityRole="button" style={styles.support} onPress={() => onNavigate("FeaturePlaceholder", { title: "Support" })}><Ionicons name="help-circle-outline" size={17} color={colors.textSecondary} /><Text style={styles.navLabel}>Support</Text></Pressable><View style={styles.quickActions}><Text style={styles.quickTitle}>Quick Actions</Text>{[["Add Member", "person-add-outline", "AddMember"], ["Add Trainer", "person-add-outline", "Trainers"], ["Mark Attendance", "checkmark-circle-outline", "Attendance"], ["Create Plan", "document-outline", "MembershipPlans"]].map(([label, icon, route]) => <Pressable accessibilityRole="button" key={label} style={styles.quickRow} onPress={() => onNavigate(route)}><Ionicons name={icon as keyof typeof Ionicons.glyphMap} size={16} color={colors.primary} /><Text style={styles.quickText}>{label}</Text></Pressable>)}</View></ScrollView>
+    <ScrollView style={styles.sidebar} contentContainerStyle={styles.sidebarContent}><View style={styles.brandRow}><AppLogo size={36} /><View><Text style={styles.brandName}>Pulse<Text style={styles.brandAccent}>Fit</Text></Text><Text style={styles.brandRole}>Gym Owner Panel</Text></View></View><View style={styles.gymSwitcher}><View style={styles.gymLogo}><Ionicons name="barbell" size={18} color="#FFFFFF" /></View><View style={styles.gymCopy}><Text style={styles.gymName}>{gymQuery.data?.name ?? "FitZone Gym"}</Text><Text style={styles.gymMeta}>Change Gym</Text></View><Ionicons name="chevron-down" size={16} color={colors.ink} /></View><View style={styles.navList}>{ownerDashboardNav.map(([label, icon, route]) => <Pressable accessibilityRole="button" key={label} style={styles.navItem} onPress={() => onNavigate(route, route === "AppTabs" ? { screen: "Dashboard" } : undefined)}><Ionicons name={icon} size={17} color={colors.textSecondary} /><Text style={styles.navLabel}>{label}</Text></Pressable>)}</View><View style={styles.settingsNav}><View style={styles.settingsHeader}><Ionicons name="settings-outline" size={17} color={colors.primary} /><Text style={styles.settingsTitle}>Settings</Text><Ionicons name="chevron-up" size={15} color={colors.primary} /></View>{tabs.map((tab) => <Pressable accessibilityRole="button" key={tab} onPress={() => setActiveTab(tab)} style={[styles.subNav, activeTab === tab && styles.subNavActive]}><View style={[styles.subDot, activeTab === tab && styles.subDotActive]} /><Text style={[styles.subText, activeTab === tab && styles.subTextActive]}>{tab}</Text></Pressable>)}</View><Pressable accessibilityRole="button" style={styles.support} onPress={() => onNavigate("FeaturePlaceholder", { title: "Support" })}><Ionicons name="help-circle-outline" size={17} color={colors.textSecondary} /><Text style={styles.navLabel}>Support</Text></Pressable><View style={styles.quickActions}><Text style={styles.quickTitle}>Quick Actions</Text>{[["Add Member", "person-add-outline", "AddMember"], ["Add Trainer", "person-add-outline", "Trainers"], ["Mark Attendance", "checkmark-circle-outline", "Attendance"], ["Create Plan", "document-outline", "MembershipPlans"]].map(([label, icon, route]) => <Pressable accessibilityRole="button" key={label} style={styles.quickRow} onPress={() => onNavigate(route)}><Ionicons name={icon as keyof typeof Ionicons.glyphMap} size={16} color={colors.primary} /><Text style={styles.quickText}>{label}</Text></Pressable>)}</View></ScrollView>
     <View style={styles.content}><View style={styles.header}><View><Text style={styles.title}>Settings</Text><Text style={styles.subtitle}>Manage your gym preferences and configurations</Text></View><View style={styles.headerActions}><Pressable accessibilityRole="button" style={styles.websiteButton} onPress={() => onNavigate("FeaturePlaceholder", { title: "Gym Website" })}><Text style={styles.websiteText}>Visit Gym Website</Text><Ionicons name="open-outline" size={15} color={colors.ink} /></Pressable><Pressable accessibilityRole="button" style={styles.notificationButton} onPress={() => onNavigate("Notifications")}><Ionicons name="notifications-outline" size={22} color={colors.ink} /><View style={styles.badge}><Text style={styles.badgeText}>12</Text></View></Pressable><Pressable accessibilityRole="button" style={styles.account} onPress={() => onNavigate("Profile")}><View style={styles.avatar}><Text style={styles.avatarText}>{(user?.full_name ?? "R").charAt(0).toUpperCase()}</Text></View><View><Text style={styles.accountName}>{user?.full_name ?? "Gym Owner"}</Text><Text style={styles.accountRole}>Gym Owner</Text></View><Ionicons name="chevron-down" size={15} color={colors.ink} /></Pressable></View></View><View style={styles.tabs}>{tabs.map((tab) => <Pressable accessibilityRole="button" key={tab} onPress={() => setActiveTab(tab)} style={[styles.tab, activeTab === tab && styles.tabActive]}><Text style={[styles.tabText, activeTab === tab && styles.tabTextActive]}>{tab}</Text></Pressable>)}</View><ScrollView style={styles.mainScroll} contentContainerStyle={styles.mainContent}><View style={styles.cardGrid}>{ownerDashboardCards.map((card) => <Pressable accessibilityRole="button" key={card[0]} onPress={() => openCard(card)} style={({ pressed }) => [styles.card, pressed && styles.pressed]}><View style={[styles.cardIcon, { backgroundColor: `${card[3]}18` }]}><Ionicons name={card[2]} size={25} color={card[3]} /></View><View style={styles.cardCopy}><Text style={styles.cardTitle}>{card[0]}</Text><Text style={styles.cardDescription}>{card[1]}</Text></View><Ionicons name="chevron-forward" size={18} color={colors.ink} /></Pressable>)}</View><View style={styles.overview}><Text style={styles.panelTitle}>Gym Overview</Text><View style={styles.overviewRow}>{[["Total Members", "1,248"], ["Active Members", "856"], ["Trainers", "12"], ["Receptionists", "4"], ["Revenue (This Month)", "₹2,48,500"]].map(([label, value]) => <View key={label} style={styles.overviewItem}><Text style={styles.overviewLabel}>{label}</Text><Text style={styles.overviewValue}>{label === "Total Members" && gymQuery.isLoading ? "..." : value}</Text></View>)}</View></View></ScrollView></View>
   </View><Modal visible={!!selectedCard} transparent animationType="fade" onRequestClose={() => setSelectedCard(null)}><View style={styles.modalBackdrop}><View style={styles.modal}><View style={styles.modalHeader}><Text style={styles.modalTitle}>{selectedCard?.[0]}</Text><Pressable accessibilityRole="button" accessibilityLabel="Close" onPress={() => setSelectedCard(null)}><Ionicons name="close" size={22} color={colors.ink} /></Pressable></View>{selectedCard && (selectedCard[0] === "Gym Profile" || selectedCard[0] === "Business Information") ? <><FormTextField label="Gym name" value={draft.name} onChangeText={(name) => setDraft((current) => ({ ...current, name }))} /><FormTextField label="Email" value={draft.email} onChangeText={(email) => setDraft((current) => ({ ...current, email }))} /><FormTextField label="Phone" value={draft.phone} onChangeText={(phone) => setDraft((current) => ({ ...current, phone }))} /><FormTextField label="Address" value={draft.address} onChangeText={(address) => setDraft((current) => ({ ...current, address }))} /><FormTextField label="Timezone" value={draft.timezone} onChangeText={(timezone) => setDraft((current) => ({ ...current, timezone }))} /></> : <FormTextField label="Setting value" placeholder="Enter a value" value={draft.value} onChangeText={(value) => setDraft((current) => ({ ...current, value }))} />}{updateGym.error ? <Text style={styles.error}>{getApiErrorMessage(updateGym.error)}</Text> : null}<PrimaryButton title="Save Settings" loading={updateGym.isPending} onPress={save} /></View></View></Modal></View>);
     }
@@ -337,7 +406,7 @@ export function LegacySuperAdminSettingsHubView({ model }: { model: ReturnType<t
                 label={item.label}
                 value={`${item.percentage ?? "—"}%`}
                 tone={
-                  ["#22C55E", "#FBBF24", "#EF4444", "#22C55E", "#22C55E"][index]
+                  ["#34C759", "#E91E63", "#FF3B30", "#34C759", "#34C759"][index]
                 }
               />
             ))}
@@ -361,11 +430,11 @@ export function LegacySuperAdminSettingsHubView({ model }: { model: ReturnType<t
                       styles.activityDot,
                       {
                         backgroundColor: [
-                          "#22C55E",
-                          "#3B9BFF",
-                          "#FBBF24",
-                          "#0A84FF",
-                          "#EF4444",
+                          "#34C759",
+                          "#E91E63",
+                          "#E91E63",
+                          "#007AFF",
+                          "#FF3B30",
                         ][i],
                       },
                     ]}

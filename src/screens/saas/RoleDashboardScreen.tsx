@@ -2,6 +2,7 @@ import type * as React from "react";
 import { RoleDashboardScreenView } from "./RoleDashboardScreen.presentation";
 import { SuperAdminDashboardScreen } from "./SuperAdminDashboardScreen";
 import { GymAdminDashboardScreen } from "./GymAdminDashboardScreen";
+import { GymOwnerDashboardScreen } from "./GymOwnerDashboardScreen";
 import { TrainerDashboardScreen } from "./TrainerDashboardScreen";
 import { MemberDashboardScreen } from "../member/MemberDashboardScreen";
 import { useAuthStore } from "../../store/useAuthStore";
@@ -25,7 +26,11 @@ export function useRoleDashboardScreenPresentation() {
     return { kind: "view4" as const, props: {  } };
   }
 
-  return { kind: "view5" as const, props: {  } };
+  if (user?.role === "gym_owner") {
+    return { kind: "view5" as const, props: {  } };
+  }
+
+  return { kind: "view4" as const, props: {  } };
 }
 
 export function RoleDashboardScreen(...args: Parameters<typeof useRoleDashboardScreenPresentation>): React.JSX.Element {

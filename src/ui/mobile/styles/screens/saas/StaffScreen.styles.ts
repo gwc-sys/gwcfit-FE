@@ -1,7 +1,7 @@
 import { controlMetrics } from "../../../theme/theme";
 import { adaptPageStyles } from "../../adaptPageStyles";
 import { StyleSheet } from "react-native";
-import { radius, spacing, typography } from "../../../theme/theme";
+import { darkThemeColors, radius, spacing, typography } from "../../../theme/theme";
 import type { ThemeColors } from "../../../theme/theme";
 
 export const createStyles = (colors: ThemeColors) =>
@@ -258,3 +258,272 @@ export const createStyles = (colors: ThemeColors) =>
     opacity: 0.75
   }
   }));
+
+
+export const createReferenceStaffStyles = (colors: ThemeColors) => adaptPageStyles(
+  StyleSheet.create({
+    screen: {
+      backgroundColor: colors.background,
+      minHeight: "100%",
+      paddingBottom: 110,
+    },
+    dynamicIslandRow: {
+      alignItems: "center",
+      paddingTop: 8,
+      paddingBottom: 10,
+    },
+    dynamicIsland: {
+      flexDirection: "row",
+      alignItems: "center",
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.separator,
+      borderRadius: 20,
+      paddingHorizontal: 14,
+      paddingVertical: 5,
+      gap: 6,
+    },
+    dynamicIslandGreenDot: {
+      width: 7,
+      height: 7,
+      borderRadius: 3.5,
+      backgroundColor: colors.success,
+    },
+    dynamicIslandText: {
+      color: colors.textPrimary,
+      fontSize: 12,
+      fontWeight: "600",
+    },
+    headerRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      paddingHorizontal: 16,
+      marginTop: 8,
+      marginBottom: 16,
+    },
+    headerTitleContainer: {
+      flex: 1,
+      minWidth: 0,
+    },
+    headerTitle: {
+      fontSize: 28,
+      fontWeight: "800",
+      color: colors.textPrimary,
+      letterSpacing: -0.5,
+    },
+    headerSubtitle: {
+      fontSize: 13,
+      color: colors.textSecondary,
+      marginTop: 3,
+    },
+    inviteButton: {
+      backgroundColor: colors.primary,
+      borderRadius: 20,
+      height: 38,
+      paddingHorizontal: 16,
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 4,
+    },
+    inviteButtonText: {
+      fontSize: 14,
+      fontWeight: "800",
+      color: colors.textPrimary,
+    },
+    filterTabsContainer: {
+      marginHorizontal: 16,
+      marginBottom: 14,
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.separator,
+      borderRadius: 24,
+      padding: 4,
+      flexDirection: "row",
+      alignItems: "center",
+    },
+    filterTab: {
+      flex: 1,
+      alignItems: "center",
+      justifyContent: "center",
+      paddingVertical: 8,
+      borderRadius: 20,
+    },
+    filterTabActive: {
+      backgroundColor: colors.surface,
+      borderColor: colors.separator,
+      borderWidth: 1,
+    },
+    filterTabText: {
+      fontSize: 13,
+      fontWeight: "600",
+      color: colors.textSecondary,
+    },
+    filterTabTextActive: {
+      color: colors.textPrimary,
+      fontWeight: "800",
+    },
+    searchContainer: {
+      marginHorizontal: 16,
+      marginBottom: 16,
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.separator,
+      borderRadius: 23,
+      height: 46,
+      paddingHorizontal: 16,
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 10,
+    },
+    searchInput: {
+      flex: 1,
+      color: colors.textPrimary,
+      fontSize: 14,
+      paddingVertical: 0,
+    },
+    staffCard: {
+      marginHorizontal: 16,
+      marginBottom: 12,
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.separator,
+      borderRadius: 18,
+      padding: 16,
+      gap: 12,
+    },
+    cardTopRow: {
+      flexDirection: "row",
+      alignItems: "flex-start",
+      justifyContent: "space-between",
+    },
+    avatar: {
+      width: 44,
+      height: 44,
+      borderRadius: 22,
+      backgroundColor: colors.surface,
+      borderColor: colors.separator,
+      borderWidth: 1,
+    },
+    avatarText: {
+      fontSize: 16,
+      fontWeight: "800",
+      color: colors.textPrimary,
+    },
+    staffInfo: {
+      flex: 1,
+      marginLeft: 12,
+      marginRight: 8,
+    },
+    staffName: {
+      fontSize: 16,
+      fontWeight: "800",
+      color: colors.textPrimary,
+    },
+    staffEmail: {
+      fontSize: 13,
+      color: colors.textSecondary,
+      marginTop: 2,
+    },
+    roleBadgeSubAdmin: {
+      backgroundColor: colors.successSoft,
+      borderWidth: 1,
+      borderColor: colors.separator,
+      borderRadius: 12,
+      paddingHorizontal: 10,
+      paddingVertical: 4,
+    },
+    roleBadgeReception: {
+      backgroundColor: colors.primarySoft,
+      borderWidth: 1,
+      borderColor: colors.separator,
+      borderRadius: 12,
+      paddingHorizontal: 10,
+      paddingVertical: 4,
+    },
+    roleBadgeTrainer: {
+      backgroundColor: colors.primarySoft,
+      borderWidth: 1,
+      borderColor: colors.separator,
+      borderRadius: 12,
+      paddingHorizontal: 10,
+      paddingVertical: 4,
+    },
+    roleBadgeDefault: {
+      backgroundColor: colors.linkSoft,
+      borderWidth: 1,
+      borderColor: colors.separator,
+      borderRadius: 12,
+      paddingHorizontal: 10,
+      paddingVertical: 4,
+    },
+    roleTextSubAdmin: {
+      color: colors.success,
+      fontSize: 11,
+      fontWeight: "700",
+    },
+    roleTextReception: {
+      color: colors.textPrimary,
+      fontSize: 11,
+      fontWeight: "700",
+    },
+    roleTextTrainer: {
+      color: colors.primary,
+      fontSize: 11,
+      fontWeight: "700",
+    },
+    roleTextDefault: {
+      color: colors.link,
+      fontSize: 11,
+      fontWeight: "700",
+    },
+    cardBottomRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      paddingTop: 4,
+    },
+    joinedRow: {
+      flexDirection: "row",
+      alignItems: "center",
+    },
+    joinedLabel: {
+      fontSize: 12,
+      color: colors.textSecondary,
+    },
+    joinedDate: {
+      fontSize: 12,
+      fontWeight: "700",
+      color: colors.textPrimary,
+    },
+    statusRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 6,
+    },
+    statusDot: {
+      width: 6,
+      height: 6,
+      borderRadius: 3,
+      backgroundColor: colors.success,
+    },
+    statusText: {
+      fontSize: 12,
+      fontWeight: "700",
+      color: colors.success,
+    },
+    statusDotInactive: {
+      width: 6,
+      height: 6,
+      borderRadius: 3,
+      backgroundColor: colors.separator,
+    },
+    statusTextInactive: {
+      fontSize: 12,
+      fontWeight: "700",
+      color: colors.textSecondary,
+    },
+  })
+);
+
+export const referenceStaffStyles = createReferenceStaffStyles(darkThemeColors);

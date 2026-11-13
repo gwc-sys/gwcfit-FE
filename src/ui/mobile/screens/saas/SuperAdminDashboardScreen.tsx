@@ -23,7 +23,7 @@ export function SuperAdminDashboardScreenView({ model }: { model: ReturnType<typ
     <PulseDashboardLayout
       activeLabel="Overview"
       roleLabel={user ? formatRole(user.role) : "Super Admin"}
-      refreshControl={<RefreshControl refreshing={gymsQuery.isFetching} onRefresh={() => gymsQuery.refetch()} />}
+      refreshControl={<RefreshControl refreshing={gymsQuery.isFetching} onRefresh={() => { void gymsQuery.refetch(); }} />}
     >
       <PulseDashboardHeader
         title={getWelcomeTitle(user?.full_name)}

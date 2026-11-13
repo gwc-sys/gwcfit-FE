@@ -124,7 +124,7 @@ export function FoodNutritionMealPickerView({ model }: { model: ReturnType<typeo
                   }
                   style={styles.removeButton}
                 >
-                  <Ionicons name="trash-outline" size={17} color="#F87171" />
+                  <Ionicons name="trash-outline" size={17} color="#E91E63" />
                 </Pressable>
               </View>
             ))}

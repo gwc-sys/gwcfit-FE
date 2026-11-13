@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import type { TextInputProps } from "react-native";
 import { StyleSheet, Text, TextInput, useWindowDimensions, View } from "react-native";
 import { useAppTheme } from "../../../theme/AppThemeProvider";
-import { controlMetrics, spacing, typography } from "../theme/theme";
+import { controlMetrics, radius, spacing, typography } from "../theme/theme";
 import type { ThemeColors } from "../theme/theme";
 
 type FormTextFieldProps = TextInputProps & {
@@ -108,7 +108,7 @@ const createStyles = (colors: ThemeColors) =>
     flexDirection: "row",
     alignItems: "center",
     gap: spacing.sm,
-    borderRadius: 14,
+    borderRadius: radius.md,
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: colors.border,
     backgroundColor: colors.surfaceMuted,

@@ -9,7 +9,7 @@ type IconProps = Omit<ComponentProps<typeof Ionicons>, "name"> & {
 };
 
 function makeIcon(name: IconName) {
-  return function AppIcon({ size = 24, color = "#111827", style }: IconProps) {
+  return function AppIcon({ size = 24, color = "#1C1C1E", style }: IconProps) {
     return <Ionicons name={name} size={size} color={color} style={style} />;
   };
 }

@@ -8,7 +8,7 @@ export const createStyles = (colors: ThemeColors) =>
   adaptPageStyles(StyleSheet.create({
     page: {
       flexGrow: 1,
-      backgroundColor: "#090806"
+      backgroundColor: "#000000"
     },
     pageWide: {
       flexDirection: "row"
@@ -18,7 +18,7 @@ export const createStyles = (colors: ThemeColors) =>
     },
     hero: {
       minHeight: 390,
-      backgroundColor: "#171006"
+      backgroundColor: "#000000"
     },
     heroCompact: {
       minHeight: 220
@@ -31,7 +31,7 @@ export const createStyles = (colors: ThemeColors) =>
       minHeight: 720
     },
     heroImage: {
-      backgroundColor: "#171006"
+      backgroundColor: "#000000"
     },
     heroOverlay: {
       flex: 1,
@@ -58,9 +58,9 @@ export const createStyles = (colors: ThemeColors) =>
       alignItems: "center",
       gap: spacing.sm,
       borderRadius: radius.pill,
-      backgroundColor: "rgba(0,122,255,0.14)",
+      backgroundColor: "rgba(233,30,99,0.14)",
       borderWidth: 1,
-      borderColor: "rgba(0,122,255,0.42)",
+      borderColor: "rgba(233,30,99,0.42)",
       paddingHorizontal: spacing.md,
       paddingVertical: spacing.sm
     },
@@ -68,11 +68,11 @@ export const createStyles = (colors: ThemeColors) =>
       width: 7,
       height: 7,
       borderRadius: radius.pill,
-      backgroundColor: "#0A84FF"
+      backgroundColor: "#E91E63"
     },
     eyebrowText: {
       ...typography.small,
-      color: "#64D2FF",
+      color: "#E91E63",
       fontSize: 11,
       fontWeight: "800",
       letterSpacing: 1.2
@@ -113,8 +113,8 @@ export const createStyles = (colors: ThemeColors) =>
       gap: spacing.xs,
       borderRadius: radius.pill,
       borderWidth: 1,
-      borderColor: "rgba(0,122,255,0.28)",
-      backgroundColor: "rgba(8,7,5,0.48)",
+      borderColor: "rgba(233,30,99,0.28)",
+      backgroundColor: "rgba(0, 0, 0,0.48)",
       paddingHorizontal: spacing.md
     },
     heroStatText: {
@@ -128,7 +128,7 @@ export const createStyles = (colors: ThemeColors) =>
       paddingHorizontal: spacing.lg,
       paddingTop: spacing.xxl,
       paddingBottom: spacing.xxl,
-      backgroundColor: "#090806"
+      backgroundColor: "#000000"
     },
     contentCompact: {
       gap: spacing.md,
@@ -151,8 +151,8 @@ export const createStyles = (colors: ThemeColors) =>
       gap: spacing.lg,
       borderRadius: radius.container,
       borderWidth: 1,
-      borderColor: "rgba(0,122,255,0.18)",
-      backgroundColor: "#12110E",
+      borderColor: "rgba(233,30,99,0.18)",
+      backgroundColor: "#000000",
       padding: spacing.xxl,
       ...shadows.card
     },
@@ -170,7 +170,7 @@ export const createStyles = (colors: ThemeColors) =>
     },
     formKicker: {
       ...typography.small,
-      color: "#0A84FF",
+      color: "#E91E63",
       fontSize: 11,
       fontWeight: "800",
       letterSpacing: 1.4,
@@ -191,12 +191,12 @@ export const createStyles = (colors: ThemeColors) =>
       justifyContent: "center"
     },
     link: {
-      color: "#0A84FF",
+      color: "#E91E63",
       fontWeight: "800"
     },
     submitButton: {
-      backgroundColor: "#0A84FF",
-      borderColor: "#0A84FF"
+      backgroundColor: "#E91E63",
+      borderColor: "#E91E63"
     },
     footer: {
       minHeight: 52,
@@ -206,8 +206,8 @@ export const createStyles = (colors: ThemeColors) =>
       gap: spacing.sm,
       borderRadius: radius.sm,
       borderWidth: 1,
-      borderColor: "rgba(0,122,255,0.16)",
-      backgroundColor: "#12110E"
+      borderColor: "rgba(233,30,99,0.16)",
+      backgroundColor: "#000000"
     },
     footerWide: {
       width: "100%",

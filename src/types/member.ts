@@ -57,6 +57,8 @@ export type MemberMembership = {
   gym_name?: string | null;
   membership_plan_uuid?: string | null;
   membership_plan_name?: string | null;
+  plan_description?: string | null;
+  plan_daily_visit_limit?: number | null;
   plan_price_cents: number;
   plan_currency: string;
   plan_duration_days?: number | null;
@@ -70,6 +72,7 @@ export type MemberMembership = {
     plan_uuid: string;
     name: string;
     description?: string | null;
+    daily_visit_limit?: number;
     duration_days: number;
     price_cents: number;
     currency: string;
@@ -161,6 +164,7 @@ export type MemberWorkout = {
   weekly_plan: JsonObject[];
   sessions: JsonObject[];
   completion_status: string;
+  category?: string | null;
   completed_workouts: number;
   missed_workouts: number;
   weekly_consistency: number;
@@ -197,6 +201,13 @@ export type MemberMealPlan = {
   water_target_ml?: number | null;
   trainer_notes?: string | null;
   completion_status: string;
+  category?: string | null;
+};
+
+export type MemberMealPlanCreate = {
+  title: string;
+  calories_per_day: number;
+  meals: JsonObject[];
 };
 
 export type MemberProgressLog = {
@@ -217,17 +228,31 @@ export type MemberProgressLogCreate = Omit<MemberProgressLog, "progress_uuid" | 
   measurements?: JsonObject;
 };
 
+export type TrainerScheduleDay = {
+  day: string;
+  hours: string;
+  active: boolean;
+  slot: string;
+};
+
 export type MemberTrainer = {
   trainer_uuid: string;
   trainer_name: string;
+  role?: string | null;
+  qualifications?: string[];
   trainer_photo?: string | null;
   email?: string | null;
   phone?: string | null;
   specialization: string[];
-  schedule: JsonObject[];
+  schedule: TrainerScheduleDay[];
   assigned_workout_plans: string[];
   assigned_meal_plans: string[];
   trainer_notes?: string | null;
+  average_rating: number;
+  total_reviews: number;
+  active_clients: number;
+  availability_status?: string | null;
+  next_available_slot?: string | null;
 };
 
 export type TrainerFeedback = {
@@ -237,6 +262,8 @@ export type TrainerFeedback = {
   rating: number;
   feedback_option?: string | null;
   feedback_text?: string | null;
+  owner_reply?: string | null;
+  replied_at?: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -251,6 +278,8 @@ export type GymFeedback = {
   review_month: string;
   rating: number;
   feedback_text?: string | null;
+  owner_reply?: string | null;
+  replied_at?: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -313,6 +342,56 @@ export type MemberReward = {
   privacy_safe_rank?: number | null;
 };
 
+export type MemberBadge = {
+  id: string;
+  title: string;
+  category: string;
+  is_locked: boolean;
+  theme_color: string;
+  icon_name: string;
+  description: string;
+};
+
+export type MemberChallenge = {
+  id: string;
+  title: string;
+  badge_tag: "AVAILABLE" | "IN_PROGRESS" | "COMPLETED";
+  description: string;
+  progress_label: string;
+  current_progress: number;
+  total_progress: number;
+  unit: string;
+  reward_points: number;
+  icon_name: string;
+  theme_color: string;
+};
+
+export type MemberPerk = {
+  id: string;
+  title: string;
+  description: string;
+  cost_pts: number;
+  is_available: boolean;
+};
+
+export type MemberGamificationSummary = {
+  points: number;
+  streak_days: number;
+  pass_status: string;
+  unlocked_count: number;
+  total_badges_count: number;
+  badges: MemberBadge[];
+  challenges: MemberChallenge[];
+  perks: MemberPerk[];
+};
+
+export type RedeemPerkResponse = {
+  success: boolean;
+  message: string;
+  remaining_points: number;
+  redemption_id: string;
+};
+
 export type SupportTicketCreate = {
   category?: string;
   subject: string;
@@ -360,7 +439,7 @@ export type MemberActivityDay = {
   calories_logged?: number;
   calories_estimated?: number;
   calories_source?: "steps" | "logged" | "none";
-  calorie_estimate_weight_kg?: number;
+  calorie_estimate_weight_kg?: number | null;
   calorie_estimate_uses_default_weight?: boolean;
   calories_target: number;
   calories_remaining: number;

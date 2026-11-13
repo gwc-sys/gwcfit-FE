@@ -9,5 +9,7 @@ export const images = {
   strengthCategory: require("../../assets/media/strength-category.png"),
   mobility: require("../../assets/media/mobility.png"),
   high56: require("../../assets/media/high56.png"),
-  plank: require("../../assets/media/plank.png")
+  plank: require("../../assets/media/plank.png"),
+  workoutFloor: require("../../assets/images/workout-floor.jpg"),
+  pulsefitLogo: require("../../assets/images/pulsefit-logo.png"),
 };

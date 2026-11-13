@@ -16,10 +16,10 @@ type QuickActionProps = {
 
 function getTone(colors: ThemeColors, tone: NonNullable<QuickActionProps["tone"]>) {
   const tones = {
-    primary: { foreground: "#FFFFFF", gradient: ["#0A84FF", "#007AFF"] as const },
-    accent: { foreground: colors.white, gradient: ["#F59E0B", "#F97316"] as const },
-    info: { foreground: colors.white, gradient: ["#10B981", "#14B8A6"] as const },
-    warning: { foreground: colors.white, gradient: ["#FB7185", "#F97316"] as const }
+    primary: { foreground: colors.white, gradient: [colors.primary, colors.primary] as const },
+    accent: { foreground: colors.white, gradient: ["#E91E63", "#E91E63"] as const },
+    info: { foreground: colors.white, gradient: ["#34C759", "#007AFF"] as const },
+    warning: { foreground: colors.white, gradient: ["#E91E63", "#E91E63"] as const }
   };
 
   return tones[tone];

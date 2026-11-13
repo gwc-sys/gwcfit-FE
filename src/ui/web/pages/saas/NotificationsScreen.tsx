@@ -16,16 +16,17 @@ export function NotificationsScreenView({ model }: { model: ReturnType<typeof us
   if (typeof model !== "object" || !("kind" in model)) return model;
   switch (model.kind) {
     case "view1": {
-      const { styles, query, colors, markRead, openRelated } = model.props;
-      const notifications = query.data?.filter(n => filter === "All" || (filter === "Important" ? n.important : n.status === "unread")) ?? [];
+      const { styles, query, colors, markRead, markAllRead, dismissNotification, clearAll, enableDelivery, openRelated, userRole } = model.props;
+      const notifications = query.error || (userRole === "trainer" && query.isFetching) ? [] : query.data?.filter(n => filter === "All" || (filter === "Important" ? n.important : n.status === "unread")) ?? [];
       return ((
     <Screen scroll contentContainerStyle={styles.screen}>
       <ScreenHeader title="Notifications" subtitle="Platform activity, enquiries, subscriptions, and security" icon="notifications-outline" />
-      <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>{(["All", "Unread", "Important"] as const).map(option => <Pressable key={option} accessibilityRole="tab" accessibilityState={{ selected: filter === option }} onPress={() => setFilter(option)} style={{ minHeight: 44, paddingHorizontal: 18, justifyContent: "center", borderRadius: 12, backgroundColor: filter === option ? colors.primarySoft : colors.surface }}><Text style={{ color: filter === option ? colors.primary : colors.ink }}>{option}</Text></Pressable>)}<PrimaryButton title="Refresh" variant="secondary" loading={query.isFetching} onPress={() => void query.refetch()} /></View>
+      <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8, alignItems: "center" }}>{(["All", "Unread", "Important"] as const).map(option => <Pressable key={option} accessibilityRole="tab" accessibilityState={{ selected: filter === option }} onPress={() => setFilter(option)} style={{ minHeight: 44, paddingHorizontal: 18, justifyContent: "center", borderRadius: 12, backgroundColor: filter === option ? colors.primarySoft : colors.surface }}><Text style={{ color: filter === option ? colors.primary : colors.ink }}>{option}</Text></Pressable>)}<PrimaryButton title="Refresh" variant="secondary" loading={query.isFetching} onPress={() => void query.refetch()} /><PrimaryButton title="Mark all as read" icon="checkmark-done-outline" variant="secondary" loading={markAllRead.isPending} disabled={!notifications.some(n => n.status === "unread")} onPress={() => markAllRead.mutate()} /><PrimaryButton title="Clear all" icon="trash-outline" variant="danger" loading={clearAll.isPending} disabled={!notifications.length} onPress={() => clearAll.mutate()} /></View>
       <NoticeBanner tone="error" message={markRead.error ? getApiErrorMessage(markRead.error) : null} />
-      <DataState loading={query.isLoading} error={query.error ? getApiErrorMessage(query.error) : null} />
+      <NoticeBanner tone={enableDelivery.error ? "error" : "success"} message={enableDelivery.error ? getApiErrorMessage(enableDelivery.error) : enableDelivery.data ?? null} />
+      <DataState loading={query.isLoading || (userRole === "trainer" && query.isFetching)} error={query.error ? getApiErrorMessage(query.error) : null} />
       {query.isLoading ? <ActivityIndicator color={colors.primary} /> : null}
-      {!query.isLoading && !query.error && !notifications.length ? <SurfacePanel title="All caught up" kicker="Notifications" icon="checkmark-circle-outline"><Text style={[styles.emptyText, { color: colors.textSecondary }]}>{filter === "Unread" ? "No unread notifications." : filter === "Important" ? "No important notifications." : "Your platform notifications will appear here."}</Text></SurfacePanel> : null}
+      {!query.isFetching && !query.error && !notifications.length ? <SurfacePanel title="All caught up" kicker="Notifications" icon="checkmark-circle-outline"><Text style={[styles.emptyText, { color: colors.textSecondary }]}>{filter === "Unread" ? "No unread notifications." : filter === "Important" ? "No important notifications." : "Your platform notifications will appear here."}</Text></SurfacePanel> : null}
       {notifications.map((notification) => (
         <View key={notification.id}>
           <SurfacePanel title={notification.title} kicker={notification.status === "unread" ? "Unread" : "Read"} icon={notification.status === "unread" ? "notifications-outline" : "checkmark-circle-outline"}>
@@ -34,6 +35,7 @@ export function NotificationsScreenView({ model }: { model: ReturnType<typeof us
             <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
               {notification.status === "unread" ? <PrimaryButton title="Mark as read" variant="secondary" disabled={markRead.isPending} onPress={() => markRead.mutate(notification.id)} /> : null}
               {notification.route && notification.route !== "Notifications" ? <PrimaryButton title="Open related information" variant="secondary" onPress={() => { if (notification.status === "unread") markRead.mutate(notification.id); openRelated(notification); }} /> : null}
+              <PrimaryButton title="Dismiss" variant="danger" disabled={dismissNotification.isPending} onPress={() => dismissNotification.mutate(notification.id)} />
             </View>
           </SurfacePanel>
         </View>

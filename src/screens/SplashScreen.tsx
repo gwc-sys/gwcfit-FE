@@ -3,12 +3,14 @@ import { Animated, StyleSheet, Text, View } from "react-native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 
 import { AppLogo } from "../components/AppLogo";
-import { palette, spacing, type } from "../theme/theme";
+import { useAppTheme } from "../theme/AppThemeProvider";
+import { spacing, type } from "../theme/theme";
 import type { RootStackParamList } from "../navigation/types";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Splash">;
 
 export function SplashScreen({ navigation }: Props) {
+  const { colors } = useAppTheme();
   const scale = useRef(new Animated.Value(0.88)).current;
   const opacity = useRef(new Animated.Value(0)).current;
 
@@ -23,13 +25,15 @@ export function SplashScreen({ navigation }: Props) {
   }, [navigation, opacity, scale]);
 
   return (
-    <View style={styles.root}>
+    <View style={[styles.root, { backgroundColor: colors.background }]}>
       <Animated.View style={[styles.logo, { opacity, transform: [{ scale }] }]}>
-        <AppLogo inverted size={112} />
+        <AppLogo size={112} chromeless />
       </Animated.View>
       <View style={styles.bottom}>
-        <Text style={styles.brand}>SIXPACK AI</Text>
-        <Text style={styles.tagline}>Towards optimal health with every step</Text>
+        <Text style={[styles.brand, { color: colors.textPrimary }]}>
+          Pulse<Text style={{ color: colors.primary }}>Fit</Text>
+        </Text>
+        <Text style={[styles.tagline, { color: colors.textSecondary }]}>Towards optimal health with every step</Text>
       </View>
     </View>
   );
@@ -40,7 +44,6 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: palette.green,
     padding: spacing.xl
   },
   logo: {
@@ -54,12 +57,10 @@ const styles = StyleSheet.create({
     marginBottom: 56
   },
   brand: {
-    color: palette.white,
     fontSize: type.h3,
     fontWeight: "900"
   },
   tagline: {
-    color: palette.white,
     fontSize: type.body,
     opacity: 0.9
   }

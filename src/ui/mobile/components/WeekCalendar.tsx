@@ -4,15 +4,15 @@ import { AppState, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useAppTheme } from "../../../theme/AppThemeProvider";
 import { Pressable } from "./NativePressable";
 
-type Props = { selectedDate: Date; onSelect: (date: Date) => void };
+type Props = { selectedDate: Date; onSelect: (date: Date) => void; membershipStart?: string | null; membershipEnd?: string | null };
 
 /** Local calendar dates avoid UTC shifts around midnight and daylight savings. */
-export function WeekCalendar({ selectedDate, onSelect }: Props) {
+export function WeekCalendar({ selectedDate, onSelect, membershipStart, membershipEnd }: Props) {
   const { colors } = useAppTheme();
   const [width, setWidth] = useState(0);
   const visibleDays = Math.max(1, Math.min(7, Math.floor((width + 4) / 52) || 7));
   const [week, setWeek] = useState(() => startOfWeek(selectedDate));
-  const scroll = useRef<ScrollView>(null);
+  const scroll = useRef<any>(null);
   const selectRef = useRef(onSelect);
   selectRef.current = onSelect;
   const [today, setToday] = useState(() => new Date().toDateString());
@@ -50,14 +50,17 @@ export function WeekCalendar({ selectedDate, onSelect }: Props) {
         const date = new Date(week.getFullYear(), week.getMonth(), week.getDate() + offset * visibleDays + index);
         const selected = date.toDateString() === selectedDate.toDateString();
         const isToday = date.toDateString() === today;
+        const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+        const todayKey = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, "0")}-${String(new Date().getDate()).padStart(2, "0")}`;
+        const membershipTone = membershipStart && membershipEnd && key >= membershipStart ? key > membershipEnd ? colors.danger : key < todayKey ? colors.warning : colors.success : null;
         return (
           <Pressable key={date.toDateString()} accessibilityRole="button"
-            accessibilityLabel={`${isToday ? "Today, " : ""}${date.toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric", year: "numeric" })}`}
+            accessibilityLabel={`${isToday ? "Today, " : ""}${date.toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric", year: "numeric" })}${membershipTone ? `, ${key > membershipEnd! ? "renew plan" : key < todayKey ? "completed membership day" : "remaining membership day"}` : ""}`}
             accessibilityState={{ selected }} onPress={() => onSelect(date)}
-            style={({ pressed }) => [styles.day, { backgroundColor: isToday ? colors.primaryButton : colors.surface, borderWidth: 1, borderColor: selected ? colors.primaryButton : "transparent", opacity: pressed ? 0.7 : 1 }]}>
-            <Text style={[styles.label, { color: isToday ? colors.white : colors.ink }]}>{date.toLocaleDateString(undefined, { weekday: "short" })}</Text>
-            <View style={[styles.number, { backgroundColor: isToday ? colors.white : colors.surfaceMuted }]}>
-              <Text style={[styles.label, { color: isToday ? colors.primaryButton : colors.ink, fontWeight: isToday || selected ? "600" : "400" }]}>{date.getDate()}</Text>
+            style={({ pressed }) => [styles.day, { backgroundColor: membershipTone ? `${membershipTone}22` : isToday ? colors.primaryButton : colors.surface, borderWidth: 1, borderColor: selected ? membershipTone ?? colors.primaryButton : "transparent", opacity: pressed ? 0.7 : 1 }]}>
+            <Text style={[styles.label, { color: membershipTone ?? (isToday ? colors.white : colors.ink) }]}>{date.toLocaleDateString(undefined, { weekday: "short" })}</Text>
+            <View style={[styles.number, { backgroundColor: membershipTone ? `${membershipTone}33` : isToday ? colors.white : colors.surfaceMuted }]}>
+              <Text style={[styles.label, { color: membershipTone ?? (isToday ? colors.primaryButton : colors.ink), fontWeight: isToday || selected || membershipTone ? "600" : "400" }]}>{date.getDate()}</Text>
             </View>
           </Pressable>
         );

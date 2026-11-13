@@ -24,7 +24,7 @@ export const styles = adaptPageStyles(StyleSheet.create({
       fontWeight: "700"
     },
   heroBody: {
-    color: "#C9CED7",
+    color: "#F2F2F7",
     fontSize: type.body,
     lineHeight: 25
   },

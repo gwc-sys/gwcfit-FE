@@ -1,1 +1,0 @@
-export { MemberPaymentsScreen } from "./MemberFeatureScreens";

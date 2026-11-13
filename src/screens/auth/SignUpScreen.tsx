@@ -166,7 +166,7 @@ export function SignUpScreen({ navigation }: Props) {
           imageStyle={styles.heroImage}
         >
           <LinearGradient
-            colors={["rgba(7,5,2,0.06)", "rgba(7,5,2,0.24)", "rgba(7,5,2,0.94)"]}
+            colors={["rgba(0,0,0,0.06)", "rgba(0,0,0,0.24)", "rgba(0,0,0,0.94)"]}
             locations={[0, 0.52, 1]}
             style={[styles.heroOverlay, compact && styles.heroOverlayCompact, wide && styles.heroOverlayWide]}
           >
@@ -190,8 +190,8 @@ export function SignUpScreen({ navigation }: Props) {
             options={["Owner", "Gym User"]}
             value={mode}
             onChange={handleModeChange}
-            accentColor="#0A84FF"
-            activeBackgroundColor="#12110E"
+            accentColor="#E91E63"
+            activeBackgroundColor={colors.surface}
           />
 
           {mode === "Owner" ? (
@@ -416,13 +416,13 @@ function GymOptionPicker({
         style={({ pressed }) => [styles.gymSelect, open && styles.gymSelectOpen, pressed && styles.pressed]}
       >
         <View style={styles.gymSelectIcon}>
-          <Ionicons name="business-outline" size={19} color="#0A84FF" />
+          <Ionicons name="business-outline" size={19} color="#E91E63" />
         </View>
         <Text numberOfLines={1} style={[styles.gymSelectText, !selectedGymName?.trim() && styles.gymSelectPlaceholder]}>
           {displayName}
         </Text>
         {loading ? (
-          <ActivityIndicator color="#0A84FF" size="small" />
+          <ActivityIndicator color="#E91E63" size="small" />
         ) : (
           <Ionicons name={open ? "chevron-up" : "chevron-down"} size={20} color={colors.muted} />
         )}
@@ -431,7 +431,7 @@ function GymOptionPicker({
       {open ? (
         loading ? (
           <View style={styles.optionState}>
-            <ActivityIndicator color="#0A84FF" />
+            <ActivityIndicator color="#E91E63" />
             <Text style={styles.optionStateText}>Loading gyms...</Text>
           </View>
         ) : queryError ? (
@@ -471,7 +471,7 @@ function GymOptionPicker({
                   style={({ pressed }) => [styles.gymOption, selected && styles.gymOptionSelected, pressed && styles.pressed]}
                 >
                   <View style={[styles.gymOptionIcon, selected && styles.gymOptionIconSelected]}>
-                    <Ionicons name="business-outline" size={18} color={selected ? "#FFFFFF" : "#0A84FF"} />
+                    <Ionicons name="business-outline" size={18} color={selected ? "#FFFFFF" : "#E91E63"} />
                   </View>
                   <Text numberOfLines={2} style={[styles.gymOptionText, selected && styles.gymOptionTextSelected]}>
                     {gym.name}
@@ -559,7 +559,7 @@ function PasswordToggle({ visible, onPress }: { visible: boolean; onPress: () =>
 const styles = StyleSheet.create({
   page: {
     flexGrow: 1,
-    backgroundColor: "#090806"
+    backgroundColor: colors.background
   },
   pageWide: {
     flexDirection: "row"
@@ -569,7 +569,7 @@ const styles = StyleSheet.create({
   },
   hero: {
     minHeight: 390,
-    backgroundColor: "#171006"
+    backgroundColor: colors.surface
   },
   heroCompact: {
     minHeight: 220
@@ -582,7 +582,7 @@ const styles = StyleSheet.create({
     minHeight: 720
   },
   heroImage: {
-    backgroundColor: "#171006"
+    backgroundColor: colors.surface
   },
   heroOverlay: {
     flex: 1,
@@ -610,8 +610,8 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
     borderRadius: radius.pill,
     borderWidth: 1,
-    borderColor: "rgba(0,122,255,0.42)",
-    backgroundColor: "rgba(0,122,255,0.14)",
+    borderColor: "rgba(233,30,99,0.42)",
+    backgroundColor: "rgba(233,30,99,0.14)",
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm
   },
@@ -619,11 +619,11 @@ const styles = StyleSheet.create({
     width: 7,
     height: 7,
     borderRadius: radius.pill,
-    backgroundColor: "#0A84FF"
+    backgroundColor: "#E91E63"
   },
   eyebrowText: {
     ...typography.small,
-    color: "#64D2FF",
+    color: colors.primary,
     fontSize: 11,
     fontWeight: "800",
     letterSpacing: 1.2
@@ -658,7 +658,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.xxl,
     paddingBottom: spacing.xxl,
-    backgroundColor: "#090806"
+    backgroundColor: colors.background
   },
   contentCompact: {
     gap: spacing.md,
@@ -681,8 +681,8 @@ const styles = StyleSheet.create({
     gap: spacing.lg,
     borderRadius: radius.container,
     borderWidth: 1,
-    borderColor: "rgba(0,122,255,0.18)",
-    backgroundColor: "#12110E",
+    borderColor: "rgba(233,30,99,0.18)",
+    backgroundColor: colors.surface,
     padding: spacing.xxl
   },
   formWide: {
@@ -751,7 +751,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md
   },
   gymSelectOpen: {
-    borderColor: "#0A84FF"
+    borderColor: "#E91E63"
   },
   gymSelectIcon: {
     width: 34,
@@ -759,7 +759,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     borderRadius: radius.pill,
-    backgroundColor: "rgba(0,122,255,0.12)"
+    backgroundColor: "rgba(233,30,99,0.12)"
   },
   gymSelectText: {
     ...typography.body,
@@ -801,8 +801,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md
   },
   gymOptionSelected: {
-    borderColor: "#0A84FF",
-    backgroundColor: "#0A84FF"
+    borderColor: "#E91E63",
+    backgroundColor: "#E91E63"
   },
   gymOptionIcon: {
     width: 34,
@@ -855,8 +855,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.sm
   },
   roleCardSelected: {
-    borderColor: "#0A84FF",
-    backgroundColor: "#0A84FF"
+    borderColor: "#E91E63",
+    backgroundColor: "#E91E63"
   },
   roleLabel: {
     ...typography.small,
@@ -877,8 +877,8 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
     borderRadius: radius.sm,
     borderWidth: 1,
-    borderColor: "rgba(0,122,255,0.16)",
-    backgroundColor: "#12110E"
+    borderColor: "rgba(233,30,99,0.16)",
+    backgroundColor: colors.surface
   },
   footerWide: {
     width: "100%",
@@ -890,11 +890,11 @@ const styles = StyleSheet.create({
     color: colors.muted
   },
   link: {
-    color: "#0A84FF",
+    color: "#007AFF",
     fontWeight: "800"
   },
   submitButton: {
-    backgroundColor: "#0A84FF",
-    borderColor: "#0A84FF"
+    backgroundColor: "#E91E63",
+    borderColor: "#E91E63"
   }
 });

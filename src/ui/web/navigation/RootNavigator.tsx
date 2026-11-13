@@ -1,6 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { NavigationContainer } from "@react-navigation/native";
 import { BottomTabBar } from "@react-navigation/bottom-tabs";
+import { useState } from "react";
 import { View } from "react-native";
 import { SplashScreen } from "../../../screens/auth/SplashScreen";
 import { OnboardingScreen } from "../../../screens/auth/OnboardingScreen";
@@ -79,7 +80,7 @@ export function MainTabsView({ model }: { model: ReturnType<typeof useMainTabsPr
       )}
 
       {canViewReports ? <Tabs.Screen name="Reports" component={OwnerReportsScreen} /> : null}
-      <Tabs.Screen name="Profile" component={OwnerProfileScreen} />
+      <Tabs.Screen name="Profile" component={OwnerProfileScreen} options={{ title: "Account" }} />
     </Tabs.Navigator>
   ));
     }
@@ -189,22 +190,24 @@ export function RoleFeaturePlaceholderScreenView({ model }: { model: ReturnType<
 }
 
 export function RootNavigatorView({ model }: { model: ReturnType<typeof useRootNavigatorPresentation> }): React.ReactNode {
+  const [splashSkipped, setSplashSkipped] = useState(false);
   if (model == null) return null;
   if (typeof model !== "object" || !("kind" in model)) return model;
   switch (model.kind) {
     case "view1": {
-      const { navTheme, Stack, navigationState, user, isMember, MemberAppTabsScreen, MemberMembershipLayoutScreen, MemberPaymentsLayoutScreen, MemberWorkoutLayoutScreen, MemberWorkoutDetailLayoutScreen, MemberExerciseDetailLayoutScreen, MemberWorkoutSessionLayoutScreen, MemberMealPlanLayoutScreen, MemberTrainerLayoutScreen, MemberClassesLayoutScreen, MemberNotificationsLayoutScreen, MemberGoalsLayoutScreen, MemberRewardsLayoutScreen, MemberSupportLayoutScreen, MemberSettingsLayoutScreen, MainTabs, SuperAdminManageGymsScreen, SuperAdminCreateGymAdminScreen, RoleInvitationsScreen, OwnerStaffScreen, OwnerMembersScreen, OwnerMemberFormScreen, OwnerMemberProfileScreen, OwnerAttendanceScreen, OwnerPaymentsScreen, OwnerTrainersScreen, OwnerWorkoutPlansScreen, RoleDietPlansScreen, OwnerReportsScreen, RoleNotificationsScreen, OwnerSettingsScreen, OwnerProfileScreen, RoleAIWorkoutGeneratorScreen, RoleWorkoutPlanScreen, RoleExerciseDetailScreen, RoleFeaturePlaceholderScreen } = model.props;
+      const { navTheme, Stack, navigationState, user, isMember, MemberAppTabsScreen, MemberMembershipLayoutScreen, MemberWorkoutLayoutScreen, MemberWorkoutDetailLayoutScreen, MemberExerciseDetailLayoutScreen, MemberWorkoutSessionLayoutScreen, MemberMealPlanLayoutScreen, MemberTrainerLayoutScreen, MemberClassesLayoutScreen, MemberNotificationsLayoutScreen, MemberGoalsLayoutScreen, MemberRewardsLayoutScreen, MemberSupportLayoutScreen, MemberSettingsLayoutScreen, MainTabs, SuperAdminManageGymsScreen, SuperAdminCreateGymAdminScreen, RoleInvitationsScreen, OwnerStaffScreen, OwnerMembersScreen, OwnerMemberClaimsScreen, OwnerMemberFormScreen, OwnerMemberProfileScreen, OwnerAttendanceScreen, OwnerPaymentsScreen, OwnerTrainersScreen, OwnerWorkoutPlansScreen, RoleDietPlansScreen, OwnerReportsScreen, OwnerRatingsFeedbackScreen, RoleNotificationsScreen, OwnerSettingsScreen, OwnerProfileScreen, RoleAIWorkoutGeneratorScreen, RoleWorkoutPlanScreen, RoleExerciseDetailScreen, RoleFeaturePlaceholderScreen } = model.props;
+      const displayedNavigationState = splashSkipped ? navigationState : "loading";
       return ((
     <NavigationContainer theme={navTheme}>
-      <Stack.Navigator key={`${navigationState}:${user?.id ?? "guest"}:${user?.role ?? "none"}`} screenOptions={{ headerShown: false }}>
-        {navigationState === "loading" ? (
-          <Stack.Screen name="Splash" component={SplashScreen} />
-        ) : navigationState === "app" ? (
+      <Stack.Navigator key={`${displayedNavigationState}:${user?.id ?? "guest"}:${user?.role ?? "none"}`} screenOptions={{ headerShown: false }}>
+        {displayedNavigationState === "loading" ? (
+          <Stack.Screen name="Splash">{() => <SplashScreen onSkip={() => setSplashSkipped(true)} />}</Stack.Screen>
+        ) : displayedNavigationState === "app" ? (
           isMember ? (
           <>
             <Stack.Screen name="AppTabs" component={MemberAppTabsScreen} />
             <Stack.Screen name="MemberMembership" component={MemberMembershipLayoutScreen} />
-            <Stack.Screen name="MemberPayments" component={MemberPaymentsLayoutScreen} />
+
             <Stack.Screen name="MemberWorkout" component={MemberWorkoutLayoutScreen} />
             <Stack.Screen name="MemberWorkoutDetail" component={MemberWorkoutDetailLayoutScreen} />
             <Stack.Screen name="MemberExerciseDetail" component={MemberExerciseDetailLayoutScreen} />
@@ -227,6 +230,7 @@ export function RootNavigatorView({ model }: { model: ReturnType<typeof useRootN
             <Stack.Screen name="Invitations" component={RoleInvitationsScreen} />
             <Stack.Screen name="Staff" component={OwnerStaffScreen} />
             <Stack.Screen name="MemberList" component={OwnerMembersScreen} />
+            <Stack.Screen name="MemberClaims" component={OwnerMemberClaimsScreen} />
             <Stack.Screen name="AddMember" component={OwnerMemberFormScreen} />
             <Stack.Screen name="EditMember" component={OwnerMemberFormScreen} />
             <Stack.Screen name="MemberProfile" component={OwnerMemberProfileScreen} />
@@ -237,6 +241,7 @@ export function RootNavigatorView({ model }: { model: ReturnType<typeof useRootN
             <Stack.Screen name="WorkoutPlans" component={OwnerWorkoutPlansScreen} />
             <Stack.Screen name="DietPlans" component={RoleDietPlansScreen} />
             <Stack.Screen name="Reports" component={OwnerReportsScreen} />
+            <Stack.Screen name="RatingsFeedback" component={OwnerRatingsFeedbackScreen} />
             <Stack.Screen name="Notifications" component={RoleNotificationsScreen} />
             <Stack.Screen name="Settings" component={OwnerSettingsScreen} />
             <Stack.Screen name="Profile" component={OwnerProfileScreen} />

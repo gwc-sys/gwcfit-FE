@@ -1,3 +1,5 @@
+import { BASE_COLORS } from "../theme/colors";
+
 export const weekBars = [
   { day: "Sun", value: 42 },
   { day: "Mon", value: 70 },
@@ -9,7 +11,7 @@ export const weekBars = [
 ];
 
 export const macroSplit = [
-  { label: "Protein", value: 42, color: "#28C76F" },
-  { label: "Carbs", value: 38, color: "#3E7BFA" },
-  { label: "Fat", value: 20, color: "#FFC64D" }
+  { label: "Protein", value: 42, color: BASE_COLORS.success },
+  { label: "Carbs", value: 38, color: BASE_COLORS.linkBlue },
+  { label: "Fat", value: 20, color: BASE_COLORS.accent }
 ];

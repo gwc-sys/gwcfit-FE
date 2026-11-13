@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@expo/metro-runtime": "~58.0.15",
+    "@expo/ui": "~58.0.25",
     "@expo/vector-icons": "^15.0.3",
     "@hookform/resolvers": "^5.4.0",
     "@mediapipe/tasks-vision": "^0.10.35",
@@ -46,7 +47,7 @@
     "react": "19.3.0",
     "react-dom": "19.3.0",
     "react-hook-form": "^7.80.0",
-    "react-native": "0.88.0",
+    "react-native": "0.88.1",
     "react-native-css-interop": "^0.2.7",
     "react-native-gesture-handler": "~3.3.0",
     "react-native-qrcode-svg": "^6.3.21",

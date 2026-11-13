@@ -81,7 +81,10 @@ export function FormTextField({
 const createStyles = (colors: ThemeColors) =>
   StyleSheet.create({
   wrap: {
-    gap: spacing.xs
+    gap: spacing.sm,
+    width: "100%",
+    minWidth: 0,
+    alignSelf: "stretch"
   },
   labelRow: {
     flexDirection: "row",
@@ -92,11 +95,12 @@ const createStyles = (colors: ThemeColors) =>
   label: {
     flex: 1,
     ...typography.small,
+    fontWeight: "500",
     color: colors.ink
   },
   required: {
     ...typography.small,
-    color: colors.accent
+    color: colors.muted
   },
   inputWrap: {
     minHeight: 54,
@@ -106,7 +110,7 @@ const createStyles = (colors: ThemeColors) =>
     borderRadius: radius.sm,
     borderWidth: 1,
     borderColor: colors.border,
-    backgroundColor: colors.surfaceElevated,
+    backgroundColor: colors.surfaceMuted,
     paddingHorizontal: spacing.md
   },
   multilineWrap: {
@@ -130,6 +134,7 @@ const createStyles = (colors: ThemeColors) =>
   },
   inputError: {
     borderColor: colors.danger,
+    borderWidth: 2,
     backgroundColor: colors.dangerSoft
   },
   helper: {

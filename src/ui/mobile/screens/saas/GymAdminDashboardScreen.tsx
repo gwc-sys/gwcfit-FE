@@ -20,6 +20,8 @@ import { requestLogoutConfirmation } from "../../../../utils/logoutConfirmation"
 import { repdbExerciseLibrary } from "../../../../data/repdbExerciseLibrary";
 import { useAppTheme } from "../../../../theme/AppThemeProvider";
 import { controlMetrics } from "../../theme/theme";
+import { referenceDashboardStyles } from "../../styles/screens/saas/GymOwnerDashboardScreen.styles";
+import { GymOwnerDashboardContentView as OwnerContentView } from "./GymOwnerDashboardScreen";
 import type * as React from "react";
 import type { useGymAdminDashboardScreenPresentation, useGymOwnerDashboardContentPresentation, useOwnerProfileMenuPresentation, useProfileMenuItemPresentation, useOwnerMetricPresentation, useDistributionRowPresentation, useSimpleChartPresentation, useStatusPanelPresentation, usePlansPanelPresentation, useRevenuePanelPresentation, useRecentMembersPanelPresentation } from "../../../../screens/saas/GymAdminDashboardScreen";
 
@@ -495,6 +497,7 @@ export function GymOwnerDashboardContentView({ model }: { model: ReturnType<type
   if (typeof model !== "object" || !("kind" in model)) return model;
   switch (model.kind) {
     case "view1": {
+      return <OwnerContentView model={model as any} />;
       const { styles, displayName, setCalendarOpen, colors, formattedSelectedDate, navigation, owner, calendarOpen, ownerCalendarStyles, setCalendarMonth, calendarMonth, calendarWeekdays, calendarDays, selectedDate, setSelectedDate, OwnerMetric, activeMembers, stats, revenue, userCounts, SimpleChart, DistributionRow, workouts, pendingPayments, StatusPanel, statusCounts, PlansPanel, plans, planCounts, RevenuePanel, revenueValues, RecentMembersPanel, recent, exerciseGroupCounts, OwnerProfileMenu, profileMenuOpen, logout, setProfileMenuOpen } = model.props;
       return ((
     <PulseDashboardLayout activeLabel="Dashboard" roleLabel="Gym Owner">
@@ -533,7 +536,7 @@ export function GymOwnerDashboardContentView({ model }: { model: ReturnType<type
                 }
                 accessibilityLabel="Previous month"
               >
-                <Ionicons name="arrow-back" size={16} color="#D7E3F0" />
+                <Ionicons name="arrow-back" size={16} color={colors.ink} />
               </Pressable>
               <Text style={ownerCalendarStyles.monthTitle}>
                 {calendarMonth.toLocaleDateString("en-IN", {
@@ -554,7 +557,7 @@ export function GymOwnerDashboardContentView({ model }: { model: ReturnType<type
                 }
                 accessibilityLabel="Next month"
               >
-                <Ionicons name="arrow-forward" size={16} color="#D7E3F0" />
+                <Ionicons name="arrow-forward" size={16} color={colors.ink} />
               </Pressable>
             </View>
             <View style={ownerCalendarStyles.weekRow}>
@@ -617,7 +620,7 @@ export function GymOwnerDashboardContentView({ model }: { model: ReturnType<type
           label="Active Members"
           value={String(activeMembers)}
           trend="Current period"
-          tone="#0A84FF"
+          tone="#007AFF"
           styles={styles}
         />
         <OwnerMetric
@@ -625,7 +628,7 @@ export function GymOwnerDashboardContentView({ model }: { model: ReturnType<type
           label="Check-ins Today"
           value={String(stats?.checkins_today ?? 0)}
           trend="↑ Today"
-          tone="#10BFA7"
+          tone="#007AFF"
           styles={styles}
         />
         <OwnerMetric
@@ -633,7 +636,7 @@ export function GymOwnerDashboardContentView({ model }: { model: ReturnType<type
           label="Revenue (This Month)"
           value={formatCurrency(revenue)}
           trend="Current period"
-          tone="#F59E0B"
+          tone="#E91E63"
           styles={styles}
         />
         <OwnerMetric
@@ -641,7 +644,7 @@ export function GymOwnerDashboardContentView({ model }: { model: ReturnType<type
           label="Trainers"
           value={String(stats?.trainers ?? userCounts.trainer)}
           trend="↑ Staff"
-          tone="#0A84FF"
+          tone="#007AFF"
           styles={styles}
         />
       </InsightCarousel>
@@ -651,9 +654,9 @@ export function GymOwnerDashboardContentView({ model }: { model: ReturnType<type
             <Text style={styles.panelTitle}>Overview</Text>
           </View>
           <View style={styles.legend}>
-            <View style={[styles.legendDot, { backgroundColor: "#18C77A" }]} />
+            <View style={[styles.legendDot, { backgroundColor: "#34C759" }]} />
             <Text style={styles.smallText}>Active Members</Text>
-            <View style={[styles.legendDot, { backgroundColor: "#0A84FF" }]} />
+            <View style={[styles.legendDot, { backgroundColor: "#007AFF" }]} />
             <Text style={styles.smallText}>New Members</Text>
           </View>
           <SimpleChart styles={styles} />
@@ -671,25 +674,25 @@ export function GymOwnerDashboardContentView({ model }: { model: ReturnType<type
               <DistributionRow
                 label="Members"
                 value={userCounts.member}
-                color="#18C77A"
+                color="#34C759"
                 styles={styles}
               />
               <DistributionRow
                 label="Trainers"
                 value={userCounts.trainer}
-                color="#1685F8"
+                color="#007AFF"
                 styles={styles}
               />
               <DistributionRow
                 label="Reception"
                 value={userCounts.receptionist}
-                color="#F59E0B"
+                color="#E91E63"
                 styles={styles}
               />
               <DistributionRow
                 label="Others"
                 value={userCounts.sub_admin}
-                color="#0A84FF"
+                color="#007AFF"
                 styles={styles}
               />
             </View>
@@ -716,21 +719,21 @@ export function GymOwnerDashboardContentView({ model }: { model: ReturnType<type
               "walk-outline",
               "Check-ins",
               stats?.checkins_today ?? 0,
-              "#10BFA7",
+              "#007AFF",
             ],
-            ["barbell-outline", "Workouts", workouts.length, "#0A84FF"],
-            ["person-add-outline", "New Members", 0, "#1685F8"],
+            ["barbell-outline", "Workouts", workouts.length, "#007AFF"],
+            ["person-add-outline", "New Members", 0, "#007AFF"],
             [
               "cash-outline",
               "Payments Received",
               formatCurrency(revenue),
-              "#18C77A",
+              "#34C759",
             ],
             [
               "document-text-outline",
               "Pending Dues",
               pendingPayments,
-              "#EF476F",
+              "#E91E63",
             ],
           ].map(([icon, label, value, color]) => (
             <View key={String(label)} style={styles.activityRow}>
@@ -760,42 +763,42 @@ export function GymOwnerDashboardContentView({ model }: { model: ReturnType<type
               "person-add-outline",
               "Add Member",
               "New Member",
-              "#0A84FF",
+              "#007AFF",
               "AddMember",
             ],
             [
               "qr-code-outline",
               "Mark Attendance",
               "Check-in Member",
-              "#18C77A",
+              "#34C759",
               "Attendance",
             ],
             [
               "person-add-outline",
               "Add Trainer",
               "New Trainer",
-              "#1685F8",
+              "#007AFF",
               "Trainers",
             ],
             [
               "card-outline",
               "Record Payment",
               "Collect Dues",
-              "#F59E0B",
+              "#E91E63",
               "Payments",
             ],
             [
               "pricetag-outline",
               "Create Plan",
               "New Membership Plan",
-              "#10BFA7",
+              "#007AFF",
               "MembershipPlans",
             ],
             [
               "analytics-outline",
               "View Reports",
               "Analytics & Reports",
-              "#0A84FF",
+              "#007AFF",
               "Reports",
             ],
           ].map(([icon, title, subtitle, tone, route]) => (
@@ -834,8 +837,8 @@ export function GymOwnerDashboardContentView({ model }: { model: ReturnType<type
         <View style={styles.quickActions}>
           {exerciseGroupCounts.map(({ group, count }) => (
             <View key={group} style={styles.quickAction}>
-              <View style={[styles.quickIcon, { backgroundColor: "#0A84FF24" }]}>
-                <Ionicons name="barbell-outline" size={20} color="#0A84FF" />
+              <View style={[styles.quickIcon, { backgroundColor: "rgba(0, 122, 255, 0.14)" }]}>
+                <Ionicons name="barbell-outline" size={20} color="#007AFF" />
               </View>
               <View style={{ flex: 1, minWidth: 0 }}>
                 <Text style={styles.quickTitle}>{group}</Text>
@@ -954,7 +957,7 @@ export function ProfileMenuItemView({ model }: { model: ReturnType<typeof usePro
         disabled && ownerProfileStyles.disabled,
       ]}
      accessibilityState={{ disabled: disabled }}>
-      <Ionicons name={icon} size={20} color={danger ? "#EF4444" : "#A9C9E9"} />
+      <Ionicons name={icon} size={20} color={danger ? "#FF3B30" : ownerProfileStyles.itemText?.color || "#8E8E93"} />
       <Text
         style={[
           ownerProfileStyles.itemText,
@@ -1019,7 +1022,7 @@ export function SimpleChartView({ model }: { model: ReturnType<typeof useSimpleC
       <View style={styles.chartRangeWrap}>
         <Pressable accessibilityRole="button" style={styles.chartRangeButton} onPress={() => setOpen((current) => !current)}>
           <Text style={styles.smallText}>{range} {range === 1 ? "Day" : "Days"}</Text>
-          <Ionicons name={open ? "chevron-up" : "chevron-down"} size={13} color="#A9C9E9" />
+          <Ionicons name={open ? "chevron-up" : "chevron-down"} size={13} color={styles.smallText?.color || "#8E8E93"} />
         </Pressable>
         {open ? <View style={styles.chartRangeMenu}>{[1, 2, 3, 5, 7].map((option) => <Pressable accessibilityRole="button" key={option} style={styles.chartRangeOption} onPress={() => { setRange(option); setOpen(false); }}><Text style={[styles.smallText, option === range && styles.chartRangeSelected]}>{option} {option === 1 ? "Day" : "Days"}</Text></Pressable>)}</View> : null}
       </View>
@@ -1036,7 +1039,7 @@ export function SimpleChartView({ model }: { model: ReturnType<typeof useSimpleC
                 styles.chartBar,
                 {
                   height: `${Math.max(5, (value / max) * 100)}%`,
-                  backgroundColor: "#18C77A",
+                  backgroundColor: "#34C759",
                 },
               ]}
             />
@@ -1045,7 +1048,7 @@ export function SimpleChartView({ model }: { model: ReturnType<typeof useSimpleC
                 styles.chartBar,
                 {
                   height: `${Math.max(5, ((chartSecondaryValues[index] ?? 0) / max) * 100)}%`,
-                  backgroundColor: "#0A84FF",
+                  backgroundColor: "#007AFF",
                 },
               ]}
             />
@@ -1086,19 +1089,19 @@ export function StatusPanelView({ model }: { model: ReturnType<typeof useStatusP
           <DistributionRow
             label="Active"
             value={statusCounts.active ?? active}
-            color="#18C77A"
+            color="#34C759"
             styles={styles}
           />
           <DistributionRow
             label="Inactive"
             value={statusCounts.inactive ?? 0}
-            color="#F59E0B"
+            color="#E91E63"
             styles={styles}
           />
           <DistributionRow
             label="Expired"
             value={statusCounts.expired ?? 0}
-            color="#EF476F"
+            color="#E91E63"
             styles={styles}
           />
         </View>
@@ -1131,7 +1134,7 @@ export function PlansPanelView({ model }: { model: ReturnType<typeof usePlansPan
                 styles.planFill,
                 {
                   width: `${Math.max(12, Number(planCounts[plan.name] ?? plan.count ?? 0) * 20)}%`,
-                  backgroundColor: ["#0A84FF", "#18C77A", "#1685F8", "#F59E0B"][
+                  backgroundColor: ["#007AFF", "#34C759", "#007AFF", "#E91E63"][
                     index
                   ],
                 },

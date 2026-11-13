@@ -143,15 +143,17 @@ export function useStatPresentation({
   label,
   value,
   tone,
-  styles
+  styles,
+  colors
 }: {
   icon: keyof typeof Ionicons.glyphMap;
   label: string;
   value: string;
   tone: string;
   styles: ReturnType<typeof createStyles>;
+  colors: ThemeColors;
 }) {
-  return { kind: "view1" as const, props: { styles, tone, icon, label, value } };
+  return { kind: "view1" as const, props: { styles, colors, tone, icon, label, value } };
 }
 
 function Stat(...args: Parameters<typeof useStatPresentation>): React.JSX.Element {

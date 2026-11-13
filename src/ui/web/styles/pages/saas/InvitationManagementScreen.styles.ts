@@ -2,54 +2,471 @@ import { StyleSheet } from "react-native";
 import { radius, spacing, typography } from "../../../theme/theme";
 import type { ThemeColors } from "../../../theme/theme";
 
-export const createStyles = (colors: ThemeColors) => StyleSheet.create({
-  page: { gap: spacing.lg, paddingBottom: spacing.xxl },
-  stats: { flexDirection: "row", flexWrap: "wrap", gap: spacing.sm },
-  stat: { flex: 1, minWidth: 170, minHeight: 90, flexDirection: "row", alignItems: "center", gap: spacing.sm, borderWidth: 1, borderColor: colors.border, borderRadius: radius.md, padding: spacing.md, backgroundColor: colors.surface }, statActive: { borderColor: colors.primary, borderWidth: 1 },
-  statIcon: { width: 42, height: 42, alignItems: "center", justifyContent: "center", borderRadius: radius.sm }, statLabel: { ...typography.small, color: colors.muted }, statValue: { ...typography.h2, color: colors.ink, marginTop: 2 }, statLive: { ...typography.small, color: colors.success, marginTop: 2 },
-  grid: { flexDirection: "row", flexWrap: "wrap", gap: spacing.lg, alignItems: "flex-start" },
-  card: { flexGrow: 1, flexBasis: 340, minWidth: 0, gap: spacing.md, padding: spacing.lg, borderWidth: 1, borderColor: colors.border, borderRadius: radius.lg, backgroundColor: colors.surface },
-  cardTitle: { ...typography.h3, color: colors.ink },
-  helper: { ...typography.small, color: colors.muted, lineHeight: 22 },
-  label: { ...typography.small, fontWeight: "700", color: colors.ink },
-  roles: { flexDirection: "row", flexWrap: "wrap", gap: spacing.sm },
-  role: { paddingVertical: spacing.sm, paddingHorizontal: spacing.md, borderRadius: radius.pill, borderWidth: 1, borderColor: colors.border },
-  roleActive: { backgroundColor: colors.primary, borderColor: colors.primary },
-  roleText: { ...typography.small, color: colors.ink },
-  roleTextActive: { color: "#FFFFFF", fontWeight: "800" },
-  tokenBox: { gap: spacing.sm, padding: spacing.md, borderRadius: radius.md, backgroundColor: colors.primarySoft },
-  tokenLabel: { ...typography.small, fontWeight: "800", color: colors.muted },
-  token: { ...typography.body, color: colors.ink, fontWeight: "700" },
-  listHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" }, historyFilterLabel: { ...typography.small, color: colors.muted, marginTop: 2 },
-  historySearch: { minHeight: 44, flexDirection: "row", alignItems: "center", gap: spacing.sm, borderWidth: 1, borderColor: colors.border, borderRadius: radius.sm, paddingHorizontal: spacing.sm, backgroundColor: colors.surfaceElevated }, historyInput: { flex: 1, minWidth: 0, minHeight: 44, color: colors.ink, ...typography.small },
-  row: { flexDirection: "row", flexWrap: "wrap", alignItems: "center", gap: spacing.sm, paddingVertical: spacing.md, borderBottomWidth: 1, borderBottomColor: colors.border },
-  rowCopy: { flex: 1, minWidth: 190, gap: 3 },
-  rowTitle: { ...typography.body, fontWeight: "600", color: colors.ink, flexShrink: 1 },
-  rowMeta: { ...typography.small, color: colors.muted },
-  rowTokenArea: { gap: spacing.xs, marginTop: spacing.xs },
-  rowToken: { ...typography.small, color: colors.ink, fontFamily: "monospace" },
-  rowTokenActions: { flexDirection: "row", flexWrap: "wrap", gap: spacing.md },
-  tokenAction: { flexDirection: "row", alignItems: "center", gap: 5, minHeight: 32 },
-  reveal: { ...typography.small, color: colors.primary, fontWeight: "800" },
-  unavailable: { ...typography.small, color: colors.muted, fontStyle: "italic", marginTop: spacing.xs },
-  badge: { paddingVertical: 5, paddingHorizontal: spacing.sm, borderRadius: radius.pill, backgroundColor: colors.primarySoft },
-  badgeInactive: { backgroundColor: colors.surfaceElevated },
-  badgeText: { ...typography.small, color: colors.ink, textTransform: "capitalize" },
-  revoke: { ...typography.small, color: colors.danger, fontWeight: "800" },
+export const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    page: {
+      gap: 20,
+      paddingTop: 16,
+      paddingBottom: 112,
+    },
 
-  registrationCard: { gap: spacing.md, padding: spacing.lg, borderWidth: 1, borderColor: colors.border, borderRadius: 22, backgroundColor: colors.surface },
-  historyCard: { flexGrow: 2 },
-  segments: { flexDirection: "row", flexWrap: "wrap", gap: 4, padding: 4, borderRadius: 14, backgroundColor: colors.surfaceElevated },
-  segment: { flexGrow: 1, minHeight: 44, paddingHorizontal: 10, alignItems: "center", justifyContent: "center", borderRadius: 10 },
-  segmentSelected: { backgroundColor: colors.primarySoft },
-  segmentText: { ...typography.small, color: colors.muted, fontWeight: "500" },
-  segmentTextSelected: { color: colors.primary, fontWeight: "700" },
-  iconButton: { minWidth: 44, minHeight: 44, alignItems: "center", justifyContent: "center", borderRadius: 12 },
-  revokeButton: { minHeight: 44, paddingHorizontal: 12, alignItems: "center", justifyContent: "center" },
-  badgeActive: { backgroundColor: colors.primarySoft },
-  badgeUsed: { backgroundColor: `${colors.success}22` },
-  badgeRevoked: { backgroundColor: `${colors.danger}22` },
-  detailBackdrop: { flex: 1, backgroundColor: "rgba(0,0,0,0.5)", alignItems: "center", justifyContent: "center", padding: 16 },
-  detailSheet: { width: "100%", maxWidth: 620, maxHeight: "90%", backgroundColor: colors.surface, borderRadius: 24, padding: 20, borderWidth: 1, borderColor: colors.border },
-  empty: { ...typography.body, color: colors.muted }
-});
+    /* 4 Stat Cards Row */
+    stats: {
+      flexDirection: "row",
+      gap: 14,
+      width: "100%",
+    },
+    stat: {
+      flex: 1,
+      minHeight: 124,
+      borderRadius: 16,
+      borderWidth: 1,
+      borderColor: colors.border,
+      backgroundColor: colors.surface,
+      padding: 18,
+      justifyContent: "space-between",
+    },
+    statActive: {
+      borderColor: colors.border,
+    },
+    statIcon: {
+      width: 36,
+      height: 36,
+      borderRadius: 18,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    statValue: {
+      fontSize: 32,
+      fontWeight: "800",
+      color: colors.ink,
+      marginTop: 10,
+      marginBottom: 2,
+    },
+    statLabel: {
+      fontSize: 13,
+      fontWeight: "500",
+      color: colors.textSecondary,
+    },
+
+    /* Two-Column Grid */
+    grid: {
+      flexDirection: "row",
+      gap: 20,
+      alignItems: "flex-start",
+      width: "100%",
+    },
+
+    /* Left Column: Create Invitation */
+    createCard: {
+      flex: 1,
+      maxWidth: 440,
+      borderRadius: 16,
+      borderWidth: 1,
+      borderColor: colors.border,
+      backgroundColor: colors.surface,
+      padding: 22,
+      gap: 14,
+    },
+    card: {
+      flex: 1,
+      borderRadius: 16,
+      borderWidth: 1,
+      borderColor: colors.border,
+      backgroundColor: colors.surface,
+      padding: 22,
+      gap: 14,
+    },
+    cardTitle: {
+      fontSize: 18,
+      fontWeight: "800",
+      color: colors.ink,
+    },
+    helper: {
+      fontSize: 12.5,
+      color: colors.textSecondary,
+      lineHeight: 18,
+      marginTop: 2,
+    },
+
+    /* Form Fields */
+    fieldBlock: {
+      gap: 6,
+    },
+    fieldHeader: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+    },
+    fieldLabel: {
+      fontSize: 13,
+      fontWeight: "600",
+      color: colors.textSecondary,
+    },
+    fieldRequired: {
+      fontSize: 11,
+      fontWeight: "600",
+      color: "#E91E63",
+    },
+    roles: {
+      flexDirection: "row",
+      flexWrap: "wrap",
+      gap: 6,
+      marginTop: 2,
+    },
+    role: {
+      paddingHorizontal: 16,
+      paddingVertical: 8,
+      borderRadius: 9999,
+      backgroundColor: "transparent",
+    },
+    roleActive: {
+      backgroundColor: "#E91E63",
+    },
+    roleText: {
+      fontSize: 13,
+      fontWeight: "600",
+      color: colors.textSecondary,
+    },
+    roleTextActive: {
+      color: colors.ink,
+      fontWeight: "700",
+    },
+    inputBox: {
+      height: 44,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 10,
+      paddingHorizontal: 14,
+      backgroundColor: colors.background,
+      color: colors.ink,
+      fontSize: 13.5,
+    },
+    inputWithIcon: {
+      height: 44,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 10,
+      paddingHorizontal: 14,
+      backgroundColor: colors.background,
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 8,
+    },
+    inputWithIconText: {
+      flex: 1,
+      color: colors.ink,
+      fontSize: 13.5,
+    },
+    inputHelper: {
+      fontSize: 11.5,
+      color: colors.textSecondary,
+      marginTop: 2,
+    },
+    submitButton: {
+      height: 44,
+      borderRadius: 9999,
+      backgroundColor: "#E91E63",
+      alignItems: "center",
+      justifyContent: "center",
+      shadowColor: "#E91E63",
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.45,
+      shadowRadius: 14,
+      marginTop: 10,
+    },
+    submitButtonText: {
+      fontSize: 13.5,
+      fontWeight: "700",
+      color: colors.white,
+    },
+
+    /* Token Box */
+    tokenBox: {
+      gap: 8,
+      padding: 14,
+      borderRadius: 12,
+      backgroundColor: "rgba(233, 30, 99, 0.12)",
+      borderWidth: 1,
+      borderColor: "rgba(233, 30, 99, 0.25)",
+      marginTop: 6,
+    },
+    tokenLabel: {
+      fontSize: 11,
+      fontWeight: "800",
+      color: "#E91E63",
+      letterSpacing: 0.5,
+    },
+    token: {
+      fontSize: 14,
+      color: colors.ink,
+      fontWeight: "700",
+    },
+
+    /* Right Column: Invitation History */
+    historyCard: {
+      flex: 1.6,
+      borderRadius: 16,
+      borderWidth: 1,
+      borderColor: colors.border,
+      backgroundColor: colors.surface,
+      padding: 22,
+      gap: 14,
+    },
+    listHeader: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "flex-start",
+    },
+    historyTitle: {
+      fontSize: 18,
+      fontWeight: "800",
+      color: colors.ink,
+    },
+    historySubtitle: {
+      fontSize: 12.5,
+      color: colors.textSecondary,
+      marginTop: 2,
+    },
+    refreshButton: {
+      width: 32,
+      height: 32,
+      borderRadius: 16,
+      backgroundColor: colors.surfaceElevated,
+      borderWidth: 1,
+      borderColor: colors.border,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+
+    /* Filter Tabs */
+    historyTabs: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 2,
+      padding: 3,
+      borderRadius: 9999,
+      backgroundColor: colors.background,
+      borderWidth: 1,
+      borderColor: colors.border,
+      alignSelf: "flex-start",
+      marginVertical: 4,
+    },
+    historyTab: {
+      paddingHorizontal: 16,
+      paddingVertical: 6,
+      borderRadius: 9999,
+      backgroundColor: "transparent",
+    },
+    historyTabActive: {
+      backgroundColor: "#E91E63",
+    },
+    historyTabText: {
+      fontSize: 12.5,
+      fontWeight: "600",
+      color: colors.textSecondary,
+    },
+    historyTabTextActive: {
+      color: colors.ink,
+      fontWeight: "700",
+    },
+
+    /* Search Box */
+    historySearchBox: {
+      height: 42,
+      width: "100%",
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 8,
+      borderRadius: 10,
+      borderWidth: 1,
+      borderColor: colors.border,
+      paddingHorizontal: 14,
+      backgroundColor: colors.background,
+      marginBottom: 6,
+    },
+    historySearchInput: {
+      flex: 1,
+      color: colors.ink,
+      fontSize: 13,
+    },
+
+    /* List Item Row Card */
+    row: {
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 12,
+      paddingHorizontal: 16,
+      paddingVertical: 14,
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: 8,
+    },
+    rowCopy: {
+      flex: 1,
+      minWidth: 0,
+      gap: 4,
+    },
+    rowTitle: {
+      fontSize: 13.5,
+      fontWeight: "700",
+      color: colors.ink,
+    },
+    rowMeta: {
+      fontSize: 11.5,
+      color: colors.textSecondary,
+      marginTop: 2,
+    },
+    rowRight: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 8,
+    },
+
+    /* Status Badges */
+    badge: {
+      paddingHorizontal: 12,
+      paddingVertical: 4,
+      borderRadius: 9999,
+      borderWidth: 1,
+    },
+    badgeUsed: {
+      backgroundColor: "rgba(52, 199, 89, 0.12)",
+      borderColor: "rgba(52, 199, 89, 0.25)",
+    },
+    badgeTextUsed: {
+      fontSize: 12,
+      fontWeight: "600",
+      color: "#34C759",
+      textTransform: "capitalize",
+    },
+    badgeActive: {
+      backgroundColor: "rgba(0, 122, 255, 0.12)",
+      borderColor: "rgba(0, 122, 255, 0.25)",
+    },
+    badgeTextActive: {
+      fontSize: 12,
+      fontWeight: "600",
+      color: "#007AFF",
+      textTransform: "capitalize",
+    },
+    badgeRevoked: {
+      backgroundColor: "rgba(233, 30, 99, 0.12)",
+      borderColor: "rgba(233, 30, 99, 0.25)",
+    },
+    badgeTextRevoked: {
+      fontSize: 12,
+      fontWeight: "600",
+      color: "#E91E63",
+      textTransform: "capitalize",
+    },
+    badgeInactive: {
+      backgroundColor: "rgba(233, 30, 99, 0.12)",
+      borderColor: "rgba(233, 30, 99, 0.25)",
+    },
+    badgeTextInactive: {
+      fontSize: 12,
+      fontWeight: "600",
+      color: "#E91E63",
+      textTransform: "capitalize",
+    },
+    badgeText: {
+      fontSize: 12,
+      fontWeight: "600",
+      color: colors.ink,
+      textTransform: "capitalize",
+    },
+
+    /* Revoke Action Button */
+    revokeButton: {
+      paddingHorizontal: 10,
+      paddingVertical: 4,
+      borderRadius: 8,
+      backgroundColor: "rgba(233, 30, 99, 0.12)",
+      borderWidth: 1,
+      borderColor: "rgba(233, 30, 99, 0.25)",
+    },
+    revoke: {
+      fontSize: 12,
+      fontWeight: "700",
+      color: "#E91E63",
+    },
+
+    /* Super Admin Enquiry Styles */
+    segments: {
+      flexDirection: "row",
+      gap: 4,
+      padding: 4,
+      borderRadius: 14,
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.border,
+      alignSelf: "flex-start",
+    },
+    segment: {
+      paddingHorizontal: 16,
+      paddingVertical: 8,
+      borderRadius: 10,
+    },
+    segmentSelected: {
+      backgroundColor: "#E91E63",
+    },
+    segmentText: {
+      fontSize: 13,
+      color: colors.textSecondary,
+      fontWeight: "600",
+    },
+    segmentTextSelected: {
+      color: colors.ink,
+      fontWeight: "700",
+    },
+    registrationCard: {
+      gap: 16,
+      padding: 22,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 16,
+      backgroundColor: colors.surface,
+    },
+    reveal: {
+      fontSize: 12,
+      color: "#E91E63",
+      fontWeight: "700",
+      marginTop: 4,
+    },
+    iconButton: {
+      width: 32,
+      height: 32,
+      borderRadius: 16,
+      backgroundColor: colors.surfaceElevated,
+      borderWidth: 1,
+      borderColor: colors.border,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    detailBackdrop: {
+      flex: 1,
+      backgroundColor: "rgba(0, 0, 0, 0.8)",
+      alignItems: "center",
+      justifyContent: "center",
+      padding: 16,
+    },
+    detailSheet: {
+      width: "100%",
+      maxWidth: 620,
+      maxHeight: "90%",
+      backgroundColor: colors.surface,
+      borderRadius: 20,
+      padding: 24,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    empty: {
+      fontSize: 13,
+      color: colors.textSecondary,
+      textAlign: "center",
+      paddingVertical: 24,
+    },
+  });

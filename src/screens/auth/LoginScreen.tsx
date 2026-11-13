@@ -31,7 +31,7 @@ type Props = NativeStackScreenProps<RootStackParamList, "Login">;
 
 export function useLoginScreenPresentation({ navigation }: Props) {
   const { height, width } = useWindowDimensions();
-  const { colors } = useAppTheme();
+  const { colors, isDark, toggleColorScheme } = useAppTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const compact = width < 390 || height < 720;
   const wide = width >= 768;
@@ -66,7 +66,7 @@ export function useLoginScreenPresentation({ navigation }: Props) {
     loginMutation.mutate(values);
   });
 
-  return { kind: "view1" as const, props: { phone, styles, wide, height, compact, canGoBack, navigation, control, errors, passwordVisible, setPasswordVisible, colors, loginMutation, submit } };
+  return { kind: "view1" as const, props: { phone, styles, wide, height, compact, canGoBack, navigation, control, errors, passwordVisible, setPasswordVisible, colors, isDark, toggleColorScheme, loginMutation, submit } };
 }
 
 export function LoginScreen(...args: Parameters<typeof useLoginScreenPresentation>): React.JSX.Element {

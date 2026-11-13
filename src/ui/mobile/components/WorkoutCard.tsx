@@ -22,7 +22,7 @@ export function WorkoutCard({ plan, onPress }: WorkoutCardProps) {
   return (
     <Pressable accessibilityRole="button" onPress={onPress} style={({ pressed }) => [styles.wrap, pressed && styles.pressed]}>
       <ImageBackground source={plan.heroImage} style={styles.image} imageStyle={styles.imageRadius}>
-        <LinearGradient colors={["rgba(5,7,10,0.18)", "rgba(5,7,10,0.86)"]} style={styles.overlay}>
+        <LinearGradient colors={["rgba(0, 0, 0,0.18)", "rgba(0, 0, 0,0.86)"]} style={styles.overlay}>
           <View style={styles.badge}>
             <Sparkles size={15} color={colors.info} />
             <Text style={styles.badgeText}>AI Fit</Text>
@@ -43,7 +43,7 @@ export function WorkoutCard({ plan, onPress }: WorkoutCardProps) {
 
 const createStyles = (colors: ThemeColors) =>
   StyleSheet.create({
-    wrap: { width: 320, height: undefined, borderRadius: radius.lg, overflow: "hidden", backgroundColor: colors.dark, ...shadows.card, minHeight: 190 },
+    wrap: { width: "100%", maxWidth: 320, alignSelf: "stretch", height: undefined, borderRadius: radius.lg, overflow: "hidden", backgroundColor: colors.dark, ...shadows.card, minHeight: 190 },
     image: {
       flex: 1
     },

@@ -1,22 +1,29 @@
+export type MemberWorkoutRouteParams =
+  | {
+      tab?: "plans" | "classes" | "schedule";
+      workoutPlanUuid?: string;
+      authUid?: string | null;
+    }
+  | undefined;
+
 export type RootStackParamList = {
   Splash: undefined;
   Onboarding: undefined;
   Login: undefined;
   SignUp: undefined;
   AccountRecovery: undefined;
-  AppTabs: undefined;
+  AppTabs: { screen?: keyof MemberTabParamList; params?: Record<string, unknown> } | undefined;
   MemberProfileHome: undefined;
   MemberMembership: undefined;
-  MemberPayments: undefined;
   MemberAttendance: undefined;
-  MemberWorkout: undefined;
+  MemberWorkout: MemberWorkoutRouteParams;
   MemberWorkoutDetail: { workoutPlanUuid: string };
   MemberExerciseDetail: { workoutPlanUuid: string; exerciseIndex: number };
   MemberWorkoutSession: { workoutPlanUuid: string; exerciseIndex?: number };
   MemberMealPlan: undefined;
   MemberProgress: undefined;
   MemberTrainer: undefined;
-  MemberClasses: undefined;
+  MemberClasses: MemberWorkoutRouteParams;
   MemberNotifications: undefined;
   MemberGoals: undefined;
   MemberRewards: undefined;
@@ -27,6 +34,7 @@ export type RootStackParamList = {
   Invitations: { enquiryId?: string } | undefined;
   Staff: undefined;
   MemberList: undefined;
+  MemberClaims: undefined;
   AddMember: undefined;
   EditMember: { memberId: string };
   MemberProfile: { memberId?: string } | undefined;
@@ -38,6 +46,7 @@ export type RootStackParamList = {
   WorkoutPlans: undefined;
   DietPlans: { view?: "foods" | "plans" } | undefined;
   Reports: undefined;
+  RatingsFeedback: undefined;
   Notifications: undefined;
   Settings: undefined;
   Profile: undefined;
@@ -59,9 +68,10 @@ export type MainTabParamList = {
 };
 
 export type MemberTabParamList = {
-  MemberHome: undefined;
+  MemberHome: { authUid?: string | null } | undefined;
   MemberAttendance: undefined;
-  MemberWorkout: undefined;
+  MemberWorkout: MemberWorkoutRouteParams;
+  MemberMealPlan: undefined;
   MemberProgress: undefined;
   MemberProfileHome: undefined;
 };

@@ -5,8 +5,12 @@
     "owner": "mahesh-raskar",
     "version": "1.0.0",
     "orientation": "default",
+    "icon": "./assets/images/pulsefit-logo.png",
     "userInterfaceStyle": "automatic",
     "scheme": "pulsefit",
+    "web": {
+      "favicon": "./assets/images/pulsefit-logo.png"
+    },
     "assetBundlePatterns": [
       "**/*"
     ],
@@ -31,7 +35,8 @@
       "googleServicesFile": "./google-services.json",
       "userInterfaceStyle": "automatic",
       "adaptiveIcon": {
-        "backgroundColor": "#007AFF"
+        "foregroundImage": "./assets/images/pulsefit-logo.png",
+        "backgroundColor": "#0F172A"
       },
       "permissions": [
         "android.permission.ACTIVITY_RECOGNITION"
@@ -81,7 +86,7 @@
     ],
     "extra": {
       "eas": {
-        "projectId": "a5f624f8-3fed-4922-ad4e-f99aab998ecf"
+        "projectId": "5ab9f289-25fa-4f24-bd66-4d388712c796"
       }
     }
   }

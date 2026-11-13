@@ -10,6 +10,7 @@ import { PrimaryButton } from "../components/PrimaryButton";
 import { WorkoutCard } from "../components/WorkoutCard";
 import { images } from "../assets/images";
 import { weekBars } from "../data/progress";
+import { BASE_COLORS } from "../theme/colors";
 import { useFitnessStore } from "../store/useFitnessStore";
 import { useAppTheme } from "../theme/AppThemeProvider";
 import { radius, shadows, spacing, typography } from "../theme/theme";
@@ -35,16 +36,16 @@ export function HomeDashboardScreen({ navigation }: Props) {
         </Pressable>
       </View>
 
-      <LinearGradient colors={["#1E3A8A", "#6366F1"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.calorieCard}>
+      <View style={[styles.calorieCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
         <View style={styles.cardHeader}>
           <View style={styles.metricTitle}>
-            <Flame size={27} color={colors.success} />
-            <Text style={[styles.metricTitleText, { color: colors.white }]}>Calories</Text>
+            <Flame size={27} color={colors.primary} />
+            <Text style={[styles.metricTitleText, { color: colors.ink }]}>Calories</Text>
           </View>
-          <Text style={[styles.week, { color: colors.white }]}>Week</Text>
+          <Text style={[styles.week, { color: colors.muted }]}>Week</Text>
         </View>
         <MetricBarChart bars={weekBars} height={140} />
-      </LinearGradient>
+      </View>
 
       <View style={[styles.aiCard, { backgroundColor: colors.surfaceElevated, borderColor: colors.border }]}> 
         <View style={[styles.aiIcon, { backgroundColor: colors.primary }]}> 
@@ -142,7 +143,7 @@ const styles = StyleSheet.create({
     width: 10,
     height: 10,
     borderRadius: 5,
-    backgroundColor: "#F43F5E",
+    backgroundColor: BASE_COLORS.accent,
     top: 14,
     right: 14
   },
@@ -151,7 +152,6 @@ const styles = StyleSheet.create({
     padding: spacing.lg,
     borderRadius: radius.lg,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.16)",
     ...shadows.soft
   },
   cardHeader: {
@@ -251,7 +251,7 @@ const styles = StyleSheet.create({
   nextImage: {
     width: "100%",
     height: 150,
-    backgroundColor: "#94A3B8"
+    backgroundColor: BASE_COLORS.lightBackground
   },
   nextContent: {
     padding: spacing.lg,
